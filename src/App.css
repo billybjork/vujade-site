@@ -1,0 +1,32 @@
+.App {
+  text-align: center;
+}
+
+.App-header {
+  background-color: #282c34;
+  color: white;
+  padding: 20px;
+}
+
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 10px;
+  padding: 10px;
+  margin: auto;
+}
+
+video {
+  width: 100%;
+  height: auto;
+}
+
+.fade-in {
+  animation: fadeIn 1s ease-in-out;
+  opacity: 1;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
