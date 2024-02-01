@@ -14,6 +14,10 @@ function shuffleArray(array) {
 
 const Video = ({ src, videoID, onVideoClick }) => {
   const videoRef = useRef(null);
+  const { ref, inView } = useInView({
+    triggerOnce: true, // Only trigger this once per component instance
+    rootMargin: '50px 0px', // Load the video slightly before it comes into view
+  });
 
   // Play video on hover
   const handleMouseEnter = () => {
@@ -26,18 +30,21 @@ const Video = ({ src, videoID, onVideoClick }) => {
   };
 
   return (
-    <video
-      ref={videoRef}
-      src={src}
-      loop
-      muted
-      playsInline
-      loading="lazy"
-      onClick={() => onVideoClick(videoID)}
-      onMouseEnter={handleMouseEnter} // Play on hover
-      onMouseLeave={handleMouseLeave} // Pause on leave
-      style={{ width: '100%', height: 'auto' }} // Ensure video fills its container
-    />
+    <div ref={ref} style={{ width: '100%', height: 'auto' }}> {/* Use the ref from useInView */}
+      {inView && ( // Only render the video tag if the component is in view
+        <video
+          ref={videoRef}
+          src={src}
+          loop
+          muted
+          playsInline
+          onClick={() => onVideoClick(videoID)}
+          onMouseEnter={handleMouseEnter} // Play on hover
+          onMouseLeave={handleMouseLeave} // Pause on leave
+          style={{ width: '100%', height: 'auto' }} // Ensure video fills its container
+        />
+      )}
+    </div>
   );
 };
 
