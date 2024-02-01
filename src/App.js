@@ -85,7 +85,6 @@ function App() {
   const [scenes, setScenes] = useState([]);
   const [selectedVideoInfo, setSelectedVideoInfo] = useState(null);
   const navigate = useNavigate();
-  const location = useLocation();
   const [uniqueVideoIDs, setUniqueVideoIDs] = useState([]);
 
   useEffect(() => {
