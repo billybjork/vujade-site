@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Deliver videos for VU JA DE WEBSITE",
   "engines": {
-    "node": "20.x"
+    "node": "16.x"
   },
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
