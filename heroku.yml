@@ -1,0 +1,8 @@
+build:
+  # Use the heroku/python buildpack for the backend
+  docker:
+    web: Dockerfile
+  # Use the heroku/nodejs buildpack for the frontend
+  frontend:
+    docker:
+      web: Frontend/Dockerfile
