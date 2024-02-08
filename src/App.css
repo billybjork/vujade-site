@@ -2,37 +2,146 @@
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
 .App-header {
   background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
   color: white;
+  padding: 20px;
 }
 
-.App-link {
-  color: #61dafb;
+.video-menu {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #ddd;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.video-menu div {
+  cursor: pointer;
+  padding: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.video-menu div:hover {
+  background-color: #e0e0e0; /* Highlight on hover */
+}
+
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 10px;
+  padding: 10px;
+  margin: auto;
+}
+
+video {
+  width: 100%;
+  height: auto;
+  opacity: 0; /* Start with hidden videos to see the fade-in effect */
+  transition: opacity 0.5s ease-in-out; /* Smooth transition for the fade-in */
+  border-radius: 5px;
+}
+
+.fade-in {
+  opacity: 1; /* Full visibility */
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.video-info {
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+}
+
+.modal {
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box; /* Ensures padding and border are included in the element's total width and height */
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 800px;
+  position: relative;
+}
+
+.embed-container {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; /* 16:9 Aspect Ratio */
+  overflow: hidden; /* Ensures no overflow from the container */
+}
+
+.embed-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none; /* Removes the border around iframe */
+}
+
+.close {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  color: #aaaaaa;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Default video styling with dimmed opacity */
+video {
+  width: 100%;
+  height: auto;
+  opacity: 0.5; /* Dimmed to 50% opacity by default */
+  transition: opacity 0.5s ease-in-out; /* Smooth transition for opacity changes */
+}
+
+/* Change video opacity to full on hover */
+video:hover {
+  opacity: 1; /* Full opacity on hover */
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  video {
+    opacity: 1; /* Full opacity for videos on mobile */
   }
-  to {
-    transform: rotate(360deg);
+
+  .video-grid {
+    grid-template-columns: repeat(3, 1fr); /* Adjust grid to fit three videos per row */
   }
 }
