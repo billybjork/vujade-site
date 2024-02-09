@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
 # Navigate up two directories to the project root and then to the 'build' directory
-react_build_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../build')
+react_build_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../build')
 
 app = Flask(__name__, static_folder=react_build_directory, static_url_path='')
 
@@ -44,7 +44,7 @@ class Scene(db.Model):
 @app.route('/<path:path>')
 def serve(path):
     if path != "" and os.path.exists(os.path.join(react_build_directory, path)):
-        return send_from_directory(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../build'), path)
+        return send_from_directory(react_build_directory, path)
     else:
         return send_from_directory(react_build_directory, 'index.html')
 
