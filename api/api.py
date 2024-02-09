@@ -3,12 +3,15 @@ from flask import Flask, send_from_directory, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
-# Define the path to the React build directory
-react_build_directory = '/Users/billy/Dropbox (Personal)/VU JA DE/Other/Site Revamp/vujade-site/build'
+# Navigate up two directories to the project root and then to the 'build' directory
+react_build_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../build')
 
-# Initialize the Flask app with the React build directory as the place to serve static files from
 app = Flask(__name__, static_folder=react_build_directory, static_url_path='')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://lcbzqxilotjcwd:5adcf988fbd3a2299206ed861abecf5f7cba7397ef1494a55ec2077ed8a44197@ec2-52-6-117-96.compute-1.amazonaws.com:5432/da44tvh1taqo3q'
+
+uri = os.environ.get('DATABASE_URL')  # or other relevant config var
+if uri.startswith("postgres://"):
+    uri = uri.replace("postgres://", "postgresql://", 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = uri
 db = SQLAlchemy(app)
 
 # Configure CORS
@@ -100,5 +103,6 @@ def get_video_info(videoID):
         print(f"Error in get_video_info: {e}")
         return jsonify({"error": str(e)}), 500
 
-if __name__ == '__main__':
+# only for development mode
+# if __name__ == '__main__':
     app.run(debug=True)
