@@ -8,7 +8,7 @@ react_build_directory = '/Users/billy/Dropbox (Personal)/VU JA DE/Other/Site Rev
 
 # Initialize the Flask app with the React build directory as the place to serve static files from
 app = Flask(__name__, static_folder=react_build_directory, static_url_path='')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://utbipcpkawqzmn:24ecb9ddf008f0f50f7b61b5906e44a83e6b711f80a00075235cdc734c1120ee@ec2-44-213-151-75.compute-1.amazonaws.com:5432/dbimjuf7evlrhe'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://lcbzqxilotjcwd:5adcf988fbd3a2299206ed861abecf5f7cba7397ef1494a55ec2077ed8a44197@ec2-52-6-117-96.compute-1.amazonaws.com:5432/da44tvh1taqo3q'
 db = SQLAlchemy(app)
 
 # Configure CORS
