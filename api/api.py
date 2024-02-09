@@ -6,7 +6,8 @@ from flask_cors import CORS
 # Navigate up two directories to the project root and then to the 'build' directory
 react_build_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../build')
 
-app = Flask(__name__, static_folder=react_build_directory, static_url_path='')
+app = Flask(__name__, static_folder=os.path.abspath("../build"), static_url_path='/')
+
 
 uri = os.environ.get('DATABASE_URL')  # or other relevant config var
 if uri.startswith("postgres://"):
@@ -43,10 +44,10 @@ class Scene(db.Model):
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-    if path != "" and os.path.exists(os.path.join(react_build_directory, path)):
-        return send_from_directory(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../build'), path)
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
     else:
-        return send_from_directory(react_build_directory, 'index.html')
+        return send_from_directory(app.static_folder, 'index.html')
 
 # API route to fetch videos
 @app.route('/videos')
@@ -103,6 +104,6 @@ def get_video_info(videoID):
         print(f"Error in get_video_info: {e}")
         return jsonify({"error": str(e)}), 500
 
-# only for development mode
-# if __name__ == '__main__':
-    app.run(debug=True)
+## only for local testing
+## if __name__ == "__main__":
+    app.run()
