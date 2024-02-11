@@ -4,9 +4,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
 # Navigate up two directories to the project root and then to the 'build' directory
-react_build_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../build')
+react_build_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../build')
 
-app = Flask(__name__, static_folder=react_build_directory, static_url_path='')
+app = Flask(__name__, static_folder=os.path.abspath("../build"), static_url_path='/')
 
 uri = os.environ.get('DATABASE_URL')  # or other relevant config var
 if uri.startswith("postgres://"):
@@ -26,27 +26,27 @@ def dict_factory(cursor, row):
 # Model definitions
 class Video(db.Model):
     __tablename__ = 'videos'
-    videoid = db.Column(db.Text(), primary_key=True)  # Updated column name
-    videoname = db.Column(db.Text(), nullable=False)  # Updated column name
-    url = db.Column(db.Text(), nullable=False)  # Updated column name
-    description = db.Column(db.Text(), nullable=True)  # Updated column name
-    sources = db.Column(db.Text(), nullable=True)  # Updated column name
+    videoid = db.Column(db.Text(), primary_key=True)
+    videoname = db.Column(db.Text(), nullable=False)
+    url = db.Column(db.Text(), nullable=False)
+    description = db.Column(db.Text(), nullable=True)
+    sources = db.Column(db.Text(), nullable=True)
     scenes = db.relationship('Scene', backref='video', lazy=True)
 
 class Scene(db.Model):
     __tablename__ = 'scenes'
-    sceneid = db.Column(db.Integer, primary_key=True)  # Updated column name
-    videoid = db.Column(db.Text(), db.ForeignKey('videos.videoid'), nullable=False)  # Updated column name
-    sceneurl = db.Column(db.Text(), nullable=False)  # Updated column name
+    sceneid = db.Column(db.Integer, primary_key=True)
+    videoid = db.Column(db.Text(), db.ForeignKey('videos.videoid'), nullable=False)
+    sceneurl = db.Column(db.Text(), nullable=False)
 
 # Serve the React application's index.html file for the root path and any other undefined paths
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-    if path != "" and os.path.exists(os.path.join(react_build_directory, path)):
-        return send_from_directory(react_build_directory, path)
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
     else:
-        return send_from_directory(react_build_directory, 'index.html')
+        return send_from_directory(app.static_folder, 'index.html')
 
 # API route to fetch videos
 @app.route('/videos')
@@ -103,6 +103,5 @@ def get_video_info(videoID):
         print(f"Error in get_video_info: {e}")
         return jsonify({"error": str(e)}), 500
 
-# only for development mode
-# if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    app.run()
