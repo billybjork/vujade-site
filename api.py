@@ -1,12 +1,19 @@
 import os
+import logging
 from flask import Flask, send_from_directory, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
-# Navigate up two directories to the project root and then to the 'build' directory
-react_build_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../build')
+# Initialize logging
+logging.basicConfig(level=logging.DEBUG)
 
-app = Flask(__name__, static_folder=os.path.abspath("../build"), static_url_path='/')
+# Navigate up one directory to the project root and then to the 'build' directory
+react_build_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'build')
+
+app = Flask(__name__, static_folder=react_build_directory, static_url_path='/')
+
+# Log the absolute path of the static folder
+logging.debug(f'Static folder set to: {app.static_folder}')
 
 uri = os.environ.get('DATABASE_URL')  # or other relevant config var
 if uri.startswith("postgres://"):
