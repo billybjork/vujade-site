@@ -21,8 +21,7 @@ if uri.startswith("postgres://"):
 app.config['SQLALCHEMY_DATABASE_URI'] = uri
 db = SQLAlchemy(app)
 
-# Configure CORS
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "https://vujade-site-bd6c94750c62.herokuapp.com"]}})
 
 def dict_factory(cursor, row):
     d = {}

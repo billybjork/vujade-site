@@ -4,8 +4,9 @@ import './App.css';
 import { useInView } from 'react-intersection-observer';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 
-// Ensure BASE_URL is defined using the environment variable or fallback to a default
-const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://127.0.0.1:5000';
+const BASE_URL = process.env.NODE_ENV === 'production'
+  ? 'https://vujade-site-bd6c94750c62.herokuapp.com'
+  : 'http://127.0.0.1:5000';
 
 function Video({ src, videoID, onVideoClick }) {
   const videoRef = useRef(null);
