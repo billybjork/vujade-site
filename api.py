@@ -1,19 +1,12 @@
 import os
-import logging
 from flask import Flask, send_from_directory, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-
-# Initialize logging
-logging.basicConfig(level=logging.DEBUG)
 
 # Navigate up one directory to the project root and then to the 'build' directory
 react_build_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'build')
 
 app = Flask(__name__, static_folder=react_build_directory, static_url_path='/')
-
-# Log the absolute path of the static folder
-logging.debug(f'Static folder set to: {app.static_folder}')
 
 uri = os.environ.get('DATABASE_URL')  # or other relevant config var
 if uri.startswith("postgres://"):
@@ -21,7 +14,7 @@ if uri.startswith("postgres://"):
 app.config['SQLALCHEMY_DATABASE_URI'] = uri
 db = SQLAlchemy(app)
 
-CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "https://vujade-site-bd6c94750c62.herokuapp.com"]}})
+CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "https://vujade-site-bd6c94750c62.herokuapp.com", "http://127.0.0.1:5000"]}})
 
 def dict_factory(cursor, row):
     d = {}

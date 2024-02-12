@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './App.css';
 import { useInView } from 'react-intersection-observer';
-import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useParams } from 'react-router-dom';
 
 const BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://vujade-site-bd6c94750c62.herokuapp.com'
@@ -20,12 +20,11 @@ function Video({ src, videoID, onVideoClick }) {
       const playPromise = videoRef.current.play();
       if (playPromise !== undefined) {
         playPromise.catch(error => {
-          // Handle interrupted play request here
           console.error("Play was interrupted.", error);
         });
       }
     }
-  };  
+  };
 
   const handleMouseLeave = () => {
     if (videoRef.current && !videoRef.current.paused) {
@@ -53,13 +52,22 @@ function Video({ src, videoID, onVideoClick }) {
 }
 
 function Modal({ videoInfo, onClose }) {
+  useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow;  
+    document.body.style.overflow = 'hidden'; // Disable background scrolling
+
+    return () => {
+      document.body.style.overflow = originalStyle; // Re-enable background scrolling
+    };
+  }, []);
+
   const getEmbeddedVideoUrl = (url) => {
     const vimeoId = url.split("vimeo.com/")[1].split('/')[0];
     return `https://player.vimeo.com/video/${vimeoId}`;
   };
 
   const handleModalContentClick = (e) => {
-    e.stopPropagation();
+    e.stopPropagation(); // Prevent clicks inside the modal from closing it
   };
 
   return (
@@ -76,32 +84,38 @@ function Modal({ videoInfo, onClose }) {
             title={videoInfo.videoName}
           ></iframe>
         </div>
-        <p style={{ whiteSpace: 'pre-wrap' }}>{videoInfo.Description || ''}</p>
+        <div dangerouslySetInnerHTML={{ __html: videoInfo.Description || '' }}></div>
       </div>
     </div>
   );
 }
 
-function App({ scenes, uniqueVideoIDs, selectedVideoInfo, setSelectedVideoInfo }) {
+function App({ scenes, uniqueVideoIDs }) {
   const navigate = useNavigate();
+  const { videoID } = useParams();
+  const [selectedVideoInfo, setSelectedVideoInfo] = useState(null);
 
-  const handleVideoNameClick = (videoID) => {
-    setSelectedVideoInfo(null); // Clear any previous video info
-    // Fetch detailed video information using the correct relative endpoint
-    axios.get(`${BASE_URL}/video_info/${videoID}`)
-      .then(response => {
-        setSelectedVideoInfo(response.data);
-        navigate(`/videos/${videoID}`);
-      })
-      .catch(error => {
-        console.error('Error fetching video info: ', error);
-      });
+  useEffect(() => {
+    if (videoID) {
+      axios.get(`${BASE_URL}/video_info/${videoID}`)
+        .then(response => {
+          setSelectedVideoInfo(response.data);
+        })
+        .catch(error => {
+          console.error('Error fetching video info: ', error);
+          navigate('/');
+        });
+    }
+  }, [videoID, navigate]);
+
+  const handleVideoNameClick = (id) => {
+    navigate(`/videos/${id}`);
   };
 
   const handleCloseModal = () => {
-    setSelectedVideoInfo(null);
-    navigate('/');
-  };
+    setSelectedVideoInfo(null); // Explicitly clear the selected video info
+    navigate('/'); // Navigate back to the homepage
+  };  
 
   return (
     <div className="App">
@@ -118,7 +132,7 @@ function App({ scenes, uniqueVideoIDs, selectedVideoInfo, setSelectedVideoInfo }
             key={scene.sceneURL}
             src={scene.sceneURL}
             videoID={scene.videoID}
-            onVideoClick={() => handleVideoNameClick(scene.videoID)}
+            onVideoClick={handleVideoNameClick}
           />
         ))}
       </div>
@@ -129,11 +143,9 @@ function App({ scenes, uniqueVideoIDs, selectedVideoInfo, setSelectedVideoInfo }
 
 function AppWrapper() {
   const [scenes, setScenes] = useState([]);
-  const [selectedVideoInfo, setSelectedVideoInfo] = useState(null);
   const [uniqueVideoIDs, setUniqueVideoIDs] = useState([]);
 
   useEffect(() => {
-    // Fetch scenes and unique video IDs
     axios.get(`${BASE_URL}/scenes`)
       .then(response => {
         setScenes(shuffleArray(response.data));
@@ -162,24 +174,8 @@ function AppWrapper() {
   return (
     <Router>
       <Routes>
-        <Route
-          path="/videos/:videoID"
-          element={<App
-            scenes={scenes}
-            uniqueVideoIDs={uniqueVideoIDs}
-            selectedVideoInfo={selectedVideoInfo}
-            setSelectedVideoInfo={setSelectedVideoInfo}
-          />}
-        />
-        <Route
-          path="/"
-          element={<App
-            scenes={scenes}
-            uniqueVideoIDs={uniqueVideoIDs}
-            selectedVideoInfo={selectedVideoInfo}
-            setSelectedVideoInfo={setSelectedVideoInfo}
-          />}
-        />
+        <Route path="/videos/:videoID" element={<App scenes={scenes} uniqueVideoIDs={uniqueVideoIDs} />} />
+        <Route path="/" element={<App scenes={scenes} uniqueVideoIDs={uniqueVideoIDs} />} />
       </Routes>
     </Router>
   );

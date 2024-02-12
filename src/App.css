@@ -68,12 +68,14 @@ video {
   z-index: 1;
   left: 0;
   top: 0;
-  width: 100%;
-  height: 100%;
+  width: 100%; /* Adjusted to cover viewport exactly */
+  height: 100%; /* Adjusted to cover viewport exactly */
+  overflow-y: auto; /* Enable scrolling on the modal */
   background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: center; /* Center vertically */
+  padding-top: 0; /* Removed padding-top to use align-items for centering */
 }
 
 *, *::before, *::after {
@@ -82,12 +84,26 @@ video {
 
 .modal-content {
   background-color: #fefefe;
-  margin: auto;
   padding: 20px;
   border: 1px solid #888;
   width: 80%;
   max-width: 800px;
-  position: relative;
+  position: relative; /* Ensure modal content is positioned relative to its container */
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19); /* Optional: Add shadow for better visibility */
+  margin: auto; /* Centered vertically and horizontally */
+  overflow-y: auto; /* Enable scrolling within the modal content */
+  max-height: 80vh; /* Adjusted for mobile responsiveness */
+}
+
+.modal-content a {
+  color: blue; /* Sets the link color to blue */
+  text-decoration: none; /* Optional: Removes the underline from links */
+}
+
+.modal-content a:hover,
+.modal-content a:focus {
+  color: darkblue; /* Darker blue on hover/focus for better visibility and interactivity */
+  text-decoration: underline; /* Optional: Adds underline on hover/focus for clarity */
 }
 
 .embed-container {
@@ -124,8 +140,6 @@ video {
 
 /* Default video styling with dimmed opacity */
 video {
-  width: 100%;
-  height: auto;
   opacity: 0.5; /* Dimmed to 50% opacity by default */
   transition: opacity 0.5s ease-in-out; /* Smooth transition for opacity changes */
 }
@@ -137,11 +151,7 @@ video:hover {
 
 /* Mobile styles */
 @media (max-width: 768px) {
-  video {
-    opacity: 1; /* Full opacity for videos on mobile */
-  }
-
   .video-grid {
-    grid-template-columns: repeat(3, 1fr); /* Adjust grid to fit three videos per row */
+    grid-template-columns: repeat(3, 1fr); /* Adjust grid to fit three videos per row on mobile */
   }
 }
