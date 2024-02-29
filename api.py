@@ -14,7 +14,7 @@ if uri.startswith("postgres://"):
 app.config['SQLALCHEMY_DATABASE_URI'] = uri
 db = SQLAlchemy(app)
 
-CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "https://vujade-site-bd6c94750c62.herokuapp.com", "http://127.0.0.1:5000"]}})
+CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "https://vujade-site-bd6c94750c62.herokuapp.com", "http://127.0.0.1:5000", "https://vujade.world", "http://vujade.world"]}})
 
 def dict_factory(cursor, row):
     d = {}
@@ -48,7 +48,7 @@ def serve(path):
         return send_from_directory(app.static_folder, 'index.html')
 
 # API route to fetch videos
-@app.route('/videos')
+@app.route('/api/videos')
 def get_videos():
     try:
         videos = Video.query.all()
@@ -58,7 +58,7 @@ def get_videos():
         return jsonify({"error": str(e)}), 500
 
 # API route to fetch all scenes
-@app.route('/scenes')
+@app.route('/api/scenes')
 def get_all_scenes():
     """Endpoint to fetch all scenes."""
     try:
@@ -69,7 +69,7 @@ def get_all_scenes():
         return jsonify({"error": str(e)}), 500
 
 # API route to fetch scenes for a specific videoID
-@app.route('/scenes/<string:videoID>')
+@app.route('/api/scenes/<string:videoID>')
 def get_scenes(videoID):
     """Endpoint to fetch scenes for a specific videoID."""
     try:
@@ -80,7 +80,7 @@ def get_scenes(videoID):
         return jsonify({"error": str(e)}), 500
 
 # API route to fetch video information by videoID
-@app.route('/video_info/<string:videoID>')
+@app.route('/api/video_info/<string:videoID>')
 def get_video_info(videoID):
     try:
         # Fetch the video by videoID

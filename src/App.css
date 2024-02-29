@@ -1,3 +1,10 @@
+/* Ensure the body or main container allows for natural document flow and scrolling */
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+}
+
 .App {
   text-align: center;
 }
@@ -8,21 +15,82 @@
   padding: 20px;
 }
 
+.splash-screen {
+  /* Set the height of the splash screen */
+  height: 100vh; /* Adjust as needed */
+
+  /* Center the content horizontally and vertically */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* Apply additional styles as needed */
+  background-color: #ffffff; /* Background color of the splash screen */
+}
+
+.splash-content {
+  /* Set the maximum width of the splash content */
+  max-width: 800px; /* Adjust as needed */
+
+  /* Center the content horizontally */
+  text-align: left;
+
+  /* Apply additional styles as needed */
+  padding: 0 80px; /* Add padding to the content */
+}
+
+.splash-text {
+  /* Apply additional styles as needed */
+  font-family: Arial, sans-serif; /* Specify the font family */
+  font-size: 18px; /* Adjust as needed */
+  line-height: 1.6; /* Adjust as needed */
+  width: 100%; /* Ensure the text takes full width */
+}
+
+.splash-image {
+  /* Set the size of the GIF image */
+  width: 200px; /* Adjust as needed */
+  height: auto;
+
+  /* Apply additional styles as needed */
+  margin-bottom: 20px; /* Add space below the image */
+  display: block; /* Center the image horizontally */
+  margin-left: auto; /* Center the image horizontally */
+  margin-right: auto; /* Center the image horizontally */
+}
+
+.italicText {
+  color: #e74c3c; /* Example: A contrasting red */
+  font-style: italic;
+}
+
+@keyframes ticker {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
 .video-menu {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-evenly;
+  white-space: nowrap;
+  animation: ticker 90s linear infinite;
+  min-height: 60px;
+}
+
+.video-menu-item {
+  cursor: pointer;
   padding: 10px;
-  background-color: #f0f0f0;
-  border-bottom: 1px solid #ddd;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  margin-right: 10px;
+  white-space: nowrap;
+  display: inline-block; /* Ensures items are laid out inline */
+}
+
+.video-menu-item:hover {
+  background-color: #e0e0e0;
 }
 
 .video-menu div {
   cursor: pointer;
-  padding: 5px;
+  padding: 20px;
   transition: background-color 0.3s ease;
 }
 
@@ -70,7 +138,7 @@ video {
   top: 0;
   width: 100%; /* Adjusted to cover viewport exactly */
   height: 100%; /* Adjusted to cover viewport exactly */
-  overflow-y: auto; /* Enable scrolling on the modal */
+  overflow-y: hidden; /* Enable scrolling on the modal */
   background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
   display: flex;
   justify-content: center;
@@ -90,6 +158,7 @@ video {
   max-width: 800px;
   position: relative; /* Ensure modal content is positioned relative to its container */
   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19); /* Optional: Add shadow for better visibility */
+  text-align: center;
   margin: auto; /* Centered vertically and horizontally */
   overflow-y: auto; /* Enable scrolling within the modal content */
   max-height: 80vh; /* Adjusted for mobile responsiveness */
@@ -136,6 +205,10 @@ video {
   color: #000;
   text-decoration: none;
   cursor: pointer;
+}
+
+.body-lock {
+  overflow: hidden !important;
 }
 
 /* Default video styling with dimmed opacity */
