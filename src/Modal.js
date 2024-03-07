@@ -1,50 +1,51 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import axios from 'axios';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useModal } from './Context';
 
 const BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://vujade-site-bd6c94750c62.herokuapp.com'
   : 'http://127.0.0.1:5000';
 
-function Modal() {
-  const location = useLocation();
-  const { isModalOpen, currentVideoID, closeModal } = useModal();
-  const [videoInfo, setVideoInfo] = useState(null);
-  const modalRef = useRef(null);
+  function Modal() {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { isModalOpen, currentVideoID, closeModal } = useModal();
+    const [videoInfo, setVideoInfo] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const modalRef = useRef(null);
 
-  console.log('Rendering Modal component', { isModalOpen, currentVideoID });
+  // Function to transform video URLs for embedding
+  const getEmbeddedVideoUrl = useCallback((url) => {
+    const parts = url.split("vimeo.com/")[1];
+    const vimeoId = parts.split('/')[0];
+    return `https://player.vimeo.com/video/${vimeoId}`;
+  }, []);
 
-  const handleCloseModal = useCallback(() => {
-    closeModal();
-    // Manipulate URL to go back to the root without causing a re-render
-    window.history.pushState({}, '', '/');
-  }, [closeModal]);  
-
-  useEffect(() => {
-    let isMounted = true;
-    // Check if videoInfo is already set for the currentVideoID to prevent unnecessary fetching
-    if (currentVideoID && isModalOpen && (!videoInfo || videoInfo.videoID !== currentVideoID)) {
-      axios.get(`${BASE_URL}/api/video_info/${currentVideoID}`)
+   // Fetch and set video info based on URL change or currentVideoID update
+   useEffect(() => {
+    const videoIDFromURL = location.pathname.split('/')[1];
+    if (videoIDFromURL && (videoIDFromURL !== currentVideoID || !videoInfo)) {
+      setIsLoading(true); // Indicate loading
+      axios.get(`${BASE_URL}/api/video_info/${videoIDFromURL}`)
         .then(response => {
-          if (isMounted) {
-            setVideoInfo(response.data);
-          }
+          setVideoInfo(response.data);
+          setIsLoading(false); // Reset loading state
         })
         .catch(error => {
           console.error('Error fetching video info: ', error);
+          setIsLoading(false); // Ensure loading state is reset even on error
         });
-    } else if (!isModalOpen) {
-      setVideoInfo(null); // Reset videoInfo when modal is closed
     }
+  }, [location.pathname, currentVideoID, videoInfo]);
 
-    return () => {
-      isMounted = false;
-    };
-}, [currentVideoID, isModalOpen, videoInfo]);
+  const handleCloseModal = useCallback(() => {
+    closeModal();
+    navigate('/'); // Use navigate to change URL back to root
+  }, [closeModal, navigate]);
 
+  // Handle closing modal by clicking outside
   useEffect(() => {
-    // Setup to close the modal by clicking outside
     const handleOuterClick = (event) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
         handleCloseModal();
@@ -63,42 +64,33 @@ function Modal() {
       document.removeEventListener('mousedown', handleOuterClick);
       document.body.classList.remove('body-lock');
     };
-  }, [isModalOpen, handleCloseModal]);
-
-  useEffect(() => {
-    // Ensure modal closes if navigating away
-    if (location.pathname === '/' && isModalOpen) {
-      closeModal();
-    }
-  }, [location, isModalOpen, closeModal]);
-
-  // Helper function to transform video URLs for embedding
-  const getEmbeddedVideoUrl = (url) => {
-    const parts = url.split("vimeo.com/")[1];
-    const vimeoId = parts.split('/')[0];
-    return `https://player.vimeo.com/video/${vimeoId}`;
-  };
+  }, [isModalOpen, closeModal, handleCloseModal]);
 
   // Memoize embedded video URL
-  const embeddedVideoUrl = useMemo(() => videoInfo ? getEmbeddedVideoUrl(videoInfo.URL) : null, [videoInfo]);
+  const embeddedVideoUrl = useMemo(() => videoInfo ? getEmbeddedVideoUrl(videoInfo.URL) : null, [videoInfo, getEmbeddedVideoUrl]);
 
-  // Return null early if the modal should not be open or if there is no video info
-  if (!isModalOpen || !videoInfo) return null;
-
+  if (isLoading || !videoInfo) { // Show loading indicator or prevent rendering if videoInfo is not available yet
+    return <div>Loading...</div>;
+  }
+  
   return (
     <div className={`modal ${isModalOpen ? 'open' : ''}`} ref={modalRef}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <span className="close" onClick={handleCloseModal}>&times;</span>
-        <h2>{videoInfo.videoName}</h2>
-        <div className="embed-container">
-          <iframe
-            src={embeddedVideoUrl} // Use memoized URL
-            allow="autoplay; fullscreen"
-            allowFullScreen
-            title={videoInfo.videoName}
-          ></iframe>
-        </div>
-        <div dangerouslySetInnerHTML={{ __html: videoInfo.Description }}></div>
+        <>
+          <h2>{videoInfo ? videoInfo.videoName : 'Loading...'}</h2>
+          <div className="embed-container">
+            {videoInfo && (
+              <iframe
+                src={embeddedVideoUrl}
+                allow="autoplay; fullscreen"
+                allowFullScreen
+                title={videoInfo ? videoInfo.videoName : ''}
+              ></iframe>
+            )}
+          </div>
+          {videoInfo && <div dangerouslySetInnerHTML={{ __html: videoInfo.Description }}></div>}
+        </>
       </div>
     </div>
   );

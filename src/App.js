@@ -52,7 +52,10 @@ const Video = React.memo(({ src, videoID, onVideoClick }) => {
           loop
           muted
           playsInline
-          onClick={() => onVideoClick(videoID)}
+          onClick={() => {
+            console.log(`Video clicked: ${videoID}`);
+            onVideoClick(videoID);
+          }}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           style={{ width: '100%', height: 'auto' }}
@@ -73,7 +76,9 @@ function shuffleArray(array) {
 
 // MainContent component with video shuffling integrated
 function MainContent({ scenes, uniqueVideoIDs }) {
+  const navigate = useNavigate();
   const { videoID } = useParams();
+  const location = useLocation();
   const { openModal, currentVideoID } = useModal();
   const [shuffledScenes, setShuffledScenes] = useState([]);
 
@@ -83,14 +88,36 @@ function MainContent({ scenes, uniqueVideoIDs }) {
 
   useEffect(() => {
     if (videoID && scenes.some(scene => scene.videoID === videoID) && currentVideoID !== videoID) {
+      console.log(`Effect to open modal for videoID: ${videoID}`);
       openModal(videoID);
     }
   }, [videoID, scenes, openModal, currentVideoID]);
 
   const handleVideoNameClick = useCallback((id) => {
-    window.history.pushState({ modalOpen: true }, '', `/${id}`);
-    openModal(id);
-  }, [openModal]);
+    const onWelcomePage = location.pathname === '/welcome';
+  
+    // Function to actually navigate and open the modal
+    const navigateAndOpenModal = () => {
+      navigate(`/${id}`); // This navigates to the root or directly to a modal if not on the welcome page
+      openModal(id);
+    };
+  
+    if (onWelcomePage) {
+      // If we're on the welcome page, smoothly scroll to the main content first
+      window.scrollTo({
+        top: document.documentElement.clientHeight, // Assuming the main content starts right after the viewport height
+        behavior: 'smooth' // Smooth scroll
+      });
+  
+      // Wait for scroll to finish before changing the URL and opening the modal
+      setTimeout(() => {
+        navigate('/'); // Change the URL to root
+        navigateAndOpenModal(); // Now open the modal
+      }, 600); // Adjust time based on scroll duration, 600ms is just an example
+    } else {
+      navigateAndOpenModal();
+    }
+  }, [openModal, navigate, location.pathname]);
 
   return (
     <div id="videos-section" className="App">
@@ -121,29 +148,65 @@ const MemoizedMainContent = React.memo(MainContent);
 function Home({ scenes, uniqueVideoIDs }) {
   const navigate = useNavigate();
   const location = useLocation();
+  // Use a ref to track the initial load of the component
+  const initialLoad = useRef(true);
+  
+  // Determines if the splash screen is visible based on the URL
   const [showSplash, setShowSplash] = useState(location.pathname === '/welcome');
+  
+  // useCallback is used to memoize handleScroll, so it doesn't change on every render
+  const handleScroll = useCallback(() => {
+    const scrollThreshold = window.innerHeight * 1.0;
+    const hasScrolledPastSplash = window.scrollY > scrollThreshold;
+  
+    // Only proceed if we're initially on /welcome and have scrolled past the threshold
+    if (location.pathname === '/welcome' && hasScrolledPastSplash && showSplash) {
+      navigate('/', { replace: true });
+      setShowSplash(false); // Update state after URL change
+    }
+  }, [navigate, location.pathname, showSplash]);  
 
   useEffect(() => {
-    // Adjust for new initial splash page at /welcome and main content at root URL (/)
-    const handleScroll = _.debounce(() => {
-      // Logic to transition from splash page to main content based on scroll
-      if (window.scrollY > window.innerHeight * 1.0 && location.pathname !== '/') {
-        navigate('/');
+    // Add scroll event listener on mount
+    const debouncedHandleScroll = _.debounce(handleScroll, 100);
+    window.addEventListener('scroll', debouncedHandleScroll);
+
+    // Cleanup on unmount
+    return () => window.removeEventListener('scroll', debouncedHandleScroll);
+  }, [handleScroll]); // handleScroll is a dependency
+
+  useEffect(() => {
+    if (initialLoad.current) {
+      initialLoad.current = false; // Mark initial load as done
+      if (location.pathname !== '/welcome') {
+        // If not initially loading on /welcome, ensure splash is not shown
+        setShowSplash(false);
       }
-    }, 100);
+    } else {
+      // Handle navigation that does not involve initial load
+      if (location.pathname === '/welcome') {
+        setShowSplash(true); // Show splash screen when navigating back to /welcome
+      } else {
+        setShowSplash(false); // Hide splash screen for other URLs
+      }
+    }
+  }, [location.pathname]);  
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [navigate, location.pathname]);
-
+  // Prevent scrolling up to the splash screen once hidden
   useEffect(() => {
-    // Ensure that navigating directly to "/" shows main content and "/welcome" shows splash
-    setShowSplash(location.pathname === '/welcome');
-  }, [location.pathname]);
+    if (!showSplash) {
+      // Scroll to a point just below the splash screen to prevent scrolling up
+      window.scrollTo(0, window.innerHeight);
+    }
+  }, [showSplash]);
+
+  const splashScreenStyle = showSplash ? {} : { display: 'none' }; // Hide splash screen completely when not visible
 
   return (
     <>
-      {showSplash ? <SplashScreen /> : null}
+      <div style={splashScreenStyle}>
+        <SplashScreen />
+      </div>
       <MemoizedMainContent scenes={scenes} uniqueVideoIDs={uniqueVideoIDs} />
     </>
   );
@@ -182,7 +245,12 @@ function AppWrapper() {
           <Routes>
             <Route path="/welcome" element={<Home scenes={memoizedScenes} uniqueVideoIDs={memoizedUniqueVideoIDs} />} />
             <Route path="/" element={<Home scenes={memoizedScenes} uniqueVideoIDs={memoizedUniqueVideoIDs} />} />
-            <Route path="/:videoID" element={<Modal />} />
+            <Route path="/:videoID" element={
+              <>
+                <Home scenes={memoizedScenes} uniqueVideoIDs={memoizedUniqueVideoIDs} />
+                <Modal />
+              </>
+            } />
           </Routes>
         </ModalProvider>
       </Suspense>
