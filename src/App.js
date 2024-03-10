@@ -3,7 +3,7 @@ import axios from 'axios';
 import './App.css';
 import SplashScreen from './SplashScreen';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
-import { ModalProvider, useModal } from './Context';
+import { ModalProvider, useModal } from './ModalContext';
 import Modal from './Modal';
 import _ from 'lodash';
 import { useInView } from 'react-intersection-observer';
@@ -96,28 +96,29 @@ function MainContent({ scenes, uniqueVideoIDs }) {
   const handleVideoNameClick = useCallback((id) => {
     const onWelcomePage = location.pathname === '/welcome';
   
-    // Function to actually navigate and open the modal
+    // Function to navigate and open the modal
     const navigateAndOpenModal = () => {
-      navigate(`/${id}`); // This navigates to the root or directly to a modal if not on the welcome page
+      if (!onWelcomePage || location.pathname !== `/${id}`) {
+        navigate(`/${id}`); // Navigate only if not already on the target path
+      }
       openModal(id);
     };
   
     if (onWelcomePage) {
-      // If we're on the welcome page, smoothly scroll to the main content first
       window.scrollTo({
-        top: document.documentElement.clientHeight, // Assuming the main content starts right after the viewport height
-        behavior: 'smooth' // Smooth scroll
+        top: document.documentElement.clientHeight,
+        behavior: 'smooth'
       });
   
-      // Wait for scroll to finish before changing the URL and opening the modal
       setTimeout(() => {
-        navigate('/'); // Change the URL to root
-        navigateAndOpenModal(); // Now open the modal
-      }, 600); // Adjust time based on scroll duration, 600ms is just an example
+        navigate('/');
+        console.log(`Preparing to open modal for videoID: ${id}`);
+        navigateAndOpenModal();
+      }, 600);
     } else {
       navigateAndOpenModal();
     }
-  }, [openModal, navigate, location.pathname]);
+  }, [openModal, navigate, location.pathname]);  
 
   return (
     <div id="videos-section" className="App">
@@ -148,57 +149,50 @@ const MemoizedMainContent = React.memo(MainContent);
 function Home({ scenes, uniqueVideoIDs }) {
   const navigate = useNavigate();
   const location = useLocation();
-  // Use a ref to track the initial load of the component
   const initialLoad = useRef(true);
-  
-  // Determines if the splash screen is visible based on the URL
   const [showSplash, setShowSplash] = useState(location.pathname === '/welcome');
-  
-  // useCallback is used to memoize handleScroll, so it doesn't change on every render
+
+  // This ref is used to store the scroll position before the URL change
+  const scrollPositionBeforeNavigation = useRef(0);
+
   const handleScroll = useCallback(() => {
     const scrollThreshold = window.innerHeight * 1.0;
     const hasScrolledPastSplash = window.scrollY > scrollThreshold;
-  
-    // Only proceed if we're initially on /welcome and have scrolled past the threshold
+
     if (location.pathname === '/welcome' && hasScrolledPastSplash && showSplash) {
+      // Store the current scroll position before changing the URL
+      scrollPositionBeforeNavigation.current = window.scrollY;
+
       navigate('/', { replace: true });
-      setShowSplash(false); // Update state after URL change
+      setShowSplash(false); // Update state to hide splash screen
     }
-  }, [navigate, location.pathname, showSplash]);  
+  }, [navigate, location.pathname, showSplash]);
 
   useEffect(() => {
     // Add scroll event listener on mount
-    const debouncedHandleScroll = _.debounce(handleScroll, 100);
-    window.addEventListener('scroll', debouncedHandleScroll);
+    window.addEventListener('scroll', handleScroll);
 
     // Cleanup on unmount
-    return () => window.removeEventListener('scroll', debouncedHandleScroll);
-  }, [handleScroll]); // handleScroll is a dependency
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
+  useEffect(() => {
+    if (!showSplash) {
+      // Restore the scroll position after the splash screen is hidden
+      console.log(`Scroll position before navigation: ${scrollPositionBeforeNavigation.current}`);
+      window.scrollTo(0, scrollPositionBeforeNavigation.current);
+      console.log('Scroll position after splash screen hidden, restored to previous state');
+    }
+  }, [showSplash]);
 
   useEffect(() => {
     if (initialLoad.current) {
       initialLoad.current = false; // Mark initial load as done
-      if (location.pathname !== '/welcome') {
-        // If not initially loading on /welcome, ensure splash is not shown
-        setShowSplash(false);
-      }
     } else {
-      // Handle navigation that does not involve initial load
-      if (location.pathname === '/welcome') {
-        setShowSplash(true); // Show splash screen when navigating back to /welcome
-      } else {
-        setShowSplash(false); // Hide splash screen for other URLs
-      }
+      // Adjust logic based on navigation that does not involve the initial load
+      setShowSplash(location.pathname === '/welcome');
     }
-  }, [location.pathname]);  
-
-  // Prevent scrolling up to the splash screen once hidden
-  useEffect(() => {
-    if (!showSplash) {
-      // Scroll to a point just below the splash screen to prevent scrolling up
-      window.scrollTo(0, window.innerHeight);
-    }
-  }, [showSplash]);
+  }, [location.pathname]);
 
   const splashScreenStyle = showSplash ? {} : { display: 'none' }; // Hide splash screen completely when not visible
 

@@ -1,12 +1,21 @@
+from flask import Flask, send_from_directory, request, jsonify
 import os
-from flask import Flask, send_from_directory, jsonify
+import logging
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
-# Navigate up one directory to the project root and then to the 'build' directory
-react_build_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'build')
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-app = Flask(__name__, static_folder=react_build_directory, static_url_path='/')
+# Determine the directory containing this script
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Set the path to the React app's build directory
+react_build_directory = os.path.join(BASE_DIR, 'build')
+
+# Initialize the Flask app with the build directory as the static folder
+app = Flask(__name__, static_folder=react_build_directory)
 
 uri = os.environ.get('DATABASE_URL')  # or other relevant config var
 if uri.startswith("postgres://"):
@@ -14,7 +23,7 @@ if uri.startswith("postgres://"):
 app.config['SQLALCHEMY_DATABASE_URI'] = uri
 db = SQLAlchemy(app)
 
-CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "https://vujade-site-bd6c94750c62.herokuapp.com", "http://127.0.0.1:5000", "https://vujade.world", "http://vujade.world"]}})
+CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:5000", "https://vujade-site-bd6c94750c62.herokuapp.com", "https://vujade.world", "http://www.vujade.world"]}})
 
 def dict_factory(cursor, row):
     d = {}
@@ -42,10 +51,12 @@ class Scene(db.Model):
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
-        return send_from_directory(app.static_folder, path)
-    else:
-        return send_from_directory(app.static_folder, 'index.html')
+    logger.info(f"Serving index.html for path: {path}")
+    # Attempt to serve the file directly from the static folder, if it exists
+    # Otherwise, serve index.html
+    if path != "" and os.path.exists(os.path.join(react_build_directory, path)):
+        return send_from_directory(react_build_directory, path)
+    return send_from_directory(react_build_directory, 'index.html')
 
 # API route to fetch videos
 @app.route('/api/videos')
@@ -103,4 +114,4 @@ def get_video_info(videoID):
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)  # Turn off debug mode in production

@@ -207,10 +207,6 @@ video {
   cursor: pointer;
 }
 
-.body-lock {
- overflow: hidden !important;
-}
-
 /* Default video styling with dimmed opacity */
 video {
   opacity: 0.5; /* Dimmed to 50% opacity by default */
