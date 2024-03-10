@@ -1,12 +1,7 @@
 from flask import Flask, send_from_directory, request, jsonify
 import os
-import logging
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # Determine the directory containing this script
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -23,7 +18,7 @@ if uri.startswith("postgres://"):
 app.config['SQLALCHEMY_DATABASE_URI'] = uri
 db = SQLAlchemy(app)
 
-CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:5000", "https://vujade-site-bd6c94750c62.herokuapp.com", "https://vujade.world", "http://www.vujade.world"]}})
+CORS(app, resources={r"/*": {"origins": ["https://*.vujade.world", "http://*.vujade.world", "https://vujade-site-bd6c94750c62.herokuapp.com"]}})
 
 def dict_factory(cursor, row):
     d = {}
@@ -51,7 +46,6 @@ class Scene(db.Model):
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-    logger.info(f"Serving index.html for path: {path}")
     # Attempt to serve the file directly from the static folder, if it exists
     # Otherwise, serve index.html
     if path != "" and os.path.exists(os.path.join(react_build_directory, path)):
