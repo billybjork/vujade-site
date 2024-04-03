@@ -44,28 +44,6 @@ const BASE_URL = process.env.NODE_ENV === 'production'
     navigate('/'); // Use navigate to change URL back to root
   }, [closeModal, navigate]);
 
-  // Handle closing modal by clicking outside
-  useEffect(() => {
-    const handleOuterClick = (event) => {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
-        handleCloseModal();
-      }
-    };
-
-    if (isModalOpen) {
-      document.addEventListener('mousedown', handleOuterClick);
-      document.body.classList.add('body-lock');
-    } else {
-      document.removeEventListener('mousedown', handleOuterClick);
-      document.body.classList.remove('body-lock');
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleOuterClick);
-      document.body.classList.remove('body-lock');
-    };
-  }, [isModalOpen, closeModal, handleCloseModal]);
-
   // Memoize embedded video URL
   const embeddedVideoUrl = useMemo(() => videoInfo ? getEmbeddedVideoUrl(videoInfo.URL) : null, [videoInfo, getEmbeddedVideoUrl]);
 
@@ -74,23 +52,25 @@ const BASE_URL = process.env.NODE_ENV === 'production'
   }
   
   return (
-    <div className={`modal ${isModalOpen ? 'open' : ''}`} ref={modalRef}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <span className="close" onClick={handleCloseModal}>&times;</span>
-        <>
-          <h2>{videoInfo ? videoInfo.videoName : 'Loading...'}</h2>
-          <div className="embed-container">
-            {videoInfo && (
-              <iframe
-                src={embeddedVideoUrl}
-                allow="autoplay; fullscreen"
-                allowFullScreen
-                title={videoInfo ? videoInfo.videoName : ''}
-              ></iframe>
-            )}
-          </div>
-          {videoInfo && <div dangerouslySetInnerHTML={{ __html: videoInfo.Description }}></div>}
-        </>
+    <div className={`modal-backdrop ${isModalOpen ? 'open' : ''}`} onClick={handleCloseModal} ref={modalRef}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-content">
+          <span className="close" onClick={handleCloseModal}>&times;</span>
+          <>
+            <h2>{videoInfo ? videoInfo.videoName : 'Loading...'}</h2>
+            <div className="embed-container">
+              {videoInfo && (
+                <iframe
+                  src={embeddedVideoUrl}
+                  allow="autoplay; fullscreen"
+                  allowFullScreen
+                  title={videoInfo ? videoInfo.videoName : ''}
+                ></iframe>
+              )}
+            </div>
+            {videoInfo && <div dangerouslySetInnerHTML={{ __html: videoInfo.Description }}></div>}
+          </>
+        </div>
       </div>
     </div>
   );

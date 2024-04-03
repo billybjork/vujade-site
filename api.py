@@ -52,6 +52,11 @@ def serve(path):
         return send_from_directory(react_build_directory, path)
     return send_from_directory(react_build_directory, 'index.html')
 
+# API route to test cube-master component
+@app.route('/cube-master')
+def serve_cube_master():
+    return send_from_directory(os.path.join(BASE_DIR, 'src/cube-master'), 'index.html')
+
 # API route to fetch videos
 @app.route('/api/videos')
 def get_videos():

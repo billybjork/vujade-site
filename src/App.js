@@ -9,6 +9,9 @@ import _ from 'lodash';
 import { useInView } from 'react-intersection-observer';
 import { isMobile } from 'react-device-detect';
 
+// to replace later as needed
+import * as CubeMaster from './cube-master/js/cube/main.js';
+
 // Base URL setup for different environments
 const BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://vujade-site-bd6c94750c62.herokuapp.com'
@@ -238,6 +241,7 @@ function AppWrapper() {
         <ModalProvider>
           <Routes>
             <Route path="/welcome" element={<Home scenes={memoizedScenes} uniqueVideoIDs={memoizedUniqueVideoIDs} />} />
+            <Route path="/cube-master" element={<CubeMaster />} />
             <Route path="/" element={<Home scenes={memoizedScenes} uniqueVideoIDs={memoizedUniqueVideoIDs} />} />
             <Route path="/:videoID" element={
               <>
