@@ -36,38 +36,44 @@ roundedSquareGeometry.center();
 class Sticker {
     /**
      * Construct a new sticker at the given position facing the given
-     * direction with the specified color.
+     * direction with the specified video URL.
      * @param {number} x X position of sticker
      * @param {number} y Y position of sticker
      * @param {number} z Z position of sticker
      * @param {*} facingVector Direction sticker is facing
-     * @param {number} color Color of sticker
+     * @param {string} videoURL Video URL for the sticker
      */
-    constructor(x, y, z, facingVector, color) {
-        // real-time position of the sticker, updated during animation
+    constructor(x, y, z, facingVector, videoURL) {
         this.positionVector = new THREE.Vector3(x, y, z);
-        // fixed position of the sticker, updated after animation is complete
         this.fixedPositionVector = new THREE.Vector3(x, y, z);
-        // real-time direction sticker is facing, updated during animation
         this.facingVector = facingVector;
-        // fixed direction sticker is facing, updated after animation is complete
-        this.fixedFacingVector = new THREE.Vector3(
-            facingVector.x,
-            facingVector.y,
-            facingVector.z
-        );
-        // store the color
-        this.color = color;
+        this.fixedFacingVector = new THREE.Vector3(facingVector.x, facingVector.y, facingVector.z);
 
-        // create a basic material with given color
+        // Setup video element
+        const video = document.createElement('video');
+        video.crossOrigin = "anonymous";
+        video.src = videoURL;
+        video.load();
+        video.muted = true;
+        video.loop = true;
+        video.play().catch(e => console.error("Autoplay was prevented:", e)); // Handle autoplay issues gracefully
+
+        // Create a video texture from the video element
+        const texture = new THREE.VideoTexture(video);
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        texture.format = THREE.RGBFormat;
+
+        // Use the video texture for the material
         this.material = new THREE.MeshBasicMaterial({
-            color: this.color,
+            map: texture,
             side: THREE.DoubleSide,
         });
-        // use the rounded square geometry for the mesh
+
+        // Use the rounded square geometry for the mesh
         this.mesh = new THREE.Mesh(roundedSquareGeometry, this.material);
 
-        // set initial position and rotation
+        // Set initial position and rotation
         this.updatePosition(this.fixedPositionVector, this.fixedFacingVector);
         this.mesh.rotation.y = Math.PI * 0.5 * Math.abs(this.facingVector.x);
         this.mesh.rotation.x = Math.PI * 0.5 * Math.abs(this.facingVector.y);

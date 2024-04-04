@@ -9,7 +9,7 @@ class Cube {
      * Construct a new cube.
      * @param {*} scene threejs scene the cube is a part of
      */
-    constructor(scene) {
+    constructor(scene, videoURLs) {
         // array to store every Cubie object
         this.cubies = [];
         // array to store all the meshes comprising the cube
@@ -17,12 +17,22 @@ class Cube {
         // map from sticker's mesh uuid to the mesh itself
         this.stickersMap = new Map();
 
+        this.videoURLs = videoURLs; // Store video URLs
+
+        // Assuming videoURLs is an array of at least 54 video URLs.
+        let videoIndex = 0; // To keep track of the current video URL index
+
         // initialize 26 cubies (ignoring the very center)
         for (let x = -1; x <= 1; x++) {
             for (let y = -1; y <= 1; y++) {
                 for (let z = -1; z <= 1; z++) {
-                    if (x !== 0 || y !== 0 || z !== 0)
-                        this.cubies.push(new Cubie(x, y, z));
+                    if (x !== 0 || y !== 0 || z !== 0) {
+                        // Pass an array of video URLs for each Cubie's stickers
+                        // This assumes each Cubie knows how to assign these URLs to its stickers
+                        const cubieVideoURLs = this.videoURLs.slice(videoIndex, videoIndex + 3);
+                        this.cubies.push(new Cubie(x, y, z, cubieVideoURLs));
+                        videoIndex += 3; // Advance the index by 3 for the next Cubie
+                    }
                 }
             }
         }

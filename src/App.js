@@ -10,7 +10,7 @@ import { useInView } from 'react-intersection-observer';
 import { isMobile } from 'react-device-detect';
 
 // to replace later as needed
-import * as CubeMaster from './cube-master/js/cube/main.js';
+import { CubeMasterInit } from './cube-master/js/cube/main.js';
 
 // Base URL setup for different environments
 const BASE_URL = process.env.NODE_ENV === 'production'
@@ -209,6 +209,32 @@ function Home({ scenes, uniqueVideoIDs }) {
   );
 }
 
+function CubeWithVideos() {
+  const [cubeVideos, setCubeVideos] = useState([]); // Correctly define state here
+
+  useEffect(() => {
+    const fetchCubeVideos = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/api/scenes`);
+        // Map the fetched scenes to a suitable format for CubeMasterInit, if necessary
+        const shuffledScenes = shuffleArray(response.data.map(scene => scene.sceneURL));
+        setCubeVideos(shuffledScenes); // Now we're correctly using setCubeVideos
+      } catch (error) {
+        console.error('Error fetching cube videos: ', error);
+      }
+    };
+    fetchCubeVideos();
+  }, []);
+
+  useEffect(() => {
+    if (cubeVideos.length > 0) {
+      CubeMasterInit(cubeVideos); // Directly passes the array of URLs
+    }
+  }, [cubeVideos]);
+
+  return <div id="cube-container"></div>;
+}
+
 function AppWrapper() {
   // State for scenes and unique video IDs
   const [scenes, setScenes] = useState([]);
@@ -241,7 +267,7 @@ function AppWrapper() {
         <ModalProvider>
           <Routes>
             <Route path="/welcome" element={<Home scenes={memoizedScenes} uniqueVideoIDs={memoizedUniqueVideoIDs} />} />
-            <Route path="/cube-master" element={<CubeMaster />} />
+            <Route path="/cube-master" element={<CubeWithVideos />} />
             <Route path="/" element={<Home scenes={memoizedScenes} uniqueVideoIDs={memoizedUniqueVideoIDs} />} />
             <Route path="/:videoID" element={
               <>

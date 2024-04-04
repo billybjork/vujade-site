@@ -47,64 +47,36 @@ const materialBlack = new THREE.MeshBasicMaterial({ color: 0x000000 });
  * Class for each cubie on the cube
  */
 class Cubie {
-    /**
-     * Construct a new cubie at the given coordinates
-     * @param {*} x x coordinate
-     * @param {*} y y coordinate
-     * @param {*} z z coordinate
-     */
-    constructor(x, y, z) {
+    constructor(x, y, z, cubieVideoURLs) { // Now accepts cubieVideoURLs
         this.angle = 0;
-        this.animating = false; // flag indicating if currently animating
-        this.animateAxis = null; // axis around which a rotation is being animated
-        this.animateDir = 0; // direction of rotation animation
+        this.animating = false;
+        this.animateAxis = null;
+        this.animateDir = 0;
 
-        // real-time position of the cubie, updated during animation
         this.positionVector = new THREE.Vector3(x, y, z);
-        // fixed position of the cubie, updated after animation is complete
         this.fixedPositionVector = new THREE.Vector3(x, y, z);
 
-        // create mesh based on rounded box geometry
         this.mesh = new THREE.Mesh(roundedBoxGeometry, materialBlack);
-
-        // store the stickers in an array
         this.stickers = [];
 
-        // add stickers of appropriate color based on cubie's coordinates
+        let videoIndex = 0; // To iterate over cubieVideoURLs
+
         if (x === -1) {
-            // add green sticker if part of left face
-            this.stickers.push(
-                new Sticker(x, y, z, new THREE.Vector3(-1, 0, 0), 0x00ff00)
-            );
+            this.stickers.push(new Sticker(x, y, z, new THREE.Vector3(-1, 0, 0), cubieVideoURLs[videoIndex++]));
         } else if (x === 1) {
-            // add blue sticker if part of right face
-            this.stickers.push(
-                new Sticker(x, y, z, new THREE.Vector3(1, 0, 0), 0x0000ff)
-            );
+            this.stickers.push(new Sticker(x, y, z, new THREE.Vector3(1, 0, 0), cubieVideoURLs[videoIndex++]));
         }
         if (y === -1) {
-            // add yellow sticker if part of down face
-            this.stickers.push(
-                new Sticker(x, y, z, new THREE.Vector3(0, -1, 0), 0xffff00)
-            );
+            this.stickers.push(new Sticker(x, y, z, new THREE.Vector3(0, -1, 0), cubieVideoURLs[videoIndex++]));
         } else if (y === 1) {
-            // add white sticker if part of up face
-            this.stickers.push(
-                new Sticker(x, y, z, new THREE.Vector3(0, 1, 0), 0xffffff)
-            );
+            this.stickers.push(new Sticker(x, y, z, new THREE.Vector3(0, 1, 0), cubieVideoURLs[videoIndex++]));
         }
         if (z === -1) {
-            // add orange sticker if part of back face
-            this.stickers.push(
-                new Sticker(x, y, z, new THREE.Vector3(0, 0, -1), 0xff9900)
-            );
+            this.stickers.push(new Sticker(x, y, z, new THREE.Vector3(0, 0, -1), cubieVideoURLs[videoIndex++]));
         } else if (z === 1) {
-            // add red sticker if part of front face
-            this.stickers.push(
-                new Sticker(x, y, z, new THREE.Vector3(0, 0, 1), 0xff0000)
-            );
+            this.stickers.push(new Sticker(x, y, z, new THREE.Vector3(0, 0, 1), cubieVideoURLs[videoIndex++]));
         }
-        // set initial position
+
         this.updatePosition(this.fixedPositionVector);
     }
 
