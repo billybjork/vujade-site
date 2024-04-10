@@ -78,16 +78,7 @@ class Sticker {
         this.mesh.rotation.y = Math.PI * 0.5 * Math.abs(this.facingVector.x);
         this.mesh.rotation.x = Math.PI * 0.5 * Math.abs(this.facingVector.y);
     }
-
-    getColor() {
-        if (this.color === 0x00ff00) return "G";
-        if (this.color === 0x0000ff) return "B";
-        if (this.color === 0xffff00) return "Y";
-        if (this.color === 0xffffff) return "W";
-        if (this.color === 0xff9900) return "O";
-        if (this.color === 0xff0000) return "R";
-    }
-
+    
     /**
      * Update the position of the sticker based on the new position and facing direction.
      * @param {*} positionVector new position
