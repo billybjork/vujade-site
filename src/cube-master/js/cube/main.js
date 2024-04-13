@@ -42,7 +42,7 @@ export function CubeMasterInit(videoURLs) {
     const domElement = document.getElementById("three"); // Targeting the DOM element for rendering
 
     const scene = new THREE.Scene(); // Creating a new THREE.js scene
-    scene.background = new THREE.Color(0xf5f5f5); // Setting the scene background color
+    scene.background = new THREE.Color(0xffffff); // Setting the scene background color
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / getHeight(), 0.1, 1000);
     camera.position.set(4, 4, 6); // Setting camera position
@@ -53,10 +53,9 @@ export function CubeMasterInit(videoURLs) {
     domElement.appendChild(renderer.domElement); // Adding the renderer to the DOM
 
     const controls = new OrbitControls(camera, renderer.domElement); // Configuring orbit controls
-    controls.minDistance = 5;
-    controls.maxDistance = 15;
     controls.enablePan = false;
-    controls.enableRotate = false;
+    controls.enableRotate = false; // Set to true if you want to allow rotation
+    controls.enableZoom = false; // Disable zooming
     controls.update();
 
     const cube = new Cube(scene, videoURLs); // Create the cube and pass videoURLs
