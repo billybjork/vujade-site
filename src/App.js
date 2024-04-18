@@ -1,7 +1,6 @@
 import React, { useState, useEffect, Suspense, useMemo, useRef } from 'react';
 import axios from 'axios';
 import './App.css';
-import SplashScreen from './SplashScreen';
 import { CubeMasterInit } from './cube-master/js/cube/main.js';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ModalProvider } from './ModalContext';
@@ -12,50 +11,78 @@ const BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://vujade-site-bd6c94750c62.herokuapp.com'
   : 'http://127.0.0.1:5000';
 
-  function CubeWithVideos() {
-    const [cubeVideos, setCubeVideos] = useState([]);
-    const cubeMasterInitialized = useRef(false);
-  
-    useEffect(() => {
-      console.log('CubeWithVideos component mounted.');
-  
-      return () => {
-        console.log('CubeWithVideos component unmounted.');
-        // Add cleanup logic here if necessary, such as CubeMasterCleanup();
-      };
-    }, []);
-  
-    useEffect(() => {
-      const fetchCubeVideos = async () => {
-        try {
-          const response = await axios.get(`${BASE_URL}/api/scenes`);
-          const shuffledScenes = _.shuffle(response.data.map(scene => scene.sceneURL));
-          setCubeVideos(shuffledScenes);
-        } catch (error) {
-          console.error('Error fetching cube videos:', error);
-        }
-      };
-      fetchCubeVideos();
-    }, []);
-  
-    useEffect(() => {
-      if (cubeVideos.length > 0 && !cubeMasterInitialized.current) {
-        console.log('Initializing CubeMaster with new video textures');
-        CubeMasterInit(cubeVideos);
-        cubeMasterInitialized.current = true;
+function CubeWithVideos() {
+  const [cubeVideos, setCubeVideos] = useState([]);
+  const cubeMasterInitialized = useRef(false);
+
+  useEffect(() => {
+    console.log('CubeWithVideos component mounted.');
+
+    return () => {
+      console.log('CubeWithVideos component unmounted.');
+      // Add cleanup logic here if necessary, such as CubeMasterCleanup();
+    };
+  }, []);
+
+  useEffect(() => {
+    const fetchCubeVideos = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/api/scenes`);
+        const shuffledScenes = _.shuffle(response.data.map(scene => scene.sceneURL));
+        setCubeVideos(shuffledScenes);
+      } catch (error) {
+        console.error('Error fetching cube videos:', error);
       }
-    }, [cubeVideos]);
-  
-    return <div id="cube-container"></div>;
-  }
+    };
+    fetchCubeVideos();
+  }, []);
+
+  useEffect(() => {
+    if (cubeVideos.length > 0 && !cubeMasterInitialized.current) {
+      console.log('Initializing CubeMaster with new video textures');
+      CubeMasterInit(cubeVideos);
+      cubeMasterInitialized.current = true;
+    }
+  }, [cubeVideos]);
+
+  return <div id="cube-container"></div>;
+}
+
+function VideoMenu() {
+  const [videoNames, setVideoNames] = useState([]);
+
+  useEffect(() => {
+    const fetchVideoNames = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/api/videos`);
+        setVideoNames(response.data.map(video => ({
+          id: video.videoID,
+          name: video.videoName
+        })));
+      } catch (error) {
+        console.error('Error fetching video names:', error);
+      }
+    };
+    fetchVideoNames();
+  }, []);
+
+  return (
+    <div className="video-menu">
+      {videoNames.map(video => (
+        <button key={video.id} onClick={() => console.log('Clicked:', video.name)}>
+          {video.name}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function Home() {
-  return (
-    <>
-      <CubeWithVideos />
-      <SplashScreen />
-    </>
-  );
+return (
+  <>
+    <CubeWithVideos />
+  </>
+);
 }
 
 function AppWrapper() {
@@ -79,6 +106,7 @@ function AppWrapper() {
     <Router>
       <Suspense fallback={<div>Loading...</div>}>
         <ModalProvider>
+          <VideoMenu />
           <Routes>
             <Route path="/" element={<Home scenes={memoizedScenes} uniqueVideoIDs={memoizedUniqueVideoIDs} />} />
             <Route path="/:videoID" element={

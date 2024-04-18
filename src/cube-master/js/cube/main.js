@@ -24,7 +24,7 @@ export function CubeMasterInit(videoURLs) {
 
     const getHeight = () => {
         // Main content height calculation
-        return window.innerHeight * 0.95;
+        return window.innerHeight * 1;
     };
 
     const getTolerance = () => {
@@ -42,9 +42,9 @@ export function CubeMasterInit(videoURLs) {
     const domElement = document.getElementById("three"); // Targeting the DOM element for rendering
 
     const scene = new THREE.Scene(); // Creating a new THREE.js scene
-    scene.background = new THREE.Color(0xffffff); // Setting the scene background color
+    scene.background = null; // Setting the scene background color
 
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / getHeight(), 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / getHeight(), 0.1, 1000);
     camera.position.set(4, 4, 6); // Setting camera position
 
     const renderer = new THREE.WebGLRenderer({ antialias: true }); // Creating the renderer with antialiasing

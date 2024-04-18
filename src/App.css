@@ -11,8 +11,15 @@ body, html {
 
 .App-header {
   background-color: #282c34;
-  color: white;
+  color: rgb(0, 0, 0);
   padding: 20px;
+}
+
+#cube-container {
+  margin-top: -50px; /* Pulls the cube up; adjust as necessary */
+  transform: translateY(-10px); /* Additional fine-tuning, pulling it up a bit more */
+  position: relative; /* Necessary for z-index to work */
+  z-index: -1; /* Lower z-index places this behind other elements */
 }
 
 .splash-screen {
@@ -64,24 +71,26 @@ body, html {
   font-style: italic;
 }
 
-@keyframes ticker {
-  0% { transform: translateX(0%); }
-  100% { transform: translateX(-50%); }
-}
-
 .video-menu {
   display: flex;
-  white-space: nowrap;
-  animation: ticker 90s linear infinite;
-  min-height: 60px;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+  background-color: #000000;
+  position: relative; /* Necessary for z-index to work */
+  z-index: 0; /* Lower z-index places this behind other elements */
 }
 
-.video-menu-item {
+.video-menu button {
+  padding: 8px 16px;
+  border: none;
+  background-color: #000000;
+  color: white;
   cursor: pointer;
-  padding: 10px;
-  margin-right: 10px;
-  white-space: nowrap;
-  display: inline-block; /* Ensures items are laid out inline */
+}
+
+.video-menu button:hover {
+  background-color: #007bff;
 }
 
 .video-menu-item:hover {
@@ -96,14 +105,6 @@ body, html {
 
 .video-menu div:hover {
   background-color: #e0e0e0; /* Highlight on hover */
-}
-
-.video-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 10px;
-  padding: 10px;
-  margin: auto;
 }
 
 video {
