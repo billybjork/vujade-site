@@ -3,6 +3,8 @@ body, html {
   margin: 0;
   padding: 0;
   overflow: auto;
+  background-color: #000; /* Ensure entire page background is black */
+  color: #fff; /* Default text color set to white for better contrast */
 }
 
 .App {
@@ -16,8 +18,7 @@ body, html {
 }
 
 #cube-container {
-  margin-top: -50px; /* Pulls the cube up; adjust as necessary */
-  transform: translateY(-10px); /* Additional fine-tuning, pulling it up a bit more */
+  margin-top: -150px; /* Pulls the cube up; adjust as necessary */
   position: relative; /* Necessary for z-index to work */
   z-index: -1; /* Lower z-index places this behind other elements */
 }
@@ -71,26 +72,49 @@ body, html {
   font-style: italic;
 }
 
+.video-menu-wrapper {
+  overflow: hidden;
+  width: 100%;
+}
+
 .video-menu {
   display: flex;
-  justify-content: center;
-  gap: 10px;
-  padding: 10px;
-  background-color: #000000;
-  position: relative; /* Necessary for z-index to work */
-  z-index: 0; /* Lower z-index places this behind other elements */
+  animation: scroll 30s linear infinite; /* Adjust time for different speeds */
+  white-space: nowrap; /* Keeps the menu in a single line */
+  justify-content: space-between; /* Distributes space evenly */
+  white-space: nowrap; /* Keeps the menu in a single line */
+}
+
+@keyframes scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%); /* Adjust based on actual content width to repeat seamlessly */
+  }
 }
 
 .video-menu button {
-  padding: 8px 16px;
+  display: inline-flex; /* Aligns text in the center and allows flexible width */
+  align-items: center; /* Vertical alignment */
+  justify-content: center; /* Horizontal alignment */
+  font-family: Helvetica, Arial, sans-serif;
+  font-weight: normal;
+  font-size: 14px; /* Initial font size */
+  padding: 20px 16px; /* Initial padding */
+  margin: 0 10px; /* Adds space between buttons */
   border: none;
   background-color: #000000;
   color: white;
   cursor: pointer;
+  transition: font-size 0.3s ease, padding 0.3s ease, font-weight 0.3s ease; /* Smooth transitions for font size, padding, and font weight */
+  box-sizing: border-box; /* Includes padding and border in the element's total width and height */
 }
 
 .video-menu button:hover {
-  background-color: #007bff;
+  font-size: 20px; /* Larger font size on hover */
+  font-weight: bold; /* Bold font weight on hover */
+  padding: 15px 12px; /* Decreased padding to compensate for the increased font size, keeping button size constant */
 }
 
 .video-menu-item:hover {
@@ -134,7 +158,7 @@ video {
 
 .modal {
   position: fixed;
-  z-index: 1;
+  z-index: 2;
   left: 0;
   top: 0;
   width: 100%; /* Adjusted to cover viewport exactly */
@@ -152,9 +176,8 @@ video {
 }
 
 .modal-content {
-  background-color: #fefefe;
+  background-color: #000000;
   padding: 20px;
-  border: 1px solid #888;
   width: 80%;
   max-width: 800px;
   position: relative; /* Ensure modal content is positioned relative to its container */
@@ -206,22 +229,4 @@ video {
   color: #000;
   text-decoration: none;
   cursor: pointer;
-}
-
-/* Default video styling with dimmed opacity */
-video {
-  opacity: 0.5; /* Dimmed to 50% opacity by default */
-  transition: opacity 0.5s ease-in-out; /* Smooth transition for opacity changes */
-}
-
-/* Change video opacity to full on hover */
-video:hover {
-  opacity: 1; /* Full opacity on hover */
-}
-
-/* Mobile styles */
-@media (max-width: 768px) {
-  .video-grid {
-    grid-template-columns: repeat(3, 1fr); /* Adjust grid to fit three videos per row on mobile */
-  }
 }

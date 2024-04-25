@@ -41,8 +41,22 @@ const BASE_URL = process.env.NODE_ENV === 'production'
 
   const handleCloseModal = useCallback(() => {
     closeModal();
-    navigate('/'); // Use navigate to change URL back to root
+    navigate('/'); // Use navigate to change URL back to root, closing the modal
   }, [closeModal, navigate]);
+  
+  // UseEffect to handle outside clicks
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        handleCloseModal();
+      }
+    };
+  
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [handleCloseModal]);
 
   // Memoize embedded video URL
   const embeddedVideoUrl = useMemo(() => videoInfo ? getEmbeddedVideoUrl(videoInfo.URL) : null, [videoInfo, getEmbeddedVideoUrl]);

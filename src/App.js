@@ -3,7 +3,8 @@ import axios from 'axios';
 import './App.css';
 import { CubeMasterInit } from './cube-master/js/cube/main.js';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ModalProvider } from './ModalContext';
+import { useNavigate } from 'react-router-dom';
+import { useModal, ModalProvider } from './ModalContext';
 import Modal from './Modal';
 import _ from 'lodash';
 
@@ -14,15 +15,6 @@ const BASE_URL = process.env.NODE_ENV === 'production'
 function CubeWithVideos() {
   const [cubeVideos, setCubeVideos] = useState([]);
   const cubeMasterInitialized = useRef(false);
-
-  useEffect(() => {
-    console.log('CubeWithVideos component mounted.');
-
-    return () => {
-      console.log('CubeWithVideos component unmounted.');
-      // Add cleanup logic here if necessary, such as CubeMasterCleanup();
-    };
-  }, []);
 
   useEffect(() => {
     const fetchCubeVideos = async () => {
@@ -50,15 +42,18 @@ function CubeWithVideos() {
 
 function VideoMenu() {
   const [videoNames, setVideoNames] = useState([]);
+  const { openModal } = useModal();  // Import the context hook
+  const navigate = useNavigate();   // React Router's navigate function
 
   useEffect(() => {
     const fetchVideoNames = async () => {
       try {
         const response = await axios.get(`${BASE_URL}/api/videos`);
-        setVideoNames(response.data.map(video => ({
+        const names = response.data.map(video => ({
           id: video.videoID,
           name: video.videoName
-        })));
+        }));
+        setVideoNames([...names, ...names]); // Duplicate the array
       } catch (error) {
         console.error('Error fetching video names:', error);
       }
@@ -66,13 +61,20 @@ function VideoMenu() {
     fetchVideoNames();
   }, []);
 
+  const handleMenuClick = (videoID) => {
+    openModal(videoID); // Open modal and set current video ID
+    navigate(`/${videoID}`); // Change URL to include videoID
+  };
+
   return (
-    <div className="video-menu">
-      {videoNames.map(video => (
-        <button key={video.id} onClick={() => console.log('Clicked:', video.name)}>
-          {video.name}
-        </button>
-      ))}
+    <div className="video-menu-wrapper">
+      <div className="video-menu">
+        {videoNames.map((video, index) => (
+          <button key={`${video.id}-${index}`} onClick={() => handleMenuClick(video.id)}>
+            {video.name}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

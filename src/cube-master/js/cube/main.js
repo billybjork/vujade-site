@@ -45,7 +45,7 @@ export function CubeMasterInit(videoURLs) {
     scene.background = null; // Setting the scene background color
 
     const camera = new THREE.PerspectiveCamera(50, window.innerWidth / getHeight(), 0.1, 1000);
-    camera.position.set(4, 4, 6); // Setting camera position
+    camera.position.set(5, 4, 8); // Setting camera position
 
     const renderer = new THREE.WebGLRenderer({ antialias: true }); // Creating the renderer with antialiasing
     renderer.setPixelRatio(window.devicePixelRatio);
