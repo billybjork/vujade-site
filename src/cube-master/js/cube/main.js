@@ -54,9 +54,13 @@ export function CubeMasterInit(videoURLs) {
 
     const controls = new OrbitControls(camera, renderer.domElement); // Configuring orbit controls
     controls.enablePan = false;
-    controls.enableRotate = false; // Set to true if you want to allow rotation
-    controls.enableZoom = false; // Disable zooming
+    controls.enableRotate = true;
+    controls.enableZoom = true;
     controls.update();
+
+    // Set minimum and maximum zoom distances
+    controls.minDistance = 5;  // Minimum zoom distance
+    controls.maxDistance = 20;   // Maximum zoom distance
 
     const cube = new Cube(scene, videoURLs); // Create the cube and pass videoURLs
 
@@ -214,39 +218,43 @@ export function CubeMasterInit(videoURLs) {
     const onDocumentMouseDown = (event) => {
         // only handle events targeting the canvas
         if (event.target.tagName.toLowerCase() !== "canvas") return;
-
-        // set dragging to true
-        dragging = true;
-
+    
         // update mouse location
         mouse.x = (event.offsetX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.offsetY / getHeight()) * 2 + 1;
-
+    
         // use raycaster to find what cube meshes intersect mouse position
-        raycaster.setFromCamera(mouse.clone(), camera);
+        raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(cube.meshes, true);
-
-        // if nothing was clicked, signal a cube rotation
-        if (intersects.length === 0) {
-            selectedObject = ClickFlags.ROTATION;
-            return;
-        }
-
-        // update selectedObject if the topmost mesh is in the cube's stickersMap
-        if (cube.stickersMap.has(intersects[0].object.uuid)) {
-            selectedObject = intersects[0];
+    
+        if (intersects.length > 0) {
+            // Mesh was clicked: disable OrbitControls and handle face rotation
+            controls.enabled = false;
+            dragging = true;
+    
+            // Determine which part of the cube was clicked
+            if (cube.stickersMap.has(intersects[0].object.uuid)) {
+                selectedObject = intersects[0];
+            } else {
+                // Handle case where a cubie but not a sticker is clicked
+                selectedObject = ClickFlags.CUBIE;
+            }
         } else {
-            // this case happens when the black cubie in between the stickers is clicked
-            // set selectedObject to special CUBIE flag
-            selectedObject = ClickFlags.CUBIE;
+            // No mesh was clicked: enable OrbitControls for full cube rotation
+            controls.enabled = true;
+            selectedObject = ClickFlags.ROTATION;
         }
-    };
+    };    
     document.addEventListener("pointerdown", onDocumentMouseDown, false);
 
     /**
      * Handle mouse release by unsetting chosen axis, direction, and selected object.
      */
     const onDocumentMouseUp = (event) => {
+        // Always enable OrbitControls on mouse up to allow rotation freedom when not dragging
+        controls.enabled = true;
+    
+        // Reset interaction states
         dragging = false;
         selectedObject = ClickFlags.NONE;
         chosenAxis = null;
