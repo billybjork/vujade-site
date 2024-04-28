@@ -54,8 +54,10 @@ class Sticker {
         video.crossOrigin = "anonymous";
         video.src = videoURL;
         video.load();
+        video.autoplay = true;
         video.muted = true;
         video.loop = true;
+        video.setAttribute('playsinline', true); // Important for iOS devices
         video.play().catch(e => console.error("Autoplay was prevented:", e)); // Handle autoplay issues gracefully
 
         // Create a video texture from the video element
@@ -164,6 +166,19 @@ class Sticker {
         this.positionVector.applyMatrix3(rotationMatrix);
         this.updatePosition(this.positionVector, this.facingVector);
         this.mesh.rotateOnWorldAxis(AxisVectors[axis], theta);
+    }
+    // Method to dim the sticker
+    dim() {
+        this.material.opacity = 0.5;
+        this.material.transparent = true;
+        this.material.needsUpdate = true;
+    }
+
+    // Method to reset the sticker's appearance
+    reset() {
+        this.material.opacity = 1.0;
+        this.material.transparent = false;
+        this.material.needsUpdate = true;
     }
 }
 
