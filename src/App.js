@@ -1,11 +1,10 @@
-import React, { useState, useEffect, Suspense, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, Suspense, useRef } from 'react';
 import axios from 'axios';
 import './App.css';
 import { CubeMasterInit } from './cube-master/js/cube/main.js';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import { useModal, ModalProvider } from './ModalContext';
-import Modal from './Modal';
+import { motion, AnimatePresence } from 'framer-motion';
 import _ from 'lodash';
 
 const BASE_URL = process.env.NODE_ENV === 'production'
@@ -41,19 +40,20 @@ function CubeWithVideos() {
 }
 
 function VideoMenu() {
+  const navigate = useNavigate();
+  const menuRef = useRef(null); // Reference to the menu container
   const [videoNames, setVideoNames] = useState([]);
-  const { openModal } = useModal();  // Import the context hook
-  const navigate = useNavigate();   // React Router's navigate function
+  const [selectedId, setSelectedId] = useState(null);
+  const [isFrozen, setIsFrozen] = useState(false);
 
   useEffect(() => {
     const fetchVideoNames = async () => {
       try {
         const response = await axios.get(`${BASE_URL}/api/videos`);
-        const names = response.data.map(video => ({
+        setVideoNames(response.data.map(video => ({
           id: video.videoID,
           name: video.videoName
-        }));
-        setVideoNames([...names, ...names]); // Duplicate the array
+        })));
       } catch (error) {
         console.error('Error fetching video names:', error);
       }
@@ -61,16 +61,34 @@ function VideoMenu() {
     fetchVideoNames();
   }, []);
 
-  const handleMenuClick = (videoID) => {
-    openModal(videoID); // Open modal and set current video ID
-    navigate(`/${videoID}`); // Change URL to include videoID
+  const handleMenuClick = (videoId, index) => {
+    setIsFrozen(true);
+    const itemWidth = menuRef.current.children[0].offsetWidth;
+    const centerPosition = window.innerWidth / 2 - itemWidth / 2;
+    const itemOffset = itemWidth * index;
+    menuRef.current.style.transition = 'transform 0.5s ease'; // Smooth transition for repositioning
+    menuRef.current.style.transform = `translateX(${centerPosition - itemOffset}px)`;
+    setSelectedId(videoId);
+    navigate(`/${videoId}`);
+  };
+
+  const resetMenu = () => {
+    setSelectedId(null);
+    setIsFrozen(false);
+    menuRef.current.style.transition = 'none'; // Remove transition to resume smooth infinite scrolling
+    menuRef.current.style.transform = 'translateX(0)';
   };
 
   return (
     <div className="video-menu-wrapper">
-      <div className="video-menu">
+      {selectedId !== null && (
+        <div className="backdrop" onClick={resetMenu}>
+          <button className="reset-button">X</button>
+        </div>
+      )}
+      <div ref={menuRef} className="video-menu" style={{ animationPlayState: isFrozen ? 'paused' : 'running' }}>
         {videoNames.map((video, index) => (
-          <button key={`${video.id}-${index}`} onClick={() => handleMenuClick(video.id)}>
+          <button key={`${video.id}-${index}`} onClick={() => handleMenuClick(video.id, index)}>
             {video.name}
           </button>
         ))}
@@ -80,11 +98,11 @@ function VideoMenu() {
 }
 
 function Home() {
-return (
-  <>
-    <CubeWithVideos />
-  </>
-);
+  return (
+    <>
+      <CubeWithVideos />
+    </>
+  );
 }
 
 function AppWrapper() {
@@ -107,18 +125,11 @@ function AppWrapper() {
   return (
     <Router>
       <Suspense fallback={<div>Loading...</div>}>
-        <ModalProvider>
-          <VideoMenu />
-          <Routes>
-            <Route path="/" element={<Home scenes={memoizedScenes} uniqueVideoIDs={memoizedUniqueVideoIDs} />} />
-            <Route path="/:videoID" element={
-              <>
-                <Home scenes={memoizedScenes} uniqueVideoIDs={memoizedUniqueVideoIDs} />
-                <Modal />
-              </>
-            } />
-          </Routes>
-        </ModalProvider>
+        <VideoMenu />
+        <Routes>
+          <Route path="/" element={<Home scenes={memoizedScenes} uniqueVideoIDs={memoizedUniqueVideoIDs} />} />
+          <Route path="/:videoID" element={<Home scenes={memoizedScenes} uniqueVideoIDs={memoizedUniqueVideoIDs} />} />
+        </Routes>
       </Suspense>
     </Router>
   );
