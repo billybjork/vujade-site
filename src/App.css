@@ -4,3 +4,130 @@ body, html {
   background-color: #000; /* Ensure entire page background is black */
   color: #fff; /* Default text color set to white for better contrast */
 }
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 24px;
+  color: #333;
+}
+
+.video-menu-wrapper {
+  overflow: hidden;
+  width: 100%;
+}
+
+.video-menu-container {
+  display: flex;
+  white-space: nowrap;
+  animation: scroll 30s linear infinite; /* Adjust duration as needed */
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.video-menu-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Helvetica, Arial, sans-serif;
+  font-weight: normal;
+  font-size: 14px;
+  padding: 20px 16px;
+  margin: 0 10px;
+  border: none;
+  background-color: #000000;
+  color: white;
+  cursor: pointer;
+  transition: font-size 0.3s ease, padding 0.3s ease, font-weight 0.3s ease;
+  box-sizing: border-box;
+}
+
+.video-menu-item:hover {
+  font-size: 20px;
+  font-weight: bold;
+  padding: 15px 12px;
+}
+
+.modal {
+  position: fixed;
+  z-index: 2;
+  left: 0;
+  top: 0;
+  width: 100%; /* Adjusted to cover viewport exactly */
+  height: 100%; /* Adjusted to cover viewport exactly */
+  overflow-y: hidden; /* Enable scrolling on the modal */
+  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+  display: flex;
+  justify-content: center;
+  align-items: center; /* Center vertically */
+  padding-top: 0; /* Removed padding-top to use align-items for centering */
+}
+
+*, *::before, *::after {
+  box-sizing: border-box; /* Ensures padding and border are included in the element's total width and height */
+}
+
+.modal-content {
+  background-color: #000000;
+  padding: 20px;
+  width: 80%;
+  max-width: 800px;
+  position: relative; /* Ensure modal content is positioned relative to its container */
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19); /* Optional: Add shadow for better visibility */
+  text-align: center;
+  margin: auto; /* Centered vertically and horizontally */
+  overflow-y: auto; /* Enable scrolling within the modal content */
+  max-height: 80vh; /* Adjusted for mobile responsiveness */
+}
+
+.modal-content a {
+  color: blue; /* Sets the link color to blue */
+  text-decoration: none; /* Optional: Removes the underline from links */
+}
+
+.modal-content a:hover,
+.modal-content a:focus {
+  color: darkblue; /* Darker blue on hover/focus for better visibility and interactivity */
+  text-decoration: underline; /* Optional: Adds underline on hover/focus for clarity */
+}
+
+.embed-container {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; /* 16:9 Aspect Ratio */
+  overflow: hidden; /* Ensures no overflow from the container */
+}
+
+.embed-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none; /* Removes the border around iframe */
+}
+
+.close {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  color: #aaaaaa;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #6a6a6a;
+  text-decoration: none;
+  cursor: pointer;
+}

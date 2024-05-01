@@ -26,15 +26,12 @@ const BASE_URL = process.env.NODE_ENV === 'production'
    useEffect(() => {
     const videoIDFromURL = location.pathname.split('/')[1];
     if (videoIDFromURL && (videoIDFromURL !== currentVideoID || !videoInfo)) {
-      setIsLoading(true); // Indicate loading
       axios.get(`${BASE_URL}/api/video_info/${videoIDFromURL}`)
         .then(response => {
           setVideoInfo(response.data);
-          setIsLoading(false); // Reset loading state
         })
         .catch(error => {
           console.error('Error fetching video info: ', error);
-          setIsLoading(false); // Ensure loading state is reset even on error
         });
     }
   }, [location.pathname, currentVideoID, videoInfo]);
@@ -60,10 +57,6 @@ const BASE_URL = process.env.NODE_ENV === 'production'
 
   // Memoize embedded video URL
   const embeddedVideoUrl = useMemo(() => videoInfo ? getEmbeddedVideoUrl(videoInfo.URL) : null, [videoInfo, getEmbeddedVideoUrl]);
-
-  if (isLoading || !videoInfo) { // Show loading indicator or prevent rendering if videoInfo is not available yet
-    return <div>Loading...</div>;
-  }
   
   return (
     <div className={`modal-backdrop ${isModalOpen ? 'open' : ''}`} onClick={handleCloseModal} ref={modalRef}>
@@ -71,7 +64,9 @@ const BASE_URL = process.env.NODE_ENV === 'production'
         <div className="modal-content">
           <span className="close" onClick={handleCloseModal}>&times;</span>
           <>
-            <h2>{videoInfo ? videoInfo.videoName : 'Loading...'}</h2>
+            <h2 className={videoInfo ? 'video-name' : 'loading'}>
+              {videoInfo ? videoInfo.videoName : 'Loading...'}
+            </h2>
             <div className="embed-container">
               {videoInfo && (
                 <iframe
@@ -88,6 +83,6 @@ const BASE_URL = process.env.NODE_ENV === 'production'
       </div>
     </div>
   );
-}
+  }
 
 export default Modal;

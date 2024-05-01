@@ -54,12 +54,10 @@ class Cube {
 
     /**
      * Perform a given function on every cubie in the cube.
-     * @param {*} fn function to perform on each cubie
+     * @param {*} fn - Function to perform on each cubie.
      */
     forEach(fn) {
-        this.cubies.forEach((cubie) => {
-            fn(cubie);
-        });
+        this.cubies.forEach(fn);
     }
 
     /**

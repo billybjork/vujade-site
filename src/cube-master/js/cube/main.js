@@ -47,10 +47,11 @@ export function CubeMasterInit(videoURLs) {
     const camera = new THREE.PerspectiveCamera(50, window.innerWidth / getHeight(), 0.1, 1000);
     camera.position.set(5, 4, 8); // Setting camera position
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true }); // Creating the renderer with antialiasing
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, getHeight());
-    domElement.appendChild(renderer.domElement); // Adding the renderer to the DOM
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio);  // High resolution
+    renderer.setSize(window.innerWidth, getHeight());  // Full size
+    renderer.domElement.style.transform = "translateZ(0)";  // CSS trick for better GPU acceleration
+    domElement.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement); // Configuring orbit controls
     controls.enablePan = false;

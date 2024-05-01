@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-
 import getRotationMatrix from "./RotationMatrices.js";
 import { Axes, AxisVectors } from "./Constants.js";
 
@@ -53,12 +52,21 @@ class Sticker {
         const video = document.createElement('video');
         video.crossOrigin = "anonymous";
         video.src = videoURL;
-        video.load();
-        video.autoplay = true;
-        video.muted = true;
+        video.load();  // Preload the video
+        video.muted = true;  // Ensure video is muted
         video.loop = true;
-        video.setAttribute('playsinline', true); // Important for iOS devices
-        video.play().catch(e => console.error("Autoplay was prevented:", e)); // Handle autoplay issues gracefully
+        video.setAttribute('playsinline', true);  // Ensures inline playback on iOS devices
+
+        // Important for iOS/Safari: Trigger playback from a user interaction event globally
+        document.body.addEventListener('click', function startVideo() {
+            video.play().then(() => {
+                console.log("Autoplay started!");
+            }).catch(e => {
+                console.error("Autoplay was prevented:", e);
+                // Optionally show a user interface prompt or a play button here
+            });
+            document.body.removeEventListener('click', startVideo);
+        });
 
         // Create a video texture from the video element
         const texture = new THREE.VideoTexture(video);
