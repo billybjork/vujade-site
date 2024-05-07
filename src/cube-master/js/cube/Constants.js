@@ -35,7 +35,7 @@ export const AxisVectors = Object.freeze({
 /**
  * Constant controlling speed of animations.
  */
-export const ANIMATION_SPEED = 12.5;
+export const ANIMATION_SPEED = 6;
 
 /**
  * Constants in the move buffer to signal the start and end of a solution

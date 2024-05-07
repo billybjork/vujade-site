@@ -13,14 +13,21 @@ const BASE_URL = process.env.NODE_ENV === 'production'
 
 function VideoMenu() {
   const [videoNames, setVideoNames] = useState([]);
-  const { openModal, uiVisible } = useModal();
+  const { openModal, uiVisible, setUiVisible } = useModal(); // Assuming `setUiVisible` is available to manage `uiVisible`
 
   useEffect(() => {
     async function fetchVideoNames() {
       try {
         const { data } = await axios.get(`${BASE_URL}/api/videos`);
-        const repeatedData = [...data, ...data]; // Repeat the data twice
-        setVideoNames(repeatedData.map(video => ({ id: video.videoID, name: video.videoName })));
+        // Repeat the data twice
+        const repeatedData = [...data, ...data]; 
+        // Map each video with a unique suffix to ensure unique keys
+        setVideoNames(repeatedData.map((video, index) => ({
+          id: video.videoID + "_" + index, // Appending index to videoID for unique key
+          name: video.videoName
+        })));
+        setUiVisible(false); // Initially set uiVisible to false to hide the menu
+        setTimeout(() => setUiVisible(true), 100); // Delay visibility to trigger animation
       } catch (error) {
         console.error('Error fetching video names:', error);
       }
@@ -29,34 +36,34 @@ function VideoMenu() {
   }, []);
 
   useEffect(() => {
-    console.log(`UI Visible: ${uiVisible}`);
-  }, [uiVisible]);  
+    console.log(`UI Visible: ${uiVisible}`); // Log uiVisible state changes
+  }, [uiVisible]);
 
   return (
     <AnimatePresence>
       {uiVisible && (
         <motion.div
-          className="video-menu-container"
-          initial={{ opacity: 1 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          {videoNames.map(video => (
-            <motion.div
-              key={video.id}
-              className="video-menu-item"
-              onClick={() => openModal(video.id)}
-              whileHover={{ scale: 1.1 }}
-            >
-              {video.name}
-            </motion.div>
-          ))}
-        </motion.div>
+        className="video-menu-container"
+        initial={{ opacity: 1, visibility: "visible" }}
+        animate={{ opacity: uiVisible ? 1 : 0, visibility: uiVisible ? "visible" : "hidden" }}
+        exit={{ opacity: 0, visibility: "hidden" }}
+        transition={{ duration: 0.5 }}
+      >
+        {videoNames.map(video => (
+          <motion.div
+            key={video.id}
+            className="video-menu-item"
+            onClick={() => openModal(video.id.split('_')[0])}
+            whileHover={{ scale: 1.1 }}
+          >
+            {video.name}
+          </motion.div>
+        ))}
+      </motion.div>
       )}
     </AnimatePresence>
   );
-}
+}  
 
 function Modal() {
   const { isModalOpen, currentVideoID, closeModal } = useModal();
@@ -150,12 +157,13 @@ function CubeWithVideos() {
     const fetchCubeVideos = async () => {
       try {
         const response = await axios.get(`${BASE_URL}/api/scenes`);
+        // Shuffle the scenes to randomize the textures used on the cube
         const shuffledScenes = _.shuffle(response.data.map(scene => scene.sceneURL));
         setCubeVideos(shuffledScenes);
-        setIsLoading(false);
       } catch (error) {
         console.error('Error fetching cube videos:', error);
-        setIsLoading(false);
+      } finally {
+        setIsLoading(false); // Ensures loading state is updated whether or not the fetch succeeds
       }
     };
     fetchCubeVideos();
@@ -164,11 +172,11 @@ function CubeWithVideos() {
   useEffect(() => {
     if (cubeVideos.length > 0 && !cubeMasterInitialized.current) {
       console.log('Initializing CubeMaster with new video textures');
-      const controls = CubeMasterInit(cubeVideos);
+      const controls = CubeMasterInit(cubeVideos); // Initialize the cube with videos
       renderingControl.current = controls;  // Store the rendering controls
       cubeMasterInitialized.current = true;
     }
-  }, [cubeVideos ]);  
+  }, [cubeVideos]);
 
   if (isLoading) {
     return <div className="loading">Loading...</div>;
@@ -178,12 +186,11 @@ function CubeWithVideos() {
     <AnimatePresence>
         <motion.div
           id="cube-container"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
+          initial={{ opacity: 0 }}  // Start from invisible to handle the initial load
+          animate={{ opacity: 1 }}  // Animate to fully visible once loaded
+          exit={{ opacity: 0 }}    // Handle the exit animation
+          transition={{ duration: 0.5 }}  // Smooth transition for opacity changes
         >
-          {/* Cube content */}
         </motion.div>
     </AnimatePresence>
   );

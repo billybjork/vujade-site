@@ -23,7 +23,6 @@ const animate = (renderer, scene, camera, update) => {
     loop();
 };
 
-
 // Main rendering function that handles continuous rendering of the scene
 const render = (renderer, scene, camera, update) => {
     animate(renderer, scene, camera, update); // Use the globally defined animate function
@@ -51,7 +50,7 @@ export function CubeMasterInit(videoURLs) {
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(5, 4, 8); // Setting camera position for optimal viewing
+    camera.position.set(6, 4, 8); // Setting camera position for optimal viewing
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio); // Ensure high resolution
@@ -132,7 +131,7 @@ export function CubeMasterInit(videoURLs) {
                         cubie.animateAxis,
                         cubie.animateDir * delta * ANIMATION_SPEED
                     );
-                    cubie.angle += delta * ANIMATION_SPEED;
+                    cubie.angle += delta * ANIMATION_SPEED
                 }
             }
         });
