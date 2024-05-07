@@ -110,8 +110,6 @@ export function CubeMasterInit(videoURLs) {
 
             if (move === MoveFlags.SOLUTION_END) {
                 animating = false;
-            } else if (move === MoveFlags.SOLUTION_START) {
-                solveCube();
             } else {
                 cube.move(move);
                 animating = true;
