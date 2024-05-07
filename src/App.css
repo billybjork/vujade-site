@@ -1,8 +1,15 @@
 /* Ensure the body or main container allows for natural document flow and scrolling */
-body, html {
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
   overflow: hidden;
-  background-color: #000; /* Ensure entire page background is black */
-  color: #fff; /* Default text color set to white for better contrast */
+  background-color: #000;
+  color: #ffffff;
 }
 
 .loading {
@@ -14,15 +21,19 @@ body, html {
   color: #333;
 }
 
+#cube-container {
+  margin-top: -50px; /* Adjust the value as needed */
+}
+
+
 .video-menu-wrapper {
-  overflow: hidden;
   width: 100%;
 }
 
 .video-menu-container {
   display: flex;
   white-space: nowrap;
-  animation: scroll 30s linear infinite; /* Adjust duration as needed */
+  animation: scroll 15s linear infinite; /* Adjust duration as needed */
 }
 
 @keyframes scroll {
@@ -30,7 +41,7 @@ body, html {
     transform: translateX(0);
   }
   100% {
-    transform: translateX(-100%);
+    transform: translateX(-50%); /* Change from -100% to -50% for seamless loop */
   }
 }
 
@@ -57,77 +68,104 @@ body, html {
   padding: 15px 12px;
 }
 
-.modal {
+.modal-backdrop {
   position: fixed;
-  z-index: 2;
-  left: 0;
   top: 0;
-  width: 100%; /* Adjusted to cover viewport exactly */
-  height: 100%; /* Adjusted to cover viewport exactly */
-  overflow-y: hidden; /* Enable scrolling on the modal */
-  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center; /* Center vertically */
-  padding-top: 0; /* Removed padding-top to use align-items for centering */
+  align-items: center;
+  z-index: 1000;
+  background: rgba(0,0,0,0.8); /* Dim background */
 }
 
-*, *::before, *::after {
-  box-sizing: border-box; /* Ensures padding and border are included in the element's total width and height */
-}
-
-.modal-content {
-  background-color: #000000;
-  padding: 20px;
-  width: 80%;
+.modal {
+  position: relative;
+  width: 90%;
   max-width: 800px;
-  position: relative; /* Ensure modal content is positioned relative to its container */
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19); /* Optional: Add shadow for better visibility */
-  text-align: center;
-  margin: auto; /* Centered vertically and horizontally */
-  overflow-y: auto; /* Enable scrolling within the modal content */
-  max-height: 80vh; /* Adjusted for mobile responsiveness */
-}
-
-.modal-content a {
-  color: blue; /* Sets the link color to blue */
-  text-decoration: none; /* Optional: Removes the underline from links */
-}
-
-.modal-content a:hover,
-.modal-content a:focus {
-  color: darkblue; /* Darker blue on hover/focus for better visibility and interactivity */
-  text-decoration: underline; /* Optional: Adds underline on hover/focus for clarity */
+  height: 80vh; /* Fixed height for the modal */
+  border-radius: 8px;
+  background: #000;
+  overflow: hidden; /* Ensures no overflow */
+  display: flex;
+  flex-direction: column;
+  padding: 40px 20px 20px 20px; /* Padding for overall modal to give space for the close button */
 }
 
 .embed-container {
-  position: relative;
-  width: 100%;
-  padding-top: 56.25%; /* 16:9 Aspect Ratio */
-  overflow: hidden; /* Ensures no overflow from the container */
+  width: 100%; /* Ensures the video container takes up the full width of the modal */
+  padding-top: 56.25%; /* 16:9 Aspect Ratio, calculates height based on the width */
+  position: relative; /* Allows absolute positioning for the iframe */
+  background: #000; /* Background color in case the iframe has issues */
 }
 
 .embed-container iframe {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  border: none; /* Removes the border around iframe */
+  width: 100%; /* Full width of the container */
+  height: 100%; /* Full height of the container, maintained by padding-top in the container */
+  border: none;
+}
+
+.text-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 20px;
+  padding-bottom: 120px;  /* Ensure this is sufficient to scroll out of the gradient */
+  color: #fff;
+
+  /* Styles for the scrollbar */
+  scrollbar-width: thin;  /* For Firefox */
+  scrollbar-color: #aaa transparent;  /* For Firefox: thumb and track color */
+  /* Styles for Webkit (Chrome, Edge, Safari) */
+  &::-webkit-scrollbar {
+    width: 4px;  /* Adjust the width of the scrollbar here */
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;  /* Makes the track background transparent */
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #aaa;  /* Grey color for the scrollbar thumb */
+    border-radius: 4px;  /* Optional: adds rounded corners to the scrollbar thumb */
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: #888;  /* Darker color on hover for better interaction visibility */
+  }
+}
+
+.text-container a, .text-container a:visited {
+  color: #4e74ff; /* Change #ffffff to whatever color you prefer for the links */
+  text-decoration: none; /* Optional: removes underline from links */
+}
+
+.text-container a:hover, .text-container a:focus {
+  text-decoration: underline; /* Optional: adds underline on hover/focus for better UX */
+}
+
+.gradient-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100px;  /* Ensure this matches the extra padding added to the bottom of the text-container */
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 2;
 }
 
 .close {
   position: absolute;
-  right: 10px;
-  top: 10px;
-  color: #aaaaaa;
-  font-size: 24px;
-  font-weight: bold;
+  right: 20px;
+  top: -10px; /* Fixed position from the top right of the modal */
+  font-size: 30px;
+  color: #ccc;
+  cursor: pointer;
+  z-index: 1050; /* Ensures it's above other content */
 }
 
-.close:hover,
-.close:focus {
-  color: #6a6a6a;
-  text-decoration: none;
-  cursor: pointer;
+.close:hover {
+  color: #888;
 }

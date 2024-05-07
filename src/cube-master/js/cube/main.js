@@ -9,13 +9,27 @@ import {
     ANIMATION_SPEED,
 } from "./Constants.js";
 
-// CubeMasterInit function encapsulates the cube setup to be called with videoURLs
-export function CubeMasterInit(videoURLs) {
+let animationFrameId = null;  // This will store the request ID for the animation frame
+let mouse = new THREE.Vector2(); // Vector2 for storing mouse coordinates
+let raycaster = new THREE.Raycaster(); // Raycaster for detecting intersects
 
-    let holdingW = false;
-    const mouse = new THREE.Vector2();
-    const delta = new THREE.Vector2();
-    const raycaster = new THREE.Raycaster();
+// Define animate globally within the module
+const animate = (renderer, scene, camera, update) => {
+    const loop = () => {
+        animationFrameId = requestAnimationFrame(loop);
+        update(); // Call update to process moves and handle animations
+        renderer.render(scene, camera);
+    };
+    loop();
+};
+
+
+// Main rendering function that handles continuous rendering of the scene
+const render = (renderer, scene, camera, update) => {
+    animate(renderer, scene, camera, update); // Use the globally defined animate function
+};
+
+export function CubeMasterInit(videoURLs) {
 
     const getHeaderSize = () => {
         // Height of header for embedding in other websites
@@ -35,59 +49,57 @@ export function CubeMasterInit(videoURLs) {
         return 0.05;
     };
 
-    let moveBuffer = []; // FIFO buffer for storing moves
-    let animating = false; // Animation state flag
-    let solving = false; // Cube solving state flag
-
-    const domElement = document.getElementById("three"); // Targeting the DOM element for rendering
-
-    const scene = new THREE.Scene(); // Creating a new THREE.js scene
-    scene.background = null; // Setting the scene background color
-
-    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / getHeight(), 0.1, 1000);
-    camera.position.set(5, 4, 8); // Setting camera position
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(5, 4, 8); // Setting camera position for optimal viewing
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio);  // High resolution
-    renderer.setSize(window.innerWidth, getHeight());  // Full size
-    renderer.domElement.style.transform = "translateZ(0)";  // CSS trick for better GPU acceleration
-    domElement.appendChild(renderer.domElement);
+    renderer.setPixelRatio(window.devicePixelRatio); // Ensure high resolution
+    renderer.setSize(window.innerWidth, window.innerHeight); // Set full size
+    const domElement = document.getElementById("cube-container");
+    domElement.appendChild(renderer.domElement); // Attach renderer to the DOM element
 
-    const controls = new OrbitControls(camera, renderer.domElement); // Configuring orbit controls
+    const controls = new OrbitControls(camera, renderer.domElement);
     controls.enablePan = false;
-    controls.enableRotate = true;
-    controls.enableZoom = true;
+    controls.enableZoom = true; // Enable zoom but disable panning
+    controls.enableRotate = true; // Allow rotation
     controls.update();
 
-    // Set minimum and maximum zoom distances
-    controls.minDistance = 5;  // Minimum zoom distance
-    controls.maxDistance = 20;   // Maximum zoom distance
+    const cube = new Cube(scene, videoURLs); // Initialize the cube with video textures
 
-    const cube = new Cube(scene, videoURLs); // Create the cube and pass videoURLs
+    const startRendering = () => {
+        if (!animationFrameId) {
+            animate(renderer, scene, camera, update); // Correctly call the global animate function
+        }
+    };    
 
-    let rotationPixelCutoff; // Variable to store cutoff pixel location for changing cube rotations
+    const stopRendering = () => {
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId); // Stop the animation loop if it's running
+            animationFrameId = null;
+        }
+    };
 
-    // Function to update the rotation pixel cutoff
+    let rotationPixelCutoff; // Declare variable to store rotation pixel cutoff
+    let animating = false; // Tracks whether any animation is currently happening
+    let holdingW = false; // Tracks whether the 'W' key is being held down
+    let moveBuffer = [];  // Initialize moveBuffer as an empty array
+
+    // This function updates the rotation pixel cutoff based on interactions
     const updateRotationPixelCutoff = () => {
         const halfWidth = window.innerWidth / 2;
         cube.cubies.forEach((cubie) => {
             if (cubie.fixedPositionVector.x === 1 && cubie.fixedPositionVector.y === -1 && cubie.fixedPositionVector.z === 1) {
                 const pos = cubie.fixedPositionVector.clone();
                 pos.project(camera);
-                rotationPixelCutoff = pos.x * halfWidth + halfWidth;
+                rotationPixelCutoff = pos.x * halfWidth + halfWidth; // Update the rotation pixel cutoff for user interactions
             }
         });
     };
     updateRotationPixelCutoff();
-    controls.addEventListener("change", updateRotationPixelCutoff); // Updating rotation pixel cutoff on zoom
+    controls.addEventListener("change", updateRotationPixelCutoff); // Add listener to update cutoff on control changes
 
-    const solveCube = () => {
-        // Functionality for solving the cube
-        console.log("Cube solving functionality has been disabled.");
-        solving = false;
-    };
-
-    const clock = new THREE.Clock(); // Clock for tracking time
+    const clock = new THREE.Clock(); // Use a clock to manage time within the animation
 
     // Function for making updates per tick
     const update = () => {
@@ -97,7 +109,6 @@ export function CubeMasterInit(videoURLs) {
             const move = moveBuffer.shift();
 
             if (move === MoveFlags.SOLUTION_END) {
-                solving = false;
                 animating = false;
             } else if (move === MoveFlags.SOLUTION_START) {
                 solveCube();
@@ -129,22 +140,12 @@ export function CubeMasterInit(videoURLs) {
         });
     };
 
-    // Animation function to be called with requestAnimationFrame
-    const animate = () => {
-        requestAnimationFrame(animate);
-        update();
-        renderer.render(scene, camera);
-    };
-    animate(); // Start the animation loop
-
     // Event handlers for keyboard and mouse events, resize, and touch
 
     /**
      * Handle key press event
      */
     const onKeyPress = (event) => {
-        // do nothing if solving
-        if (solving) return;
 
         // append 'w' if holding w
         const key = holdingW ? "w" + event.key : event.key;
@@ -153,8 +154,6 @@ export function CubeMasterInit(videoURLs) {
             // push normal move if key is in KeysToMoves map
             moveBuffer.push(KeysToMoves[key]);
         } else if (event.key === "Enter") {
-            // set solving to true and queue a solve request
-            solving = true;
             moveBuffer.push(MoveFlags.SOLUTION_START);
         } else if (event.key === "w" || event.key === "W") {
             holdingW = true;
@@ -217,8 +216,11 @@ export function CubeMasterInit(videoURLs) {
      * Handle clicks by finding the mesh that was clicked.
      */
     const onDocumentMouseDown = (event) => {
+    
         // only handle events targeting the canvas
-        if (event.target.tagName.toLowerCase() !== "canvas") return;
+        if (event.target.tagName.toLowerCase() !== "canvas") {
+            return;
+        }
     
         // update mouse location
         mouse.x = (event.offsetX / window.innerWidth) * 2 - 1;
@@ -229,7 +231,8 @@ export function CubeMasterInit(videoURLs) {
         const intersects = raycaster.intersectObjects(cube.meshes, true);
     
         if (intersects.length > 0) {
-            // Mesh was clicked: disable OrbitControls and handle face rotation
+    
+            // Disable OrbitControls and handle face rotation
             controls.enabled = false;
             dragging = true;
     
@@ -268,26 +271,33 @@ export function CubeMasterInit(videoURLs) {
      * move is being requested, and pushing it to the moveBuffer.
      */
     const onDocumentMouseMove = (event) => {
-        // do nothing if not dragging, or if solving
-        if (!dragging || chosenAxis !== null || solving) return;
-
+    
+        // do nothing if not dragging
+        if (!dragging || chosenAxis !== null) {
+            return;
+        }
+    
         // do nothing if clicked a cubie
-        if (selectedObject === ClickFlags.CUBIE) return;
-
-        // find the difference of the current mouse position from where the click began
-        delta.x = (event.offsetX / window.innerWidth) * 2 - 1 - mouse.x;
-        delta.y = -(event.offsetY / getHeight()) * 2 + 1 - mouse.y;
-
-        // do nothing if mouse hasn't moved far enough
-        if (delta.length() <= getTolerance()) return;
-
-        // determine if swipe is up/down or left/right
+        if (selectedObject === ClickFlags.CUBIE) {
+            return;
+        }
+    
+        // Calculate mouse movement delta
+        const delta = new THREE.Vector2(
+            (event.offsetX / window.innerWidth) * 2 - 1 - mouse.x,
+            -(event.offsetY / getHeight()) * 2 + 1 - mouse.y
+        );
+    
+        // Check if the movement is significant enough to consider as a swipe
+        if (delta.length() <= getTolerance()) {
+            return;
+        }
+    
+        // Determine the direction of the swipe
         if (Math.abs(delta.x) > Math.abs(delta.y)) {
-            // if change was more in X direction than Y, then moving left/right
             chosenAxis = Axes.POSITIVE.X;
             chosenDir = delta.x > 0 ? 1 : -1;
         } else {
-            // if change was more in Y direction than X, then moving up/down
             chosenAxis = Axes.POSITIVE.Y;
             chosenDir = delta.y > 0 ? 1 : -1;
         }
@@ -412,4 +422,10 @@ export function CubeMasterInit(videoURLs) {
         dragging = false;
     };
     document.addEventListener("pointermove", onDocumentMouseMove, false);
+
+    // Start the animation loop with update function integrated
+    render(renderer, scene, camera, update);
+
+    // Return these functions so they can be called externally
+    return { startRendering, stopRendering };
 };

@@ -2,9 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './App.css';
 import { CubeMasterInit } from './cube-master/js/cube/main.js';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useModal, ModalProvider } from './ModalContext';
-import Modal from './Modal';
 import { motion, AnimatePresence } from 'framer-motion';
 import _ from 'lodash';
 
@@ -12,12 +11,142 @@ const BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://vujade-site-bd6c94750c62.herokuapp.com'
   : 'http://127.0.0.1:5000';
 
+function VideoMenu() {
+  const [videoNames, setVideoNames] = useState([]);
+  const { openModal, uiVisible } = useModal();
+
+  useEffect(() => {
+    async function fetchVideoNames() {
+      try {
+        const { data } = await axios.get(`${BASE_URL}/api/videos`);
+        const repeatedData = [...data, ...data]; // Repeat the data twice
+        setVideoNames(repeatedData.map(video => ({ id: video.videoID, name: video.videoName })));
+      } catch (error) {
+        console.error('Error fetching video names:', error);
+      }
+    }
+    fetchVideoNames();
+  }, []);
+
+  useEffect(() => {
+    console.log(`UI Visible: ${uiVisible}`);
+  }, [uiVisible]);  
+
+  return (
+    <AnimatePresence>
+      {uiVisible && (
+        <motion.div
+          className="video-menu-container"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          {videoNames.map(video => (
+            <motion.div
+              key={video.id}
+              className="video-menu-item"
+              onClick={() => openModal(video.id)}
+              whileHover={{ scale: 1.1 }}
+            >
+              {video.name}
+            </motion.div>
+          ))}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function Modal() {
+  const { isModalOpen, currentVideoID, closeModal } = useModal();
+  const [videoInfo, setVideoInfo] = useState(null);
+  const [loading, setLoading] = useState(false); // State to handle loading of video information
+
+  // Effect to fetch video information based on currentVideoID
+  useEffect(() => {
+    async function fetchVideoInfo() {
+      if (currentVideoID) {
+        setLoading(true); // Start loading
+        try {
+          const { data } = await axios.get(`${BASE_URL}/api/video_info/${currentVideoID}`);
+          setVideoInfo(data); // Set fetched data to videoInfo state
+        } catch (error) {
+          console.error('Error fetching video info:', error);
+          setVideoInfo(null); // Reset video info on error
+        }
+        setLoading(false); // Stop loading
+      }
+    }
+    fetchVideoInfo();
+  }, [currentVideoID]);
+
+  // Handling the case where videoInfo is null
+  if (!isModalOpen || loading) return null;  // Display nothing if the modal is closed or loading
+
+  // Ensure that videoInfo is available before trying to access the URL
+  if (!videoInfo) {
+    return (
+      <div className="modal-backdrop">
+        <div className="loading-container"></div>
+      </div>
+    );
+  }
+
+  // Extract video ID from videoInfo URL
+  const videoID = videoInfo.URL.split("/")[3];
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="modal-backdrop"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <motion.div
+          className="modal"
+          initial={{ y: '100vh' }}
+          animate={{ y: 0 }}
+          exit={{ y: '100vh' }}
+          transition={{ duration: 0.5 }}
+          onClick={e => e.stopPropagation()}
+        >
+          <span className="close" onClick={() => {
+            closeModal();
+            setVideoInfo(null); // Reset video information on modal close
+          }}>&times;</span>
+          <div className="embed-container">
+            <iframe
+              key={videoID} // Assign key prop to force recreation on ID change
+              src={`https://player.vimeo.com/video/${videoID}`}
+              allow="autoplay; fullscreen"
+              allowFullScreen
+              title={videoInfo.videoName}
+            ></iframe>
+          </div>
+          <div className="text-container">
+            <h2>{videoInfo.videoName}</h2>
+            <div dangerouslySetInnerHTML={{ __html: videoInfo.Description }}></div>
+          </div>
+          <div className="gradient-overlay"></div>  {/* Gradient overlay added here */}
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  ); 
+}
+
 function CubeWithVideos() {
   const [cubeVideos, setCubeVideos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const cubeMasterInitialized = useRef(false);
 
+  // Ref to store the rendering functions
+  const renderingControl = useRef({ startRendering: null, stopRendering: null });
+
   useEffect(() => {
+    // Fetch video URLs to be used as textures on the cube
     const fetchCubeVideos = async () => {
       try {
         const response = await axios.get(`${BASE_URL}/api/scenes`);
@@ -35,88 +164,40 @@ function CubeWithVideos() {
   useEffect(() => {
     if (cubeVideos.length > 0 && !cubeMasterInitialized.current) {
       console.log('Initializing CubeMaster with new video textures');
-      CubeMasterInit(cubeVideos);
+      const controls = CubeMasterInit(cubeVideos);
+      renderingControl.current = controls;  // Store the rendering controls
       cubeMasterInitialized.current = true;
     }
-  }, [cubeVideos]);
+  }, [cubeVideos ]);  
 
   if (isLoading) {
     return <div className="loading">Loading...</div>;
   }
 
-  return <div id="cube-container"></div>;
-}
-function VideoMenu() {
-  const [videoNames, setVideoNames] = useState([]);
-  const { openModal } = useModal();
-  const navigate = useNavigate();
-  const [isMenuOpen, setIsMenuOpen] = useState(true);
-
-  useEffect(() => {
-    const fetchVideoNames = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}/api/videos`);
-        const names = response.data.map(video => ({
-          id: video.videoID,
-          name: video.videoName
-        }));
-        setVideoNames([...names, ...names]); // Duplicate the array
-      } catch (error) {
-        console.error('Error fetching video names:', error);
-      }
-    };
-    fetchVideoNames();
-  }, []);
-
-  const handleMenuClick = (videoID) => {
-    openModal(videoID);
-    navigate(`/${videoID}`);
-    // setIsMenuOpen(false); // Close the menu when a modal is opened
-  };
-
- // const handleCloseModal = () => {
-    // setIsMenuOpen(true); // Open the menu when the modal is closed
-  //};
-
   return (
-    <div className="video-menu-wrapper">
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            className="video-menu-container"
-            initial={{ y: 100, opacity: 0 }} // Initial position and opacity
-            animate={{ y: 0, opacity: 1 }} // Animation when menu is open
-            exit={{ y: 100, opacity: 0 }} // Animation when menu is closed
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }} // Easing transition
-          >
-            {videoNames.map((video, index) => (
-              <motion.div
-                key={`${video.id}-${index}`}
-                className="video-menu-item"
-                onClick={() => handleMenuClick(video.id)}
-                whileHover={{ scale: 1.1 }} // Scale animation on hover
-              >
-                {video.name}
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+    <AnimatePresence>
+        <motion.div
+          id="cube-container"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          {/* Cube content */}
+        </motion.div>
+    </AnimatePresence>
   );
 }
 
 function AppWrapper() {
   const [scenes, setScenes] = useState([]);
-  const [uniqueVideoIDs, setUniqueVideoIDs] = useState([]);
+  const { openModal } = useModal();
 
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        const scenesResponse = await axios.get(`${BASE_URL}/api/scenes`);
-        const videosResponse = await axios.get(`${BASE_URL}/api/videos`);
-        setScenes(scenesResponse.data);
-        setUniqueVideoIDs(_.uniqBy(videosResponse.data, 'videoID'));
+        const response = await axios.get(`${BASE_URL}/api/scenes`);
+        setScenes(response.data);
       } catch (error) {
         console.error('Error fetching initial data:', error);
       }
@@ -127,26 +208,15 @@ function AppWrapper() {
   return (
     <Router>
       <ModalProvider>
-        <VideoMenu />
         <Routes>
-          <Route path="/" element={<Home scenes={scenes} uniqueVideoIDs={uniqueVideoIDs} />} />
-          <Route path="/:videoID" element={
-            <>
-              <Home scenes={scenes} uniqueVideoIDs={uniqueVideoIDs} />
-              <Modal />
-            </>
-          } />
+          <Route path="/" element={<>
+            <VideoMenu onVideoSelect={openModal} />
+            <CubeWithVideos scenes={scenes} />
+          </>} />
         </Routes>
+        <Modal />
       </ModalProvider>
     </Router>
-  );
-}
-
-function Home() {
-  return (
-    <>
-      <CubeWithVideos />
-    </>
   );
 }
 
