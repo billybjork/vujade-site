@@ -17,7 +17,6 @@ export const ModalProvider = ({ children }) => {
   const closeModal = useCallback(() => {
     setIsModalOpen(false);
     setCurrentVideoID(null);
-    setTimeout(() => setUiVisible(true), 100); // Delay visibility to trigger fade-in animation
   }, []);
 
   const providerValue = useMemo(() => ({
