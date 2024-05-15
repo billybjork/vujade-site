@@ -28,7 +28,7 @@ const render = (renderer, scene, camera, update) => {
     animate(renderer, scene, camera, update); // Use the globally defined animate function
 };
 
-export function CubeMasterInit(videoURLs) {
+export function CubeMasterInit(videoURLs, allVideosLoadedCallback, domElement) {
 
     const getHeaderSize = () => {
         // Height of header for embedding in other websites
@@ -52,11 +52,11 @@ export function CubeMasterInit(videoURLs) {
     const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(6, 4, 8); // Setting camera position for optimal viewing
 
+    // Use the passed DOM element
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio); // Ensure high resolution
-    renderer.setSize(window.innerWidth, window.innerHeight); // Set full size
-    const domElement = document.getElementById("cube-container");
-    domElement.appendChild(renderer.domElement); // Attach renderer to the DOM element
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    domElement.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enablePan = false;
@@ -64,7 +64,7 @@ export function CubeMasterInit(videoURLs) {
     controls.enableRotate = true; // Allow rotation
     controls.update();
 
-    const cube = new Cube(scene, videoURLs); // Initialize the cube with video textures
+    const cube = new Cube(scene, videoURLs, allVideosLoadedCallback); // Initialize the cube with video textures
 
     const startRendering = () => {
         if (!animationFrameId) {
@@ -84,7 +84,7 @@ export function CubeMasterInit(videoURLs) {
     let holdingW = false; // Tracks whether the 'W' key is being held down
     let moveBuffer = [];  // Initialize moveBuffer as an empty array
 
-    // This function updates the rotation pixel cutoff based on interactions
+    // Update the rotation pixel cutoff based on interactions
     const updateRotationPixelCutoff = () => {
         const halfWidth = window.innerWidth / 2;
         cube.cubies.forEach((cubie) => {

@@ -9,42 +9,56 @@ class Cube {
      * Construct a new cube.
      * @param {*} scene threejs scene the cube is a part of
      */
-    constructor(scene, videoURLs) {
-        // array to store every Cubie object
-        this.cubies = [];
-        // array to store all the meshes comprising the cube
-        this.meshes = [];
-        // map from sticker's mesh uuid to the mesh itself
-        this.stickersMap = new Map();
-
+    constructor(scene, videoURLs, allVideosLoadedCallback) {
+        console.log("Initializing Cube with videos", videoURLs);  // Log video URLs being passed to Cube
+        this.cubies = [];  // Array to store every Cubie object
+        this.meshes = [];  // Array to store all the meshes comprising the cube
+        this.stickersMap = new Map();  // Map from sticker's mesh uuid to the mesh itself
         this.videoURLs = videoURLs; // Store video URLs
 
-        // Assuming videoURLs is an array of at least 54 video URLs.
-        let videoIndex = 0; // To keep track of the current video URL index
+        let videoIndex = 0; // index to track video assignment
+        let loadedVideosCount = 0;
+        let errorCount = 0;
 
-        // initialize 26 cubies (ignoring the very center)
+        this.videoLoaded = (success = true) => {
+            loadedVideosCount++;
+            if (!success) {
+                console.error(`Error in loading one of the videos. Total errors: ${++errorCount}`);
+            }
+            console.log(`Video loaded: ${loadedVideosCount} of ${videoURLs.length}`);
+            if (loadedVideosCount === videoURLs.length) {
+                if (errorCount > 0) {
+                    console.log(`${errorCount} videos failed to load.`);
+                }
+                console.log("All videos processed, triggering callback.");
+                allVideosLoadedCallback();
+            }
+        };
+        this.videoLoaded = this.videoLoaded.bind(this);
+
         for (let x = -1; x <= 1; x++) {
             for (let y = -1; y <= 1; y++) {
                 for (let z = -1; z <= 1; z++) {
-                    if (x !== 0 || y !== 0 || z !== 0) {
-                        // Pass an array of video URLs for each Cubie's stickers
-                        // This assumes each Cubie knows how to assign these URLs to its stickers
-                        const cubieVideoURLs = this.videoURLs.slice(videoIndex, videoIndex + 3);
-                        this.cubies.push(new Cubie(x, y, z, cubieVideoURLs));
-                        videoIndex += 3; // Advance the index by 3 for the next Cubie
+                    if (x !== 0 || y !== 0 || z !== 0) { // ignore the very center cubie
+                        let numStickers = 0;
+                        numStickers += (x !== 0) ? 1 : 0; // add sticker for faces in the x-direction
+                        numStickers += (y !== 0) ? 1 : 0; // add sticker for faces in the y-direction
+                        numStickers += (z !== 0) ? 1 : 0; // add sticker for faces in the z-direction
+
+                        const cubieVideoURLs = this.videoURLs.slice(videoIndex, videoIndex + numStickers);
+                        this.cubies.push(new Cubie(x, y, z, cubieVideoURLs, this.videoLoaded));
+                        videoIndex += numStickers;
                     }
                 }
             }
         }
-        // for each cubie
+        
+        console.log("Total videos assigned to cubies:", videoIndex);  // Verify all videos are assigned
+
         this.cubies.forEach((cubie) => {
-            // add it to the scene
             scene.add(cubie.mesh);
-            // add cubie's mesh to mesh array
             this.meshes.push(cubie.mesh);
-            // for each sticker on the cubie
-            cubie.stickers.forEach((sticker) => {
-                // add sticker to scene, mesh array, and stickers map
+            cubie.stickers.forEach((sticker, i) => {
                 scene.add(sticker.mesh);
                 this.meshes.push(sticker.mesh);
                 this.stickersMap.set(sticker.mesh.uuid, sticker);

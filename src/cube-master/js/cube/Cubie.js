@@ -47,7 +47,7 @@ const materialBlack = new THREE.MeshBasicMaterial({ color: 0x000000 });
  * Class for each cubie on the cube
  */
 class Cubie {
-    constructor(x, y, z, cubieVideoURLs) { // Now accepts cubieVideoURLs
+    constructor(x, y, z, cubieVideoURLs, onVideoLoaded) { // Now accepts cubieVideoURLs and a callback for video load completion
         this.angle = 0;
         this.animating = false;
         this.animateAxis = null;
@@ -56,28 +56,29 @@ class Cubie {
         this.positionVector = new THREE.Vector3(x, y, z);
         this.fixedPositionVector = new THREE.Vector3(x, y, z);
 
-        this.mesh = new THREE.Mesh(roundedBoxGeometry, materialBlack);
+        this.mesh = new THREE.Mesh(roundedBoxGeometry, materialBlack); // basic black material for the cubie
         this.stickers = [];
 
-        let videoIndex = 0; // To iterate over cubieVideoURLs
+        let videoIndex = 0; // To iterate over cubieVideoURLs, managing video load state
 
+        // Initialize stickers with video URLs and add a callback to track video load
         if (x === -1) {
-            this.stickers.push(new Sticker(x, y, z, new THREE.Vector3(-1, 0, 0), cubieVideoURLs[videoIndex++]));
+            this.stickers.push(new Sticker(x, y, z, new THREE.Vector3(-1, 0, 0), cubieVideoURLs[videoIndex++], onVideoLoaded));
         } else if (x === 1) {
-            this.stickers.push(new Sticker(x, y, z, new THREE.Vector3(1, 0, 0), cubieVideoURLs[videoIndex++]));
+            this.stickers.push(new Sticker(x, y, z, new THREE.Vector3(1, 0, 0), cubieVideoURLs[videoIndex++], onVideoLoaded));
         }
         if (y === -1) {
-            this.stickers.push(new Sticker(x, y, z, new THREE.Vector3(0, -1, 0), cubieVideoURLs[videoIndex++]));
+            this.stickers.push(new Sticker(x, y, z, new THREE.Vector3(0, -1, 0), cubieVideoURLs[videoIndex++], onVideoLoaded));
         } else if (y === 1) {
-            this.stickers.push(new Sticker(x, y, z, new THREE.Vector3(0, 1, 0), cubieVideoURLs[videoIndex++]));
+            this.stickers.push(new Sticker(x, y, z, new THREE.Vector3(0, 1, 0), cubieVideoURLs[videoIndex++], onVideoLoaded));
         }
         if (z === -1) {
-            this.stickers.push(new Sticker(x, y, z, new THREE.Vector3(0, 0, -1), cubieVideoURLs[videoIndex++]));
+            this.stickers.push(new Sticker(x, y, z, new THREE.Vector3(0, 0, -1), cubieVideoURLs[videoIndex++], onVideoLoaded));
         } else if (z === 1) {
-            this.stickers.push(new Sticker(x, y, z, new THREE.Vector3(0, 0, 1), cubieVideoURLs[videoIndex++]));
+            this.stickers.push(new Sticker(x, y, z, new THREE.Vector3(0, 0, 1), cubieVideoURLs[videoIndex++], onVideoLoaded));
         }
 
-        this.updatePosition(this.fixedPositionVector);
+        this.updatePosition(this.fixedPositionVector); // Set initial position and rotation based on fixed vectors
     }
 
     /**

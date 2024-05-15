@@ -42,20 +42,32 @@ class Sticker {
      * @param {*} facingVector Direction sticker is facing
      * @param {string} videoURL Video URL for the sticker
      */
-    constructor(x, y, z, facingVector, videoURL) {
+    constructor(x, y, z, facingVector, videoURL, onVideoLoaded) {
         this.positionVector = new THREE.Vector3(x, y, z);
         this.fixedPositionVector = new THREE.Vector3(x, y, z);
         this.facingVector = facingVector;
         this.fixedFacingVector = new THREE.Vector3(facingVector.x, facingVector.y, facingVector.z);
-
+    
         // Setup video element
         const video = document.createElement('video');
         video.crossOrigin = "anonymous";
         video.src = videoURL;
-        video.load();  // Preload the video
         video.muted = true;  // Ensure video is muted
         video.loop = true;
         video.setAttribute('playsinline', true);  // Ensures inline playback on iOS devices
+    
+        // Load the video and setup a callback for when it's ready to play
+        video.oncanplaythrough = () => {
+            console.log(`Video can play through: ${videoURL}`);  // Log when video is ready to play
+            video.oncanplaythrough = null;  // Remove event listener to prevent multiple triggers
+            onVideoLoaded();  // Call the callback function
+        };
+        video.onerror = () => {
+            console.error(`Error loading video: ${video.src}`);  // Log the failing URL directly
+            onVideoLoaded(false);  // Call the callback with an error indicator
+        };
+        video.src = videoURL;
+        video.load();  // Attempt to load the video        
 
         // Important for iOS/Safari: Trigger playback from a user interaction event globally
         document.body.addEventListener('click', function startVideo() {

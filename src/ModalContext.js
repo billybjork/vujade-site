@@ -7,13 +7,11 @@ export const useModal = () => useContext(ModalContext);
 export const ModalProvider = ({ children }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideoID, setCurrentVideoID] = useState(null);
-  const [uiVisible, setUiVisible] = useState(true); // Initially set UI visible
 
   const openModal = useCallback((videoID) => {
     setIsModalOpen(true);
     setCurrentVideoID(videoID);
     // Optionally delay hiding the UI if needed to coordinate with modal animations
-    setTimeout(() => setUiVisible(false), 100);  // Adjust timing as needed
   }, []);  
 
   const closeModal = useCallback(() => {
@@ -23,8 +21,8 @@ export const ModalProvider = ({ children }) => {
   }, []);
 
   const providerValue = useMemo(() => ({
-    isModalOpen, currentVideoID, openModal, closeModal, uiVisible, setUiVisible
-  }), [isModalOpen, currentVideoID, openModal, closeModal, uiVisible, setUiVisible]);
+    isModalOpen, currentVideoID, openModal, closeModal
+  }), [isModalOpen, currentVideoID, openModal, closeModal ]);
 
   return (
     <ModalContext.Provider value={providerValue}>
