@@ -30,6 +30,12 @@ shape.quadraticCurveTo(pos, pos, pos, pos + radius);
 const roundedSquareGeometry = new THREE.ShapeBufferGeometry(shape);
 roundedSquareGeometry.center();
 
+// Utility function to extract videoID
+function extractVideoID(url) {
+    const match = url.match(/VideoScenes-V2\/(.*?)_Scene/);
+    return match ? match[1] : '';
+}
+
 /**
  * Class for an individual sticker on the cube.
  */
@@ -48,6 +54,9 @@ class Sticker {
         this.fixedPositionVector = new THREE.Vector3(x, y, z);
         this.facingVector = facingVector;
         this.fixedFacingVector = new THREE.Vector3(facingVector.x, facingVector.y, facingVector.z);
+        this.videoURL = videoURL;
+        this.videoid = extractVideoID(videoURL);  // Extract and store the video ID
+        console.log(`Extracted videoID: ${this.videoid} from URL: ${videoURL}`);
 
         // Tweening properties
         this.isTweening = false;

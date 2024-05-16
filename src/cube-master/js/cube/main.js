@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from "../three/OrbitControls.js";
 import Cube from "./Cube.js";
+import { useModal } from '../../../ModalContext';
 import {
     Axes,
     KeysToMoves,
@@ -29,8 +30,9 @@ const render = (renderer, scene, camera, update, controls) => {
     animate(renderer, scene, camera, update, controls); // Use the globally defined animate function
 };
 
-export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallback, domElement) {
+export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallback, domElement, openModal) {
 
+    console.log('Received openModal:', openModal);
     const getHeaderSize = () => {
         // Height of header for embedding in other websites
         return 0;
@@ -171,11 +173,13 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
 
     // Declare a variable to keep track of the currently hovered sticker
     let hoveredSticker = null;
+    // Variable to hold the sticker that might be clicked
+    let activeSticker = null;
 
     // Event handlers for keyboard and mouse events, resize, and touch...
     document.addEventListener("pointermove", (event) => {
         if (!dragging) {
-            // Handle hover functionality when not dragging
+            // Existing hover functionality
             mouse.x = (event.offsetX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.offsetY / getHeight()) * 2 + 1;
             raycaster.setFromCamera(mouse, camera);
@@ -188,16 +192,18 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
                         if (hoveredSticker) hoveredSticker.reset();
                         hoveredSticker = intersectedSticker;
                         hoveredSticker.dim();
+                        activeSticker = hoveredSticker; // Set activeSticker when a new sticker is hovered
                     }
                 }
             } else {
                 if (hoveredSticker) {
                     hoveredSticker.reset();
                     hoveredSticker = null;
+                    activeSticker = null; // Clear activeSticker if no sticker is hovered
                 }
             }
         } else {
-            // Dragging functionality: Update drag conditions only
+            // Existing dragging functionality
             const delta = new THREE.Vector2(
                 (event.offsetX / window.innerWidth) * 2 - 1 - mouse.x,
                 -(event.offsetY / getHeight()) * 2 + 1 - mouse.y
@@ -278,15 +284,22 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     let chosenDir = 0;
     let selectedObject = ClickFlags.NONE;
     let dragging = false;
-
+    let clickStartPosition = null;
+    let hasMoved = false;
+    
     /**
      * Handle clicks by finding the mesh that was clicked.
      */
     document.addEventListener("pointerdown", (event) => {
+        console.log('Pointer down, active sticker:', activeSticker);
         mouse.x = (event.offsetX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.offsetY / getHeight()) * 2 + 1;
+        clickStartPosition = { x: event.offsetX, y: event.offsetY }; // Store the starting position
+        hasMoved = false; // Reset move flag
+    
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(cube.meshes, true);
+    
         if (intersects.length > 0) {
             controls.enabled = false;
             dragging = true;
@@ -308,16 +321,34 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
      * Handle mouse release by unsetting chosen axis, direction, and selected object.
      */
     document.addEventListener("pointerup", (event) => {
+        console.log('Pointer up, active sticker before reset check:', activeSticker);
         controls.enabled = true;
         dragging = false;
         selectedObject = ClickFlags.NONE;
         chosenAxis = null;
         chosenDir = 0;
-        if (hoveredSticker) {
-            hoveredSticker.reset();
-            hoveredSticker = null;
+    
+        // Calculate if the mouse has moved significantly
+        let moveX = Math.abs(clickStartPosition.x - event.offsetX);
+        let moveY = Math.abs(clickStartPosition.y - event.offsetY);
+        hasMoved = moveX > 5 || moveY > 5;
+        console.log(`Mouse moved: ${moveX}px, ${moveY}px - Considered as 'moved': ${hasMoved}`);
+    
+        if (activeSticker && !hasMoved) {
+            console.log(`Click detected on sticker with videoID: ${activeSticker.videoid}`);
+            openModal(activeSticker.videoid);
+        } else {
+            console.log('Click not detected or has moved:', hasMoved);
         }
-    }, false);    
+    
+        if (activeSticker) {
+            activeSticker.reset();
+            activeSticker = null;
+        }
+    
+        clickStartPosition = null; // Reset start position
+    
+    }, false); 
 
     /**
      * Handle mouse move events by determining what
@@ -327,6 +358,7 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     
         // do nothing if not dragging
         if (!dragging || chosenAxis !== null) {
+            // console.log('Pointer move, hovered sticker:', hoveredSticker);
             return;
         }
     

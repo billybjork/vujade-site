@@ -14,6 +14,7 @@ export const ModalProvider = ({ children }) => {
 
   // Opens the video modal and sets the current video ID
   const openModal = useCallback((videoID) => {
+    console.log(`Opening modal for video ID: ${videoID}`);  // Log to confirm this method is called
     setIsModalOpen(true);
     setCurrentVideoID(videoID);
     // Optionally delay hiding the UI if needed to coordinate with modal animations

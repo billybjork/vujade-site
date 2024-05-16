@@ -16,7 +16,7 @@ function CubeWithVideos() {
   const [loadProgress, setLoadProgress] = useState(0);  // Track loading progress
   const cubeContainerRef = useRef(null);
   const cubeMasterInitialized = useRef(false);
-  const { openEnterSiteModal, closeEnterSiteModal } = useModal();
+  const { openModal, openEnterSiteModal, closeEnterSiteModal } = useModal();  // Retrieve openModal from context
 
   // Ref to store the rendering functions
   const renderingControl = useRef({ startRendering: null, stopRendering: null });
@@ -32,22 +32,23 @@ function CubeWithVideos() {
       } catch (error) {
         console.error('Error fetching cube videos:', error);
       }
-    };     
+    };
     fetchCubeVideos();
   }, []);
 
   useEffect(() => {
-    // Ensure the cube is initialized only once and only when the cube container is available in the DOM
     if (cubeVideos.length === 54 && !cubeMasterInitialized.current && cubeContainerRef.current) {
-      const controls = CubeMasterInit(cubeVideos, () => {
-        setIsLoading(false);
-      }, (progress) => {  // Update for progress tracking
-        setLoadProgress(progress);  // Assume `progress` is a percentage from 0 to 100
-      }, cubeContainerRef.current);
-      renderingControl.current = controls;
-      cubeMasterInitialized.current = true;
+        const controls = CubeMasterInit(
+            cubeVideos, 
+            () => { setIsLoading(false); }, 
+            (progress) => { setLoadProgress(progress); }, 
+            cubeContainerRef.current, 
+            openModal  // Pass openModal directly
+        );
+        renderingControl.current = controls;
+        cubeMasterInitialized.current = true;
     }
-  }, [cubeVideos]);
+}, [cubeVideos, openModal]);  // Include openModal in the dependency array
 
   useEffect(() => {
     if (!isLoading) {
@@ -82,6 +83,8 @@ function Modal() {
   const { isModalOpen, currentVideoID, closeModal } = useModal();
   const [videoInfo, setVideoInfo] = useState(null);
   const [loading, setLoading] = useState(false); // State to handle loading of video information
+
+  console.log(`Modal status: ${isModalOpen}, Video ID: ${currentVideoID}`); // Add this to check state
 
   // Effect to fetch video information based on currentVideoID
   useEffect(() => {
