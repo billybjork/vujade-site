@@ -9,8 +9,7 @@ class Cube {
      * Construct a new cube.
      * @param {*} scene threejs scene the cube is a part of
      */
-    constructor(scene, videoURLs, allVideosLoadedCallback) {
-        console.log("Initializing Cube with videos", videoURLs);  // Log video URLs being passed to Cube
+    constructor(scene, videoURLs, allVideosLoadedCallback, progressCallback) {
         this.cubies = [];  // Array to store every Cubie object
         this.meshes = [];  // Array to store all the meshes comprising the cube
         this.stickersMap = new Map();  // Map from sticker's mesh uuid to the mesh itself
@@ -18,33 +17,25 @@ class Cube {
 
         let videoIndex = 0; // index to track video assignment
         let loadedVideosCount = 0;
-        let errorCount = 0;
 
         this.videoLoaded = (success = true) => {
             loadedVideosCount++;
-            if (!success) {
-                console.error(`Error in loading one of the videos. Total errors: ${++errorCount}`);
-            }
-            console.log(`Video loaded: ${loadedVideosCount} of ${videoURLs.length}`);
+            // Calculate the percentage of loaded videos
+            const progressPercent = Math.floor((loadedVideosCount / videoURLs.length) * 100);
+            progressCallback(progressPercent); // Call the progress callback with the new percentage
+
             if (loadedVideosCount === videoURLs.length) {
-                if (errorCount > 0) {
-                    console.log(`${errorCount} videos failed to load.`);
-                }
-                console.log("All videos processed, triggering callback.");
                 allVideosLoadedCallback();
             }
         };
+
         this.videoLoaded = this.videoLoaded.bind(this);
 
         for (let x = -1; x <= 1; x++) {
             for (let y = -1; y <= 1; y++) {
                 for (let z = -1; z <= 1; z++) {
                     if (x !== 0 || y !== 0 || z !== 0) { // ignore the very center cubie
-                        let numStickers = 0;
-                        numStickers += (x !== 0) ? 1 : 0; // add sticker for faces in the x-direction
-                        numStickers += (y !== 0) ? 1 : 0; // add sticker for faces in the y-direction
-                        numStickers += (z !== 0) ? 1 : 0; // add sticker for faces in the z-direction
-
+                        let numStickers = (x !== 0) + (y !== 0) + (z !== 0); // calculate number of stickers
                         const cubieVideoURLs = this.videoURLs.slice(videoIndex, videoIndex + numStickers);
                         this.cubies.push(new Cubie(x, y, z, cubieVideoURLs, this.videoLoaded));
                         videoIndex += numStickers;
@@ -52,8 +43,6 @@ class Cube {
                 }
             }
         }
-        
-        console.log("Total videos assigned to cubies:", videoIndex);  // Verify all videos are assigned
 
         this.cubies.forEach((cubie) => {
             scene.add(cubie.mesh);

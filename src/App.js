@@ -13,21 +13,21 @@ const BASE_URL = process.env.NODE_ENV === 'production'
 function CubeWithVideos() {
   const [cubeVideos, setCubeVideos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadProgress, setLoadProgress] = useState(0);  // Track loading progress
   const cubeContainerRef = useRef(null);
   const cubeMasterInitialized = useRef(false);
+  const { openEnterSiteModal, closeEnterSiteModal } = useModal();
 
   // Ref to store the rendering functions
   const renderingControl = useRef({ startRendering: null, stopRendering: null });
 
   useEffect(() => {
     // Fetch video URLs to be used as textures on the cube
-    console.log("Fetching video URLs..."); // Log the start of fetch
     const fetchCubeVideos = async () => {
       try {
         const response = await axios.get(`${BASE_URL}/api/scenes`);
         const shuffledScenes = _.shuffle(response.data);
         const first54Videos = shuffledScenes.slice(0, 54).map(scene => scene.sceneURL); // Extract URLs from scenes
-        console.log("Selected videos for cube textures:", first54Videos);
         setCubeVideos(first54Videos);
       } catch (error) {
         console.error('Error fetching cube videos:', error);
@@ -37,25 +37,46 @@ function CubeWithVideos() {
   }, []);
 
   useEffect(() => {
-    console.log("Checking cube initialization conditions...", cubeVideos.length, cubeMasterInitialized.current, cubeContainerRef.current);
     // Ensure the cube is initialized only once and only when the cube container is available in the DOM
     if (cubeVideos.length === 54 && !cubeMasterInitialized.current && cubeContainerRef.current) {
-      console.log('Initializing CubeMaster with new video textures');
       const controls = CubeMasterInit(cubeVideos, () => {
-        console.log("All videos loaded, setting isLoading to false.");
         setIsLoading(false);
+      }, (progress) => {  // Update for progress tracking
+        setLoadProgress(progress);  // Assume `progress` is a percentage from 0 to 100
       }, cubeContainerRef.current);
       renderingControl.current = controls;
       cubeMasterInitialized.current = true;
     }
   }, [cubeVideos]);
 
+  useEffect(() => {
+    if (!isLoading) {
+      openEnterSiteModal();
+    }
+  }, [isLoading, openEnterSiteModal]);
+
   return (
     <div id="cube-container" ref={cubeContainerRef} className={isLoading ? 'hidden' : 'visible'}>
-        {isLoading && <div className="loading">Loading...</div>}
+        {isLoading && <div className="loading">{`${loadProgress}% Loaded`}</div>}
     </div>
   );
-}  
+}
+
+function EnterSiteModal() {
+  const { enterSiteModalOpen, closeEnterSiteModal } = useModal();
+
+  if (!enterSiteModalOpen) return null;
+
+  return (
+    <div className="modal-backdrop open">
+      <div className="modal">
+        <button onClick={() => {
+          closeEnterSiteModal();  // Closes this modal
+        }}>Enter Site</button>
+      </div>
+    </div>
+  );
+}
 
 function Modal() {
   const { isModalOpen, currentVideoID, closeModal } = useModal();
@@ -147,6 +168,7 @@ function AppWrapper() {
           </>} />
         </Routes>
         <Modal />
+        <EnterSiteModal />
       </ModalProvider>
     </Router>
   );

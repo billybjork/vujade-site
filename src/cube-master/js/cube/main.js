@@ -14,9 +14,10 @@ let mouse = new THREE.Vector2(); // Vector2 for storing mouse coordinates
 let raycaster = new THREE.Raycaster(); // Raycaster for detecting intersects
 
 // Define animate globally within the module
-const animate = (renderer, scene, camera, update) => {
+const animate = (renderer, scene, camera, update, controls) => {
     const loop = () => {
         animationFrameId = requestAnimationFrame(loop);
+        update(controls); // Now passing controls as an argument
         update(); // Call update to process moves and handle animations
         renderer.render(scene, camera);
     };
@@ -24,11 +25,11 @@ const animate = (renderer, scene, camera, update) => {
 };
 
 // Main rendering function that handles continuous rendering of the scene
-const render = (renderer, scene, camera, update) => {
-    animate(renderer, scene, camera, update); // Use the globally defined animate function
+const render = (renderer, scene, camera, update, controls) => {
+    animate(renderer, scene, camera, update, controls); // Use the globally defined animate function
 };
 
-export function CubeMasterInit(videoURLs, allVideosLoadedCallback, domElement) {
+export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallback, domElement) {
 
     const getHeaderSize = () => {
         // Height of header for embedding in other websites
@@ -50,7 +51,7 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, domElement) {
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(6, 4, 8); // Setting camera position for optimal viewing
+    camera.position.set(4, 3, 10); // Set initial camera position
 
     // Use the passed DOM element
     const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -58,13 +59,38 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, domElement) {
     renderer.setSize(window.innerWidth, window.innerHeight);
     domElement.appendChild(renderer.domElement);
 
+    // Adding spotlight and ambient light
+    const spotlight = new THREE.SpotLight(0xffffff, 0.5); // white light with full intensity
+    const spotlightPosition = new THREE.Vector3(3, 0, 2); // Initial spotlight position
+    spotlight.position.copy(spotlightPosition);
+    spotlight.target.position.set(0, 0, 0); // Ensure this is the center of the cube
+    spotlight.angle = Math.PI / 4; // Narrow beam of light
+    spotlight.penumbra = 2; // Softer edge to make the transition less harsh
+    spotlight.decay = 2; // Light intensity decreases with distance
+    spotlight.distance = 100; // Adjust distance to cover the cube
+    scene.add(spotlight);
+    scene.add(spotlight.target);
+
+    // Adjust ambient light if scene is too dark or too bright
+    const ambientLight = new THREE.AmbientLight(0x404040, 2); // You can reduce intensity if needed
+    scene.add(ambientLight);
+
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enablePan = false;
     controls.enableZoom = true; // Enable zoom but disable panning
     controls.enableRotate = true; // Allow rotation
+
+    function updateSpotlightPosition() {
+        const relativeCameraPosition = new THREE.Vector3().subVectors(camera.position, spotlight.target.position);
+        const distanceFromTarget = relativeCameraPosition.length();
+        relativeCameraPosition.normalize();
+        spotlight.position.copy(spotlight.target.position).add(relativeCameraPosition.multiplyScalar(distanceFromTarget));
+    }
+
+    controls.addEventListener('change', updateSpotlightPosition);
     controls.update();
 
-    const cube = new Cube(scene, videoURLs, allVideosLoadedCallback); // Initialize the cube with video textures
+    const cube = new Cube(scene, videoURLs, allVideosLoadedCallback, progressCallback); // Initialize the cube with video textures
 
     const startRendering = () => {
         if (!animationFrameId) {
@@ -104,6 +130,10 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, domElement) {
     const update = () => {
         const delta = clock.getDelta();
 
+        controls.update();  // Update the controls with damping effect
+
+        updateSpotlightPosition();  // Update spotlight position based on camera
+
         if (!animating && moveBuffer.length > 0) {
             const move = moveBuffer.shift();
 
@@ -138,6 +168,46 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, domElement) {
     };
 
     // Event handlers for keyboard and mouse events, resize, and touch
+
+    // Declare a variable to keep track of the currently hovered sticker
+    let hoveredSticker = null;
+
+    // Event handlers for keyboard and mouse events, resize, and touch...
+    document.addEventListener("pointermove", (event) => {
+        if (!dragging) {
+            // Handle hover functionality when not dragging
+            mouse.x = (event.offsetX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.offsetY / getHeight()) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(cube.meshes, true);
+            if (intersects.length > 0) {
+                let intersectedMesh = intersects[0].object;
+                if (cube.stickersMap.has(intersectedMesh.uuid)) {
+                    let intersectedSticker = cube.stickersMap.get(intersectedMesh.uuid);
+                    if (hoveredSticker !== intersectedSticker) {
+                        if (hoveredSticker) hoveredSticker.reset();
+                        hoveredSticker = intersectedSticker;
+                        hoveredSticker.dim();
+                    }
+                }
+            } else {
+                if (hoveredSticker) {
+                    hoveredSticker.reset();
+                    hoveredSticker = null;
+                }
+            }
+        } else {
+            // Dragging functionality: Update drag conditions only
+            const delta = new THREE.Vector2(
+                (event.offsetX / window.innerWidth) * 2 - 1 - mouse.x,
+                -(event.offsetY / getHeight()) * 2 + 1 - mouse.y
+            );
+            if (delta.length() > getTolerance() && selectedObject !== ClickFlags.CUBIE) {
+                // Compute the direction of the drag here and handle it appropriately
+                // Ensure you update `chosenAxis` and `chosenDir` as needed
+            }
+        }
+    }, false);
 
     /**
      * Handle key press event
@@ -212,56 +282,42 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, domElement) {
     /**
      * Handle clicks by finding the mesh that was clicked.
      */
-    const onDocumentMouseDown = (event) => {
-    
-        // only handle events targeting the canvas
-        if (event.target.tagName.toLowerCase() !== "canvas") {
-            return;
-        }
-    
-        // update mouse location
+    document.addEventListener("pointerdown", (event) => {
         mouse.x = (event.offsetX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.offsetY / getHeight()) * 2 + 1;
-    
-        // use raycaster to find what cube meshes intersect mouse position
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(cube.meshes, true);
-    
         if (intersects.length > 0) {
-    
-            // Disable OrbitControls and handle face rotation
             controls.enabled = false;
             dragging = true;
-    
-            // Determine which part of the cube was clicked
-            if (cube.stickersMap.has(intersects[0].object.uuid)) {
+            let clickedMesh = intersects[0].object;
+            if (cube.stickersMap.has(clickedMesh.uuid)) {
                 selectedObject = intersects[0];
-            } else {
-                // Handle case where a cubie but not a sticker is clicked
-                selectedObject = ClickFlags.CUBIE;
+            }
+            if (hoveredSticker) {
+                hoveredSticker.reset();
+                hoveredSticker = null;
             }
         } else {
-            // No mesh was clicked: enable OrbitControls for full cube rotation
             controls.enabled = true;
             selectedObject = ClickFlags.ROTATION;
         }
-    };    
-    document.addEventListener("pointerdown", onDocumentMouseDown, false);
+    }, false);    
 
     /**
      * Handle mouse release by unsetting chosen axis, direction, and selected object.
      */
-    const onDocumentMouseUp = (event) => {
-        // Always enable OrbitControls on mouse up to allow rotation freedom when not dragging
+    document.addEventListener("pointerup", (event) => {
         controls.enabled = true;
-    
-        // Reset interaction states
         dragging = false;
         selectedObject = ClickFlags.NONE;
         chosenAxis = null;
         chosenDir = 0;
-    };
-    document.addEventListener("pointerup", onDocumentMouseUp, false);
+        if (hoveredSticker) {
+            hoveredSticker.reset();
+            hoveredSticker = null;
+        }
+    }, false);    
 
     /**
      * Handle mouse move events by determining what

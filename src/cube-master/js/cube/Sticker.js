@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import getRotationMatrix from "./RotationMatrices.js";
 import { Axes, AxisVectors } from "./Constants.js";
+import { gsap } from 'gsap';
 
 /**
  * Rounded Rectangle code taken from three.js examples: https://threejs.org/examples/#webgl_geometry_shapes
@@ -47,6 +48,13 @@ class Sticker {
         this.fixedPositionVector = new THREE.Vector3(x, y, z);
         this.facingVector = facingVector;
         this.fixedFacingVector = new THREE.Vector3(facingVector.x, facingVector.y, facingVector.z);
+
+        // Tweening properties
+        this.isTweening = false;
+        this.tweenStart = 0;
+        this.tweenDuration = 0.5; // Duration in seconds
+        this.startOpacity = 1.0;
+        this.targetOpacity = 1.0;
     
         // Setup video element
         const video = document.createElement('video');
@@ -58,12 +66,10 @@ class Sticker {
     
         // Load the video and setup a callback for when it's ready to play
         video.oncanplaythrough = () => {
-            console.log(`Video can play through: ${videoURL}`);  // Log when video is ready to play
             video.oncanplaythrough = null;  // Remove event listener to prevent multiple triggers
             onVideoLoaded();  // Call the callback function
         };
         video.onerror = () => {
-            console.error(`Error loading video: ${video.src}`);  // Log the failing URL directly
             onVideoLoaded(false);  // Call the callback with an error indicator
         };
         video.src = videoURL;
@@ -87,9 +93,11 @@ class Sticker {
         texture.format = THREE.RGBFormat;
 
         // Use the video texture for the material
-        this.material = new THREE.MeshBasicMaterial({
+        this.material = new THREE.MeshPhongMaterial({
             map: texture,
             side: THREE.DoubleSide,
+            shininess: 10,  // Optional, adjust for desired shininess effect
+            specular: 0x222222,  // Optional, adjust the color reflected by the light
         });
 
         // Use the rounded square geometry for the mesh
@@ -187,18 +195,29 @@ class Sticker {
         this.updatePosition(this.positionVector, this.facingVector);
         this.mesh.rotateOnWorldAxis(AxisVectors[axis], theta);
     }
+    
     // Method to dim the sticker
     dim() {
-        this.material.opacity = 0.5;
-        this.material.transparent = true;
-        this.material.needsUpdate = true;
+        gsap.to(this.material, {
+            duration: 0.3, // Duration of the dim animation in seconds
+            opacity: 0.5,
+            onUpdate: () => {
+                this.material.transparent = true;
+                this.material.needsUpdate = true;
+            }
+        });
     }
 
     // Method to reset the sticker's appearance
     reset() {
-        this.material.opacity = 1.0;
-        this.material.transparent = false;
-        this.material.needsUpdate = true;
+        gsap.to(this.material, {
+            duration: 0.3, // Duration of the reset animation in seconds
+            opacity: 1.0,
+            onUpdate: () => {
+                this.material.transparent = false;
+                this.material.needsUpdate = true;
+            }
+        });
     }
 }
 
