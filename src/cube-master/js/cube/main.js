@@ -286,20 +286,20 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     let dragging = false;
     let clickStartPosition = null;
     let hasMoved = false;
-    
+
     /**
-     * Handle clicks by finding the mesh that was clicked.
+     * Function to handle pointer down events
      */
-    document.addEventListener("pointerdown", (event) => {
+    const onDocumentMouseDown = (event) => {
         console.log('Pointer down, active sticker:', activeSticker);
         mouse.x = (event.offsetX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.offsetY / getHeight()) * 2 + 1;
-        clickStartPosition = { x: event.offsetX, y: event.offsetY }; // Store the starting position
-        hasMoved = false; // Reset move flag
-    
+        clickStartPosition = { x: event.offsetX, y: event.offsetY };
+        hasMoved = false; // Flag to check if the pointer has moved significantly
+
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(cube.meshes, true);
-    
+
         if (intersects.length > 0) {
             controls.enabled = false;
             dragging = true;
@@ -315,40 +315,42 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
             controls.enabled = true;
             selectedObject = ClickFlags.ROTATION;
         }
-    }, false);    
+    };      
+
+    document.addEventListener("pointerdown", onDocumentMouseDown, false);
 
     /**
-     * Handle mouse release by unsetting chosen axis, direction, and selected object.
+     * Function to handle pointer up events
      */
-    document.addEventListener("pointerup", (event) => {
+    const onDocumentMouseUp = (event) => {
         console.log('Pointer up, active sticker before reset check:', activeSticker);
         controls.enabled = true;
         dragging = false;
         selectedObject = ClickFlags.NONE;
         chosenAxis = null;
         chosenDir = 0;
-    
-        // Calculate if the mouse has moved significantly
+
         let moveX = Math.abs(clickStartPosition.x - event.offsetX);
         let moveY = Math.abs(clickStartPosition.y - event.offsetY);
         hasMoved = moveX > 5 || moveY > 5;
         console.log(`Mouse moved: ${moveX}px, ${moveY}px - Considered as 'moved': ${hasMoved}`);
-    
+
         if (activeSticker && !hasMoved) {
             console.log(`Click detected on sticker with videoID: ${activeSticker.videoid}`);
             openModal(activeSticker.videoid);
         } else {
             console.log('Click not detected or has moved:', hasMoved);
         }
-    
+
         if (activeSticker) {
             activeSticker.reset();
             activeSticker = null;
         }
-    
-        clickStartPosition = null; // Reset start position
-    
-    }, false); 
+
+        clickStartPosition = null;
+    };        
+
+    document.addEventListener("pointerup", onDocumentMouseUp, false);   
 
     /**
      * Handle mouse move events by determining what

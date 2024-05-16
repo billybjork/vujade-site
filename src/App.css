@@ -21,6 +21,42 @@ html, body {
   color: #333;
 }
 
+.enter-site-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.7);  /* Light background for a fresh look */
+  z-index: 1050;
+}
+
+.enter-site-modal {
+  padding: 20px;
+  background-color: #000;  /* Keeping it consistent with your theme */
+  color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
+}
+
+.enter-site-button {
+  padding: 10px 25px;
+  font-size: 18px;
+  background-color: #007BFF;  /* Bright blue for visibility */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.enter-site-button:hover {
+  background-color: #0056b3;  /* Darker blue on hover */
+}
+
 #cube-container {
   margin-top: -50px; /* Adjust the value as needed */
 }

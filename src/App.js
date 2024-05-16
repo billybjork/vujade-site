@@ -16,7 +16,7 @@ function CubeWithVideos() {
   const [loadProgress, setLoadProgress] = useState(0);  // Track loading progress
   const cubeContainerRef = useRef(null);
   const cubeMasterInitialized = useRef(false);
-  const { openModal, openEnterSiteModal, closeEnterSiteModal } = useModal();  // Retrieve openModal from context
+  const { openModal, openEnterSiteModal } = useModal();  // Retrieve openModal from context
 
   // Ref to store the rendering functions
   const renderingControl = useRef({ startRendering: null, stopRendering: null });
@@ -69,11 +69,9 @@ function EnterSiteModal() {
   if (!enterSiteModalOpen) return null;
 
   return (
-    <div className="modal-backdrop open">
-      <div className="modal">
-        <button onClick={() => {
-          closeEnterSiteModal();  // Closes this modal
-        }}>Enter Site</button>
+    <div className="enter-site-modal-backdrop">
+      <div className="enter-site-modal">
+        <button className="enter-site-button" onClick={closeEnterSiteModal}>Enter Site</button>
       </div>
     </div>
   );
