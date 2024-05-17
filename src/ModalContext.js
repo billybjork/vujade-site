@@ -1,30 +1,36 @@
 import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';  // Import useNavigate for handling URL changes
 
 const ModalContext = createContext();
 
 export const useModal = () => useContext(ModalContext);
 
 export const ModalProvider = ({ children }) => {
-  // State for video modal control
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideoID, setCurrentVideoID] = useState(null);
-
-  // State for "Enter site" modal control
   const [enterSiteModalOpen, setEnterSiteModalOpen] = useState(false);
+  const navigate = useNavigate();  // Hook to navigate programmatically
 
   // Opens the video modal and sets the current video ID
   const openModal = useCallback((videoID) => {
-    console.log(`Opening modal for video ID: ${videoID}`);  // Log to confirm this method is called
+    console.log(`Opening modal for video ID: ${videoID}`);
     setIsModalOpen(true);
     setCurrentVideoID(videoID);
-    // Optionally delay hiding the UI if needed to coordinate with modal animations
-  }, []);  
+    if (window.location.pathname !== `/${videoID}`) {
+      navigate(`/${videoID}`, { replace: true });  // Navigate only if not already on this path
+    }
+  }, [navigate]);
 
   // Closes the video modal and resets the video ID
   const closeModal = useCallback(() => {
+    console.log('Attempting to close modal...');
     setIsModalOpen(false);
     setCurrentVideoID(null);
-  }, []);
+    if (window.location.pathname !== '/') {
+      console.log('Navigating back to root...');
+      navigate('/', { replace: true });
+    }
+  }, [navigate]);  
 
   // Opens the "Enter site" modal
   const openEnterSiteModal = useCallback(() => {

@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import './App.css';
 import { CubeMasterInit } from './cube-master/js/cube/main.js';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useModal, ModalProvider } from './ModalContext';
 import _ from 'lodash';
 
@@ -16,13 +16,14 @@ function CubeWithVideos() {
   const [loadProgress, setLoadProgress] = useState(0);  // Track loading progress
   const cubeContainerRef = useRef(null);
   const cubeMasterInitialized = useRef(false);
-  const { openModal, openEnterSiteModal } = useModal();  // Retrieve openModal from context
+  const { openModal, openEnterSiteModal, enterSiteModalOpen } = useModal();  // Retrieve openModal from context
+  const location = useLocation(); // Get current location
 
   // Ref to store the rendering functions
   const renderingControl = useRef({ startRendering: null, stopRendering: null });
 
+  // Fetch video URLs to be used as textures on the cube
   useEffect(() => {
-    // Fetch video URLs to be used as textures on the cube
     const fetchCubeVideos = async () => {
       try {
         const response = await axios.get(`${BASE_URL}/api/scenes`);
@@ -36,25 +37,34 @@ function CubeWithVideos() {
     fetchCubeVideos();
   }, []);
 
+  // Initialize the cube once cubeVideos are ready and the container is ready
   useEffect(() => {
     if (cubeVideos.length === 54 && !cubeMasterInitialized.current && cubeContainerRef.current) {
-        const controls = CubeMasterInit(
-            cubeVideos, 
-            () => { setIsLoading(false); }, 
-            (progress) => { setLoadProgress(progress); }, 
-            cubeContainerRef.current, 
-            openModal  // Pass openModal directly
-        );
-        renderingControl.current = controls;
-        cubeMasterInitialized.current = true;
+      const controls = CubeMasterInit(
+          cubeVideos, 
+          () => { setIsLoading(false); }, 
+          (progress) => { setLoadProgress(progress); }, 
+          cubeContainerRef.current, 
+          openModal  // Pass openModal directly
+      );
+      renderingControl.current = controls;
+      cubeMasterInitialized.current = true;
     }
-}, [cubeVideos, openModal]);  // Include openModal in the dependency array
+  }, [cubeVideos]); // Removed openModal from dependencies to prevent re-initialization
 
-  useEffect(() => {
-    if (!isLoading) {
+// Handling the initial loading modal
+useEffect(() => {
+  if (!isLoading) {
+    // When cube loading is done, check path to decide modal action
+    const path = location.pathname;
+    const videoID = path.split('/')[1];  // Assuming path is like '/videoID'
+    if (videoID && videoID !== '' && path !== '/') {
+      openModal(videoID);
+    } else if (path === '/' && !enterSiteModalOpen) {
       openEnterSiteModal();
     }
-  }, [isLoading, openEnterSiteModal]);
+  }
+}, [isLoading, location, openModal, openEnterSiteModal, enterSiteModalOpen]);
 
   return (
     <div id="cube-container" ref={cubeContainerRef} className={isLoading ? 'hidden' : 'visible'}>
@@ -79,6 +89,7 @@ function EnterSiteModal() {
 
 function Modal() {
   const { isModalOpen, currentVideoID, closeModal } = useModal();
+  const navigate = useNavigate(); // Use navigate to change the URL
   const [videoInfo, setVideoInfo] = useState(null);
   const [loading, setLoading] = useState(false); // State to handle loading of video information
 
@@ -122,7 +133,9 @@ function Modal() {
     <div className={`modal-backdrop ${isModalOpen ? 'open' : 'closed'}`}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <span className="close" onClick={() => {
+          console.log('Closing modal...');
           closeModal();
+          navigate('/'); // Navigate to root when modal is closed
           setVideoInfo(null); // Reset video information on modal close
         }}>&times;</span>
         <div className="embed-container">
@@ -141,18 +154,48 @@ function Modal() {
         <div className="gradient-overlay"></div>  {/* Gradient overlay added here */}
       </div>
     </div>
-  ); 
+  );
 }
 
 function AppWrapper() {
-  const [scenes, setScenes] = useState([]);
-  const { openModal } = useModal();
+  const { videoID } = useParams();
+  const navigate = useNavigate();
+  const { openModal, closeModal, isModalOpen, openEnterSiteModal, enterSiteModalOpen } = useModal();
+
+  // Use state to track if the CubeWithVideos has finished loading
+  const [cubeLoading, setCubeLoading] = useState(true);
+
+  // Enhanced closeModal that ensures navigation to the root path
+  const closeAndNavigate = useCallback(() => {
+    closeModal();
+    if (window.location.pathname !== '/') {
+      navigate('/', { replace: true });
+    }
+  }, [closeModal, navigate]);
+
+  // Handle modal states based on URL changes
+  useEffect(() => {
+    if (videoID) {
+      // Check if the modal needs to be opened
+      if (!isModalOpen) {
+        openModal(videoID);
+      }
+    } else {
+      // When no videoID is present, handle modal states appropriately
+      if (isModalOpen) {
+        closeAndNavigate();
+      } else if (!enterSiteModalOpen) {
+        openEnterSiteModal();
+      }
+    }
+  }, [videoID, openModal, closeModal, isModalOpen, openEnterSiteModal, enterSiteModalOpen, closeAndNavigate]);
 
   useEffect(() => {
+    // Effect to fetch content from the backend API
     const fetchContent = async () => {
       try {
         const response = await axios.get(`${BASE_URL}/api/scenes`);
-        setScenes(response.data);
+        // Process response if necessary
       } catch (error) {
         console.error('Error fetching initial data:', error);
       }
@@ -161,18 +204,17 @@ function AppWrapper() {
   }, []);
 
   return (
-    <Router>
-      <ModalProvider>
-        <Routes>
-          <Route path="/" element={<>
-            <CubeWithVideos scenes={scenes} />
-          </>} />
-        </Routes>
-        <Modal />
-        <EnterSiteModal />
-      </ModalProvider>
-    </Router>
+    <ModalProvider>
+      <CubeWithVideos setCubeLoading={setCubeLoading} />
+      <Routes>
+        <Route path="/" element={null} />
+        <Route path="/:videoID" element={null} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <Modal />
+      {cubeLoading ? null : <EnterSiteModal />}
+    </ModalProvider>
   );
 }
 
-export default AppWrapper;
+export default AppWrapper
