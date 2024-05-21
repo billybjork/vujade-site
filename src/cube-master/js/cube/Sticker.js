@@ -32,7 +32,7 @@ roundedSquareGeometry.center();
 
 // Utility function to extract videoID
 function extractVideoID(url) {
-    const match = url.match(/VideoScenes-V2\/(.*?)_Scene/);
+    const match = url.match(/VideoScenes-V3\/(.*?)_Scene/);
     return match ? match[1] : '';
 }
 

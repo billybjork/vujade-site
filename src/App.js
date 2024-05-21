@@ -128,7 +128,11 @@ function Modal() {
 
   // Return modal with conditional rendering based on open/close state
   return (
-    <div className={`modal-backdrop ${isModalOpen ? 'open' : 'closed'}`}>
+    <div className={`modal-backdrop ${isModalOpen ? 'open' : 'closed'}`} onClick={() => {
+        console.log('Backdrop clicked, closing modal...');
+        closeModal();
+        navigate('/'); // Navigate to root when modal is closed
+      }}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <span className="close" onClick={() => {
           console.log('Closing modal...');
