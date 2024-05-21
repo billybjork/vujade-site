@@ -10,13 +10,14 @@ const BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://vujade-site-bd6c94750c62.herokuapp.com'
   : 'http://127.0.0.1:5000';
 
-function CubeWithVideos() {
+function CubeWithVideos({ setCubeLoading }) {
   const [cubeVideos, setCubeVideos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState(0);  // Track loading progress
+  const [showEnterSite, setShowEnterSite] = useState(true);  // State to control visibility of the Enter Site button
   const cubeContainerRef = useRef(null);
   const cubeMasterInitialized = useRef(false);
-  const { openModal, openEnterSiteModal, enterSiteModalOpen } = useModal();  // Retrieve openModal from context
+  const { openModal } = useModal();  // Retrieve openModal from context
   const location = useLocation(); // Get current location
 
   // Ref to store the rendering functions
@@ -42,7 +43,7 @@ function CubeWithVideos() {
     if (cubeVideos.length === 54 && !cubeMasterInitialized.current && cubeContainerRef.current) {
       const controls = CubeMasterInit(
           cubeVideos, 
-          () => { setIsLoading(false); }, 
+          () => { setIsLoading(false); setCubeLoading(false); }, 
           (progress) => { setLoadProgress(progress); }, 
           cubeContainerRef.current, 
           openModal  // Pass openModal directly
@@ -50,42 +51,39 @@ function CubeWithVideos() {
       renderingControl.current = controls;
       cubeMasterInitialized.current = true;
     }
-  }, [cubeVideos]); // Removed openModal from dependencies to prevent re-initialization
+  }, [cubeVideos, setCubeLoading, openModal]); // Adjusted dependencies
 
-// Handling the initial loading modal
-useEffect(() => {
-  if (!isLoading) {
-    // When cube loading is done, check path to decide modal action
-    const path = location.pathname;
-    const videoID = path.split('/')[1];  // Assuming path is like '/videoID'
-    if (videoID && videoID !== '' && path !== '/') {
-      openModal(videoID);
-    } else if (path === '/' && !enterSiteModalOpen) {
-      openEnterSiteModal();
+  // Handling the initial loading modal
+  useEffect(() => {
+    if (!isLoading) {
+      // When cube loading is done, check path to decide modal action
+      const path = location.pathname;
+      const videoID = path.split('/')[1];  // Assuming path is like '/videoID'
+      if (videoID && videoID !== '' && path !== '/') {
+        openModal(videoID);
+      }
     }
-  }
-}, [isLoading, location, openModal, openEnterSiteModal, enterSiteModalOpen]);
+  }, [isLoading, location, openModal]);
 
   return (
     <div id="cube-container" ref={cubeContainerRef} className={isLoading ? 'hidden' : 'visible'}>
-        {isLoading && <div className="loading">{`${loadProgress}% Loaded`}</div>}
+      {isLoading ? (
+        <div className="loading">{`Loading...`}</div>
+      ) : showEnterSite && (
+        <div className="enter-site-backdrop">
+          <button 
+            className="enter-site-button" 
+            onClick={() => {
+              renderingControl.current.startRendering();  // Start rendering the cube
+              setShowEnterSite(false);  // Hide the Enter Site button after it's clicked
+            }}>
+            Enter Site
+          </button>
+        </div>
+      )}
     </div>
   );
-}
-
-function EnterSiteModal() {
-  const { enterSiteModalOpen, closeEnterSiteModal } = useModal();
-
-  if (!enterSiteModalOpen) return null;
-
-  return (
-    <div className="enter-site-modal-backdrop">
-      <div className="enter-site-modal">
-        <button className="enter-site-button" onClick={closeEnterSiteModal}>Enter Site</button>
-      </div>
-    </div>
-  );
-}
+}  
 
 function Modal() {
   const { isModalOpen, currentVideoID, closeModal } = useModal();
@@ -160,7 +158,7 @@ function Modal() {
 function AppWrapper() {
   const { videoID } = useParams();
   const navigate = useNavigate();
-  const { openModal, closeModal, isModalOpen, openEnterSiteModal, enterSiteModalOpen } = useModal();
+  const { openModal, closeModal, isModalOpen } = useModal();
 
   // Use state to track if the CubeWithVideos has finished loading
   const [cubeLoading, setCubeLoading] = useState(true);
@@ -184,11 +182,9 @@ function AppWrapper() {
       // When no videoID is present, handle modal states appropriately
       if (isModalOpen) {
         closeAndNavigate();
-      } else if (!enterSiteModalOpen) {
-        openEnterSiteModal();
       }
     }
-  }, [videoID, openModal, closeModal, isModalOpen, openEnterSiteModal, enterSiteModalOpen, closeAndNavigate]);
+  }, [videoID, openModal, closeModal, isModalOpen, closeAndNavigate]);
 
   useEffect(() => {
     // Effect to fetch content from the backend API
@@ -212,7 +208,6 @@ function AppWrapper() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Modal />
-      {cubeLoading ? null : <EnterSiteModal />}
     </ModalProvider>
   );
 }

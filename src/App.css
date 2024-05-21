@@ -21,7 +21,7 @@ html, body {
   color: #333;
 }
 
-.enter-site-modal-backdrop {
+.enter-site-backdrop {
   position: fixed;
   top: 0;
   left: 0;
@@ -31,10 +31,10 @@ html, body {
   justify-content: center;
   align-items: center;
   background-color: rgba(0, 0, 0, 0.7);  /* Light background for a fresh look */
-  z-index: 1050;
+  z-index: 950;
 }
 
-.enter-site-modal {
+.enter-site {
   padding: 20px;
   background-color: #000;  /* Keeping it consistent with your theme */
   color: #fff;

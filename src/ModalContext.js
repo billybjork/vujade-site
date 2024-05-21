@@ -35,7 +35,8 @@ export const ModalProvider = ({ children }) => {
   // Opens the "Enter site" modal
   const openEnterSiteModal = useCallback(() => {
     setEnterSiteModalOpen(true);
-  }, []);
+    console.log("enterSiteModalOpen after open:", enterSiteModalOpen); // This will still show the old state due to closure
+}, []);
 
   // Closes the "Enter site" modal
   const closeEnterSiteModal = useCallback(() => {
