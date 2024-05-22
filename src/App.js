@@ -55,6 +55,11 @@ function CubeWithVideos({ setCubeLoading }) {
 
   // Handling the initial loading modal
   useEffect(() => {
+    const path = location.pathname;
+    const videoID = path.split('/')[1];  // Assuming path is like '/videoID'
+    if (videoID && videoID !== '') {
+      openModal(videoID);
+    }
     if (!isLoading) {
       // When cube loading is done, check path to decide modal action
       const path = location.pathname;
