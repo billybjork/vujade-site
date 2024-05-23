@@ -3,6 +3,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: 'Courier New', monospace;
 }
 
 html, body {
@@ -10,6 +11,17 @@ html, body {
   overflow: hidden;
   background-color: #000;
   color: #ffffff;
+}
+
+.instructions {
+  position: fixed;
+  top: 20%;  /* Positioned above the Enter Site button */
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 20px;
+  color: rgb(157, 157, 157);
+  z-index: 1500;
 }
 
 .loading {
@@ -30,22 +42,15 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.7);  /* Light background for a fresh look */
+  background-color: rgba(0, 0, 0, 0.7);
   z-index: 950;
-}
-
-.enter-site {
-  padding: 20px;
-  background-color: #000;  /* Keeping it consistent with your theme */
-  color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
 }
 
 .enter-site-button {
   padding: 10px 25px;
   font-size: 18px;
-  background-color: #007BFF;  /* Bright blue for visibility */
+  font-weight: bold;
+  background-color: #007BFF;
   color: white;
   border: none;
   border-radius: 5px;
@@ -54,53 +59,48 @@ html, body {
 }
 
 .enter-site-button:hover {
-  background-color: #0056b3;  /* Darker blue on hover */
+  background-color: #0056b3;
 }
 
 #cube-container {
-  margin-top: -50px; /* Adjust the value as needed */
+  margin-top: 0px;
 }
 
-.video-menu-wrapper {
+.header-menu {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-}
-
-.video-menu-container {
   display: flex;
-  white-space: nowrap;
-  animation: scroll 15s linear infinite; /* Adjust duration as needed */
-}
-
-@keyframes scroll {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%); /* Change from -100% to -50% for seamless loop */
-  }
-}
-
-.video-menu-item {
-  display: inline-flex;
-  align-items: center;
+  flex-direction: row;
   justify-content: center;
-  font-family: Helvetica, Arial, sans-serif;
-  font-weight: normal;
-  font-size: 14px;
-  padding: 20px 16px;
-  margin: 0 10px;
-  border: none;
-  background-color: #000000;
-  color: white;
-  cursor: pointer;
-  transition: font-size 0.3s ease, padding 0.3s ease, font-weight 0.3s ease;
-  box-sizing: border-box;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 1s ease;
+  padding: 10px 0; /* Add vertical padding */
+  overflow-x: auto; /* Allows horizontal scrolling */
+  white-space: nowrap; /* Keeps buttons in a single line */
+  flex-wrap: wrap; /* Allows wrapping on smaller screens */
 }
 
-.video-menu-item:hover {
-  font-size: 20px;
+.header-menu.visible {
+  opacity: 1;
+}
+
+.header-menu button {
+  padding: 8px 16px; /* Adequate padding for touch targets */
+  font-size: 16px; /* Larger font for better readability */
+  color: #ffffff; /* White color for text */
+  background-color: transparent; /* No background initially */
+  border: none; /* Remove default button border */
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s; /* Smooth transitions for hover effects */
+  border-radius: 20px; /* Rounded corners */
+}
+
+.header-menu button:hover {
   font-weight: bold;
-  padding: 15px 12px;
+  color: #ffffff; /* Bright color change on hover */
 }
 
 .modal-backdrop {
@@ -130,12 +130,18 @@ html, body {
   box-sizing: border-box; /* Ensures padding is included in the width calculation */
 }
 
-/* Responsive adjustments using media queries */
 @media (max-width: 768px) {
+  .header-menu button {
+    padding: 6px 12px; /* Slightly smaller padding */
+    font-size: 14px; /* Smaller font size for better fit */
+  }
+
+  .instructions, .loading, .enter-site-button {
+    font-size: 16px; /* Adjust font size for readability */
+  }
+
   .modal {
-    width: 100%; /* Full width on smaller screens */
-    max-width: none; /* No maximum width */
-    padding: 30px 5px; /* Further reduced padding on very small screens */
+    padding: 20px; /* Adjust padding for modal content */
   }
 }
 

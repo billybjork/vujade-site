@@ -10,14 +10,15 @@ const BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://vujade-site-bd6c94750c62.herokuapp.com'
   : 'http://127.0.0.1:5000';
 
-function CubeWithVideos({ setCubeLoading }) {
+function CubeWithVideos({ setCubeLoading, onEnterSite }) {
   const [cubeVideos, setCubeVideos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState(0);  // Track loading progress
   const [showEnterSite, setShowEnterSite] = useState(true);  // State to control visibility of the Enter Site button
+  const [showInstructions, setShowInstructions] = useState(true);  // State to control visibility of onscreen instructions
   const cubeContainerRef = useRef(null);
   const cubeMasterInitialized = useRef(false);
-  const { openModal } = useModal();  // Retrieve openModal from context
+  const { openModal, isModalOpen } = useModal();  // Retrieve openModal and isModalOpen from context
   const location = useLocation(); // Get current location
 
   // Ref to store the rendering functions
@@ -29,7 +30,7 @@ function CubeWithVideos({ setCubeLoading }) {
       try {
         const response = await axios.get(`${BASE_URL}/api/scenes`);
         const shuffledScenes = _.shuffle(response.data);
-        const first54Videos = shuffledScenes.slice(0, 54).map(scene => scene.sceneURL); // Extract URLs from scenes
+        const first54Videos = shuffledScenes.slice(0, 54).map(scene => scene.sceneURL);
         setCubeVideos(first54Videos);
       } catch (error) {
         console.error('Error fetching cube videos:', error);
@@ -40,47 +41,49 @@ function CubeWithVideos({ setCubeLoading }) {
 
   // Initialize the cube once cubeVideos are ready and the container is ready
   useEffect(() => {
-    if (cubeVideos.length === 54 && !cubeMasterInitialized.current && cubeContainerRef.current) {
+    if (cubeVideos.length == 54 && !cubeMasterInitialized.current && cubeContainerRef.current) {
       const controls = CubeMasterInit(
           cubeVideos, 
           () => { setIsLoading(false); setCubeLoading(false); }, 
           (progress) => { setLoadProgress(progress); }, 
           cubeContainerRef.current, 
-          openModal  // Pass openModal directly
+          openModal
       );
       renderingControl.current = controls;
       cubeMasterInitialized.current = true;
     }
-  }, [cubeVideos, setCubeLoading, openModal]); // Adjusted dependencies
+  }, [cubeVideos, setCubeLoading, openModal]);
 
-  // Handling the initial loading modal
+  // Handling the initial loading modal and visibility of instructions
   useEffect(() => {
     const path = location.pathname;
-    const videoID = path.split('/')[1];  // Assuming path is like '/videoID'
+    const videoID = path.split('/')[1];
     if (videoID && videoID !== '') {
       openModal(videoID);
     }
-    if (!isLoading) {
-      // When cube loading is done, check path to decide modal action
-      const path = location.pathname;
-      const videoID = path.split('/')[1];  // Assuming path is like '/videoID'
-      if (videoID && videoID !== '' && path !== '/') {
-        openModal(videoID);
-      }
-    }
-  }, [isLoading, location, openModal]);
+
+    // When modal opens, hide instructions permanently for this session
+    setShowInstructions(!isModalOpen && showInstructions);
+  }, [isLoading, location, openModal, isModalOpen, showInstructions]);  // Added showInstructions as a dependency to maintain its state
 
   return (
     <div id="cube-container" ref={cubeContainerRef} className={isLoading ? 'hidden' : 'visible'}>
+      {showInstructions && (
+        <div className="instructions">
+          This is an interactive Rubik's Cube.<br /><br />Click a tile to watch the full video.
+        </div>
+      )}
       {isLoading ? (
-        <div className="loading">{`Loading...`}</div>
+        <div className="loading">{"Loading..."}</div>
       ) : showEnterSite && (
         <div className="enter-site-backdrop">
           <button 
             className="enter-site-button" 
             onClick={() => {
-              renderingControl.current.startRendering();  // Start rendering the cube
-              setShowEnterSite(false);  // Hide the Enter Site button after it's clicked
+              renderingControl.current.startRendering();
+              setShowEnterSite(false);
+              setShowInstructions(false);
+              onEnterSite();  // Notifies that the site entry has occurred, showing the menu
             }}>
             Enter Site
           </button>
@@ -88,7 +91,21 @@ function CubeWithVideos({ setCubeLoading }) {
       )}
     </div>
   );
-}  
+}
+
+function HeaderMenu({ videos, onVideoSelect }) {
+  if (!videos.length) return null;
+
+  return (
+    <div className="header-menu visible">
+      {videos.map(video => (
+        <button key={video.id} onClick={() => onVideoSelect(video.id)}>
+          {video.name}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function Modal() {
   const { isModalOpen, currentVideoID, closeModal } = useModal();
@@ -169,8 +186,37 @@ function AppWrapper() {
   const navigate = useNavigate();
   const { openModal, closeModal, isModalOpen } = useModal();
 
+  // State to hold all videos for the header menu
+  const [allVideos, setAllVideos] = useState([]);
+  // State to control the visibility of the Header Menu
+  const [showMenu, setShowMenu] = useState(false);
+
   // Use state to track if the CubeWithVideos has finished loading
   const [cubeLoading, setCubeLoading] = useState(true);
+
+  // Function to handle video selection from the menu
+  const handleVideoSelect = useCallback((videoId) => {
+    openModal(videoId);
+    navigate(`/${videoId}`); // Navigate to the selected video
+  }, [navigate, openModal]);
+
+  // Fetch all videos for the header menu
+  useEffect(() => {
+    const fetchAllVideos = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/api/videos`); // Endpoint that returns all videos
+        setAllVideos(response.data.map(video => ({ id: video.videoID, name: video.videoName })));
+      } catch (error) {
+        console.error('Error fetching all videos:', error);
+      }
+    };
+    fetchAllVideos();
+  }, []);
+
+  // Function to trigger showing the menu when "Enter Site" is clicked in CubeWithVideos
+  const handleEnterSite = () => {
+    setShowMenu(true);
+  };
 
   // Enhanced closeModal that ensures navigation to the root path
   const closeAndNavigate = useCallback(() => {
@@ -195,30 +241,22 @@ function AppWrapper() {
     }
   }, [videoID, openModal, closeModal, isModalOpen, closeAndNavigate]);
 
-  useEffect(() => {
-    // Effect to fetch content from the backend API
-    const fetchContent = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}/api/scenes`);
-        // Process response if necessary
-      } catch (error) {
-        console.error('Error fetching initial data:', error);
-      }
-    };
-    fetchContent();
-  }, []);
-
   return (
     <ModalProvider>
-      <CubeWithVideos setCubeLoading={setCubeLoading} />
+      {/* Conditional rendering of the HeaderMenu based on showMenu state */}
+      {showMenu && <HeaderMenu videos={allVideos} onVideoSelect={handleVideoSelect} />}
+
+      <CubeWithVideos setCubeLoading={setCubeLoading} onEnterSite={handleEnterSite} />
+
       <Routes>
         <Route path="/" element={null} />
         <Route path="/:videoID" element={null} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+
       <Modal />
     </ModalProvider>
   );
 }
 
-export default AppWrapper
+export default AppWrapper;
