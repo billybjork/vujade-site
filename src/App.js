@@ -70,7 +70,7 @@ function CubeWithVideos({ setCubeLoading, onEnterSite }) {
     <div id="cube-container" ref={cubeContainerRef} className={isLoading ? 'hidden' : 'visible'}>
       {showInstructions && (
         <div className="instructions">
-          This is an interactive Rubik's Cube.<br /><br />Click a tile to watch the full video.
+          This is an interactive Rubik's Cube.<br /><br />Play with it, or click a video to watch.
         </div>
       )}
       {isLoading ? (
@@ -196,9 +196,10 @@ function AppWrapper() {
 
   // Function to handle video selection from the menu
   const handleVideoSelect = useCallback((videoId) => {
+    console.log("Video selected: ", videoId); // Debugging line
     openModal(videoId);
     navigate(`/${videoId}`); // Navigate to the selected video
-  }, [navigate, openModal]);
+  }, [navigate, openModal]);  
 
   // Fetch all videos for the header menu
   useEffect(() => {

@@ -20,6 +20,7 @@ html, body {
   width: 100%;
   text-align: center;
   font-size: 20px;
+  font-weight: bold;
   color: rgb(157, 157, 157);
   z-index: 1500;
 }
@@ -30,7 +31,7 @@ html, body {
   align-items: center;
   height: 100vh;
   font-size: 24px;
-  color: #333;
+  color: #565656;
 }
 
 .enter-site-backdrop {
@@ -113,20 +114,20 @@ html, body {
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  background: rgba(0,0,0,0.8); /* Dim background */
+  background: rgba(0,0,0,1); /* Dim background */
 }
 
 .modal {
   position: relative;
   width: 90%; /* Responsive width */
   max-width: 800px; /* Max width for desktop */
-  height: 80vh;
+  height: 100vh;
   border-radius: 8px;
   background: #000;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding: 40px 20px 20px 20px; /* Increased top padding to accommodate close button */
+  padding: 80px 20px 20px 20px; /* Increased top padding to accommodate close button */
   box-sizing: border-box; /* Ensures padding is included in the width calculation */
 }
 
@@ -141,7 +142,9 @@ html, body {
   }
 
   .modal {
-    padding: 20px; /* Adjust padding for modal content */
+    width: 100%; /* Full width on smaller screens */
+    max-width: none; /* No maximum width */
+    padding: 70px 0px; /* Further reduced padding on very small screens */
   }
 }
 
@@ -210,11 +213,10 @@ html, body {
 .close {
   position: absolute;
   right: 20px;
-  top: -10px; /* Fixed position from the top right of the modal */
-  font-size: 30px;
+  top: 30px; /* Fixed position from the top right of the modal */
+  font-size: 40px;
   color: #ccc;
   cursor: pointer;
-  z-index: 1050; /* Ensures it's above other content */
 }
 
 .close:hover {
