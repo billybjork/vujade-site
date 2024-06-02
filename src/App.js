@@ -48,7 +48,12 @@ function CubeWithVideos({ setCubeLoading }) {
           },
           (progress) => { setLoadProgress(progress); },
           cubeContainerRef.current,
-          openModal
+          openModal,
+          (videoLoadedSuccess) => {
+            if (!videoLoadedSuccess) {
+                // Handle autoplay failure if needed
+            }
+        }
       );
       renderingControl.current = controls;
       cubeMasterInitialized.current = true;
@@ -78,20 +83,17 @@ function CubeWithVideos({ setCubeLoading }) {
 }  
 
 function HeaderMenu({ videos, onVideoSelect }) {
-  // Access modal functions directly from the context
   const { openModal } = useModal();
 
-  // Ensure videos are available, if not, return null or a placeholder
   if (!videos.length) return null;
 
-  // Handler for clicking on a video item
   const handleVideoClick = (videoId) => {
     console.log("Video selected via menu: ", videoId);
-    openModal(videoId);  // Open modal directly from the context
+    openModal(videoId);
   };
 
   return (
-    <div className="header-menu visible">
+    <div className="header-menu">
       {videos.map(video => (
         <button key={video.id} onClick={() => handleVideoClick(video.id)}>
           {video.name}
@@ -196,11 +198,12 @@ function AppWrapper() {
 
   // State to hold all videos for the header menu
   const [allVideos, setAllVideos] = useState([]);
-  // State to control the visibility of the Header Menu
-  const [showMenu, setShowMenu] = useState(true);
-
-  // Use state to track if the CubeWithVideos has finished loading
+  
+  // State to track if the CubeWithVideos has finished loading
   const [cubeLoading, setCubeLoading] = useState(true);
+
+  // State to trigger re-render of HeaderMenu
+  const [menuVisible, setMenuVisible] = useState(true);
 
   // Function to handle video selection from the menu
   const handleVideoSelect = useCallback((videoId) => {
@@ -208,23 +211,14 @@ function AppWrapper() {
     if (!isModalOpen) {  // Only open modal if not already open
       openModal(videoId);
     }
-    navigate(`/${videoId}`, { replace: true }); // Move navigate here to ensure it's only triggered here
+    navigate(`/${videoId}`, { replace: true }); // Navigate to the video ID
   }, [navigate, openModal, isModalOpen]);
-
-  // useEffect for URL and modal state management
-  useEffect(() => {
-    if (videoID && !isModalOpen) {
-      openModal(videoID);
-    } else if (!videoID && isModalOpen) {
-      closeModal();  // Ensure closeModal is responsible for navigating to root
-    }
-  }, [videoID, openModal, closeModal, isModalOpen]);
 
   // Fetch all videos for the header menu
   useEffect(() => {
     const fetchAllVideos = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/api/videos`); // Endpoint that returns all videos
+        const response = await axios.get(`${BASE_URL}/api/videos`);
         setAllVideos(response.data.map(video => ({ id: video.videoID, name: video.videoName })));
       } catch (error) {
         console.error('Error fetching all videos:', error);
@@ -256,22 +250,26 @@ function AppWrapper() {
     }
   }, [videoID, openModal, closeModal, isModalOpen, closeAndNavigate]);
 
+  // Force re-render of HeaderMenu when CubeWithVideos finishes loading
+  useEffect(() => {
+    if (!cubeLoading) {
+      setMenuVisible(false); // Trigger re-render of HeaderMenu
+      setTimeout(() => setMenuVisible(true), 0); // Re-show HeaderMenu immediately
+    }
+  }, [cubeLoading]);
+
   return (
     <ModalProvider>
-      {/* Conditional rendering of the HeaderMenu based on showMenu state */}
-      {showMenu && <HeaderMenu videos={allVideos} onVideoSelect={handleVideoSelect} />}
-  
+      {menuVisible && <HeaderMenu videos={allVideos} onVideoSelect={handleVideoSelect} />}
       <CubeWithVideos setCubeLoading={setCubeLoading} />
-  
       <Routes>
         <Route path="/" element={null} />
         <Route path="/:videoID" element={null} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-  
       <Modal />
     </ModalProvider>
-  );  
+  );
 }
 
 export default AppWrapper;

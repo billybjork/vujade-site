@@ -22,46 +22,38 @@ html, body {
   color: #565656;
 }
 
-#cube-container {
-  margin-top: 0px;
-  z-index: 900;
-}
-
 .header-menu {
   position: absolute;
   top: 0;
-  left: 0;
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  gap: 10px;
-  opacity: 1;
-  z-index: 950;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%; /* Adjust the width as needed */
+  z-index: 999;
   padding: 10px 0; /* Add vertical padding */
   overflow-x: auto; /* Allows horizontal scrolling */
   white-space: nowrap; /* Keeps buttons in a single line */
-  flex-wrap: wrap; /* Allows wrapping on smaller screens */
-}
-
-.header-menu.visible {
-  opacity: 1;
+  overflow-y: hidden; /* Hide vertical overflow */
+  white-space: normal; /* Allow wrapping */
+  text-align: center; /* Center align the buttons */
 }
 
 .header-menu button {
+  display: inline-block; /* Allows wrapping and maintains inline flow */
+  margin-right: 10px; /* Adds space between buttons */
+  margin-bottom: 10px; /* Adds space between lines of buttons */
   padding: 8px 16px; /* Adequate padding for touch targets */
-  font-size: 16px; /* Larger font for better readability */
+  font-size: 20px; /* Larger font for better readability */
+  font-weight: normal;
   color: #ffffff; /* White color for text */
   background-color: transparent; /* No background initially */
   border: none; /* Remove default button border */
   cursor: pointer;
-  transition: background-color 0.3s, color 0.3s; /* Smooth transitions for hover effects */
   border-radius: 20px; /* Rounded corners */
+  transition: background-color 0.3s, color 0.3s, font-weight 0.3s; /* Smooth transitions for hover effects */
 }
 
 .header-menu button:hover {
   font-weight: bold;
-  color: #ffffff; /* Bright color change on hover */
 }
 
 .modal-backdrop {
@@ -87,14 +79,22 @@ html, body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  z-index: 1001;
   padding: 80px 20px 20px 20px; /* Increased top padding to accommodate close button */
   box-sizing: border-box; /* Ensures padding is included in the width calculation */
 }
 
 @media (max-width: 768px) {
+  .header-menu {
+    width: 100%; /* Full width on smaller screens */
+    left: 0;
+    transform: none;
+    padding: 10px; /* Adjust padding as needed */
+  }
+
   .header-menu button {
     padding: 6px 12px; /* Slightly smaller padding */
-    font-size: 14px; /* Smaller font size for better fit */
+    font-size: 17px; /* Smaller font size for better fit */
   }
 
   .loading {

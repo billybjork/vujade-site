@@ -118,6 +118,17 @@ class Sticker {
         this.updatePosition(this.fixedPositionVector, this.fixedFacingVector);
         this.mesh.rotation.y = Math.PI * 0.5 * Math.abs(this.facingVector.x);
         this.mesh.rotation.x = Math.PI * 0.5 * Math.abs(this.facingVector.y);
+
+        // Add event listeners for user interactions
+        ['click', 'touchstart'].forEach(eventType => {
+            window.addEventListener(eventType, () => {
+                if (!this.autoplaySuccess) {
+                    video.play().catch(e => {
+                        console.error("Manual play was prevented:", e);
+                    });
+                }
+            });
+        });
     }    
     
     /**
