@@ -10,15 +10,16 @@ const BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://vujade-site-bd6c94750c62.herokuapp.com'
   : 'http://127.0.0.1:5000';
 
+
 function CubeWithVideos({ setCubeLoading, onEnterSite }) {
   const [cubeVideos, setCubeVideos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState(0);  // Track loading progress
-  const [showEnterSite, setShowEnterSite] = useState(true);  // State to control visibility of the Enter Site button
-  const [showInstructions, setShowInstructions] = useState(true);  // State to control visibility of onscreen instructions
+  const [showEnterSite, setShowEnterSite] = useState(false);  // Initially set to false to not show enter site modal
+  const [autoplayFailed, setAutoplayFailed] = useState(false);  // State to track if any video failed to autoplay
   const cubeContainerRef = useRef(null);
   const cubeMasterInitialized = useRef(false);
-  const { openModal, isModalOpen } = useModal();  // Retrieve openModal and isModalOpen from context
+  const { openModal, closeModal, isModalOpen } = useModal();  // Retrieve openModal, closeModal and isModalOpen from context
   const location = useLocation(); // Get current location
 
   // Ref to store the rendering functions
@@ -44,35 +45,40 @@ function CubeWithVideos({ setCubeLoading, onEnterSite }) {
     if (cubeVideos.length == 54 && !cubeMasterInitialized.current && cubeContainerRef.current) {
       const controls = CubeMasterInit(
           cubeVideos, 
-          () => { setIsLoading(false); setCubeLoading(false); }, 
-          (progress) => { setLoadProgress(progress); }, 
-          cubeContainerRef.current, 
-          openModal
+          () => {
+            setIsLoading(false);
+            setCubeLoading(false);
+            // Check if autoplay failed
+            if (autoplayFailed) {
+              setShowEnterSite(true);  // Show enter site button only if autoplay failed
+            }
+          },
+          (progress) => { setLoadProgress(progress); },
+          cubeContainerRef.current,
+          openModal,
+          (failed) => { setAutoplayFailed(failed); }  // Callback to update if autoplay failed
       );
       renderingControl.current = controls;
       cubeMasterInitialized.current = true;
     }
   }, [cubeVideos, setCubeLoading, openModal]);
 
-  // Handling the initial loading modal and visibility of instructions
+  // Handling the initial loading modal
   useEffect(() => {
     const path = location.pathname;
     const videoID = path.split('/')[1];
-    if (videoID && videoID !== '') {
+    if (videoID && !isModalOpen) {
+      console.log('Effect trying to open modal...');
       openModal(videoID);
+    } else if (!videoID && isModalOpen) {
+      console.log('Effect trying to close modal...');
+      closeModal();
     }
 
-    // When modal opens, hide instructions permanently for this session
-    setShowInstructions(!isModalOpen && showInstructions);
-  }, [isLoading, location, openModal, isModalOpen, showInstructions]);  // Added showInstructions as a dependency to maintain its state
+  }, [isLoading, location, openModal, isModalOpen]);
 
   return (
     <div id="cube-container" ref={cubeContainerRef} className={isLoading ? 'hidden' : 'visible'}>
-      {showInstructions && (
-        <div className="instructions">
-          This is an interactive Rubik's Cube.<br /><br />Play with it, or click a video to watch.
-        </div>
-      )}
       {isLoading ? (
         <div className="loading">{"Loading..."}</div>
       ) : showEnterSite && (
@@ -82,10 +88,9 @@ function CubeWithVideos({ setCubeLoading, onEnterSite }) {
             onClick={() => {
               renderingControl.current.startRendering();
               setShowEnterSite(false);
-              setShowInstructions(false);
               onEnterSite();  // Notifies that the site entry has occurred, showing the menu
             }}>
-            Enter Site
+            🚪 Enter
           </button>
         </div>
       )}
@@ -94,12 +99,22 @@ function CubeWithVideos({ setCubeLoading, onEnterSite }) {
 }
 
 function HeaderMenu({ videos, onVideoSelect }) {
+  // Access modal functions directly from the context
+  const { openModal } = useModal();
+
+  // Ensure videos are available, if not, return null or a placeholder
   if (!videos.length) return null;
+
+  // Handler for clicking on a video item
+  const handleVideoClick = (videoId) => {
+    console.log("Video selected via menu: ", videoId);
+    openModal(videoId);  // Open modal directly from the context
+  };
 
   return (
     <div className="header-menu visible">
       {videos.map(video => (
-        <button key={video.id} onClick={() => onVideoSelect(video.id)}>
+        <button key={video.id} onClick={() => handleVideoClick(video.id)}>
           {video.name}
         </button>
       ))}
@@ -109,32 +124,44 @@ function HeaderMenu({ videos, onVideoSelect }) {
 
 function Modal() {
   const { isModalOpen, currentVideoID, closeModal } = useModal();
-  const navigate = useNavigate(); // Use navigate to change the URL
+  const navigate = useNavigate();
   const [videoInfo, setVideoInfo] = useState(null);
-  const [loading, setLoading] = useState(false); // State to handle loading of video information
+  const [loading, setLoading] = useState(false);
 
-  console.log(`Modal status: ${isModalOpen}, Video ID: ${currentVideoID}`); // Add this to check state
+  // Local helper to format date
+  function formatDate(dateString) {
+    if (!dateString) return "[Date not available]"; // Handle undefined or null dates
 
-  // Effect to fetch video information based on currentVideoID
+    const date = new Date(dateString);
+    if (isNaN(date)) return "[Invalid Date]"; // Check if the date is valid
+  
+    const month = date.toLocaleString('en-US', { month: 'long' });
+    const year = date.getFullYear();
+    const formatted = `${month}, ${year}`;
+  
+    return `[Published ${formatted}]`;
+  }
+
+  // Fetch video information based on currentVideoID
   useEffect(() => {
     async function fetchVideoInfo() {
       if (currentVideoID) {
-        setLoading(true); // Start loading
+        setLoading(true);
         try {
           const { data } = await axios.get(`${BASE_URL}/api/video_info/${currentVideoID}`);
-          setVideoInfo(data); // Set fetched data to videoInfo state
+          setVideoInfo(data);
         } catch (error) {
           console.error('Error fetching video info:', error);
-          setVideoInfo(null); // Reset video info on error
+          setVideoInfo(null);  // Reset video info on error
         }
-        setLoading(false); // Stop loading
+        setLoading(false);
       }
     }
     fetchVideoInfo();
   }, [currentVideoID]);
 
-  // Handling the case where videoInfo is null
-  if (!isModalOpen || loading) return null;  // Display nothing if the modal is closed or loading
+  // Handling the case where videoInfo is null or the modal is loading
+  if (!isModalOpen || loading) return null;
 
   // Ensure that videoInfo is available before trying to access the URL
   if (!videoInfo) {
@@ -148,13 +175,12 @@ function Modal() {
   // Extract video ID from videoInfo URL
   const videoID = videoInfo.URL.split("/")[3];
 
-  // Return modal with conditional rendering based on open/close state
   return (
     <div className={`modal-backdrop ${isModalOpen ? 'open' : 'closed'}`} onClick={() => {
-        console.log('Backdrop clicked, closing modal...');
-        closeModal();
-        navigate('/'); // Navigate to root when modal is closed
-      }}>
+      console.log('Backdrop clicked, closing modal...');
+      closeModal();
+      navigate('/'); // Navigate to root when modal is closed
+    }}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <span className="close" onClick={() => {
           console.log('Closing modal...');
@@ -173,9 +199,12 @@ function Modal() {
         </div>
         <div className="text-container">
           <h2>{videoInfo.videoName}</h2>
+          <br></br>
+          <p style={{ fontStyle: 'italic' }}>{formatDate(videoInfo.Published)}</p>
+          <br></br>
           <div dangerouslySetInnerHTML={{ __html: videoInfo.Description }}></div>
         </div>
-        <div className="gradient-overlay"></div>  {/* Gradient overlay added here */}
+        <div className="gradient-overlay"></div>
       </div>
     </div>
   );
@@ -189,17 +218,28 @@ function AppWrapper() {
   // State to hold all videos for the header menu
   const [allVideos, setAllVideos] = useState([]);
   // State to control the visibility of the Header Menu
-  const [showMenu, setShowMenu] = useState(false);
+  const [showMenu, setShowMenu] = useState(true);
 
   // Use state to track if the CubeWithVideos has finished loading
   const [cubeLoading, setCubeLoading] = useState(true);
 
   // Function to handle video selection from the menu
   const handleVideoSelect = useCallback((videoId) => {
-    console.log("Video selected: ", videoId); // Debugging line
-    openModal(videoId);
-    navigate(`/${videoId}`); // Navigate to the selected video
-  }, [navigate, openModal]);  
+    console.log("Video selected: ", videoId);
+    if (!isModalOpen) {  // Only open modal if not already open
+      openModal(videoId);
+    }
+    navigate(`/${videoId}`, { replace: true }); // Move navigate here to ensure it's only triggered here
+  }, [navigate, openModal, isModalOpen]);
+
+  // useEffect for URL and modal state management
+  useEffect(() => {
+    if (videoID && !isModalOpen) {
+      openModal(videoID);
+    } else if (!videoID && isModalOpen) {
+      closeModal();  // Ensure closeModal is responsible for navigating to root
+    }
+  }, [videoID, openModal, closeModal, isModalOpen]);
 
   // Fetch all videos for the header menu
   useEffect(() => {
@@ -246,18 +286,18 @@ function AppWrapper() {
     <ModalProvider>
       {/* Conditional rendering of the HeaderMenu based on showMenu state */}
       {showMenu && <HeaderMenu videos={allVideos} onVideoSelect={handleVideoSelect} />}
-
+  
       <CubeWithVideos setCubeLoading={setCubeLoading} onEnterSite={handleEnterSite} />
-
+  
       <Routes>
         <Route path="/" element={null} />
         <Route path="/:videoID" element={null} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-
+  
       <Modal />
     </ModalProvider>
-  );
+  );  
 }
 
 export default AppWrapper;

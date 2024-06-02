@@ -57,7 +57,7 @@ class Sticker {
         this.videoURL = videoURL;
         this.videoid = extractVideoID(videoURL);  // Extract and store the video ID
         console.log(`Extracted videoID: ${this.videoid} from URL: ${videoURL}`);
-
+    
         // Tweening properties
         this.isTweening = false;
         this.tweenStart = 0;
@@ -68,39 +68,41 @@ class Sticker {
         // Setup video element
         const video = document.createElement('video');
         video.crossOrigin = "anonymous";
-        video.src = videoURL;
         video.muted = true;  // Ensure video is muted
         video.loop = true;
         video.setAttribute('playsinline', true);  // Ensures inline playback on iOS devices
+        video.preload = "auto";
+        
+        this.autoplaySuccess = false;  // Initialize autoplay success tracking
     
-        // Load the video and setup a callback for when it's ready to play
+        // Load the video and setup callbacks for when it's ready to play and for errors
         video.oncanplaythrough = () => {
             video.oncanplaythrough = null;  // Remove event listener to prevent multiple triggers
-            onVideoLoaded();  // Call the callback function
+            video.play().then(() => {
+                this.autoplaySuccess = true;  // Set success to true when autoplay starts
+                console.log("Autoplay started!");
+                onVideoLoaded();  // Call the callback function if provided
+            }).catch(e => {
+                this.autoplaySuccess = false;  // Set success to false on error
+                console.error("Autoplay was prevented:", e);
+                onVideoLoaded(false);  // Call the callback with an error indicator
+                // Optionally show a user interface prompt or a play button here
+            });
         };
         video.onerror = () => {
+            this.autoplaySuccess = false;
+            console.error("Video load error for: " + videoURL);
             onVideoLoaded(false);  // Call the callback with an error indicator
         };
         video.src = videoURL;
-        video.load();  // Attempt to load the video        
-
-        // Important for iOS/Safari: Trigger playback from a user interaction event globally
-        document.body.addEventListener('click', function startVideo() {
-            video.play().then(() => {
-                console.log("Autoplay started!");
-            }).catch(e => {
-                console.error("Autoplay was prevented:", e);
-                // Optionally show a user interface prompt or a play button here
-            });
-            document.body.removeEventListener('click', startVideo);
-        });
-
+        video.load();  // Attempt to load the video
+    
         // Create a video texture from the video element
         const texture = new THREE.VideoTexture(video);
         texture.minFilter = THREE.LinearFilter;
         texture.magFilter = THREE.LinearFilter;
         texture.format = THREE.RGBFormat;
-
+    
         // Use the video texture for the material
         this.material = new THREE.MeshPhongMaterial({
             map: texture,
@@ -108,15 +110,15 @@ class Sticker {
             shininess: 10,  // Optional, adjust for desired shininess effect
             specular: 0x222222,  // Optional, adjust the color reflected by the light
         });
-
+    
         // Use the rounded square geometry for the mesh
         this.mesh = new THREE.Mesh(roundedSquareGeometry, this.material);
-
+    
         // Set initial position and rotation
         this.updatePosition(this.fixedPositionVector, this.fixedFacingVector);
         this.mesh.rotation.y = Math.PI * 0.5 * Math.abs(this.facingVector.x);
         this.mesh.rotation.x = Math.PI * 0.5 * Math.abs(this.facingVector.y);
-    }
+    }    
     
     /**
      * Update the position of the sticker based on the new position and facing direction.

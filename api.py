@@ -34,6 +34,7 @@ class Video(db.Model):
     url = db.Column(db.Text(), nullable=False)
     description = db.Column(db.Text(), nullable=True)
     sources = db.Column(db.Text(), nullable=True)
+    published = db.Column(db.Date(), nullable=True)
     scenes = db.relationship('Scene', backref='video', lazy=True)
 
 class Scene(db.Model):
@@ -56,8 +57,9 @@ def serve(path):
 @app.route('/api/videos')
 def get_videos():
     try:
-        videos = Video.query.all()
-        return jsonify([{ 'videoID': video.videoid, 'videoName': video.videoname, 'URL': video.url, 'Description': video.description, 'Sources': video.sources, 'Scenes': [{'sceneURL': scene.sceneurl} for scene in video.scenes] } for video in videos])
+        # Order by 'published' date
+        videos = Video.query.order_by(Video.published).all()
+        return jsonify([{ 'videoID': video.videoid, 'videoName': video.videoname, 'URL': video.url, 'Description': video.description, 'Sources': video.sources, 'Published': video.published.isoformat() if video.published else None, 'Scenes': [{'sceneURL': scene.sceneurl} for scene in video.scenes] } for video in videos])
     except Exception as e:
         print(f"Error in get_videos: {e}")
         return jsonify({"error": str(e)}), 500
@@ -88,16 +90,17 @@ def get_scenes(videoID):
 @app.route('/api/video_info/<string:videoID>')
 def get_video_info(videoID):
     try:
-        # Fetch the video by videoID
         video_info = Video.query.filter_by(videoid=videoID).first()
         if video_info:
-            # Construct the video information, including associated scenes
+            # Ensure date is sent in ISO format
+            published_date = video_info.published.isoformat() if video_info.published else None
             video_data = {
                 'videoID': video_info.videoid,
                 'videoName': video_info.videoname,
                 'URL': video_info.url,
                 'Description': video_info.description,
                 'Sources': video_info.sources,
+                'Published': published_date,
                 'Scenes': [{'sceneID': scene.sceneid, 'sceneURL': scene.sceneurl} for scene in video_info.scenes]
             }
             return jsonify(video_data)

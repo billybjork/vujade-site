@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from "../three/OrbitControls.js";
 import Cube from "./Cube.js";
-import { useModal } from '../../../ModalContext';
 import {
     Axes,
     KeysToMoves,
@@ -32,7 +31,6 @@ const render = (renderer, scene, camera, update, controls) => {
 
 export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallback, domElement, openModal) {
 
-    console.log('Received openModal:', openModal);
     const getHeaderSize = () => {
         // Height of header for embedding in other websites
         return 0;
@@ -52,7 +50,7 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     };
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(4, 3, 10); // Set initial camera position
 
     // Use the passed DOM element

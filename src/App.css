@@ -13,18 +13,6 @@ html, body {
   color: #ffffff;
 }
 
-.instructions {
-  position: fixed;
-  top: 20%;  /* Positioned above the Enter Site button */
-  left: 0;
-  width: 100%;
-  text-align: center;
-  font-size: 20px;
-  font-weight: bold;
-  color: rgb(157, 157, 157);
-  z-index: 1500;
-}
-
 .loading {
   display: flex;
   justify-content: center;
@@ -76,7 +64,7 @@ html, body {
   flex-direction: row;
   justify-content: center;
   gap: 10px;
-  opacity: 0;
+  opacity: 1;
   transition: opacity 1s ease;
   padding: 10px 0; /* Add vertical padding */
   overflow-x: auto; /* Allows horizontal scrolling */
@@ -137,7 +125,7 @@ html, body {
     font-size: 14px; /* Smaller font size for better fit */
   }
 
-  .instructions, .loading, .enter-site-button {
+  .loading, .enter-site-button {
     font-size: 16px; /* Adjust font size for readability */
   }
 
@@ -213,8 +201,8 @@ html, body {
 .close {
   position: absolute;
   right: 20px;
-  top: 30px; /* Fixed position from the top right of the modal */
-  font-size: 40px;
+  top: 20px; /* Fixed position from the top right of the modal */
+  font-size: 45px;
   color: #ccc;
   cursor: pointer;
 }
