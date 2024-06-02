@@ -11,7 +11,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <Router>
       <ModalProvider>
-        <AppWrapper />
+          <AppWrapper />
       </ModalProvider>
     </Router>
   </React.StrictMode>

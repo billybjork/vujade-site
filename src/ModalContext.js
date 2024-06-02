@@ -14,12 +14,16 @@ export const ModalProvider = ({ children }) => {
   // Opens the video modal and sets the current video ID
   const openModal = useCallback((videoID) => {
     console.log(`Opening modal for video ID: ${videoID}`);
-    setIsModalOpen(true);
-    setCurrentVideoID(videoID);
-    if (window.location.pathname !== `/${videoID}`) {
-      navigate(`/${videoID}`, { replace: true });  // Navigate only if not already on this path
-    }
-  }, [navigate]);
+    setIsModalOpen(false); // Close the modal first
+    setCurrentVideoID(null); // Reset the video ID
+    setTimeout(() => { // Add a small delay
+      setIsModalOpen(true);
+      setCurrentVideoID(videoID);
+      if (window.location.pathname !== `/${videoID}`) {
+        navigate(`/${videoID}`, { replace: true });  // Navigate only if not already on this path
+      }
+    }, 100); // 100ms delay
+  }, [navigate]);  
 
   // Closes the video modal and resets the video ID
   const closeModal = useCallback(() => {
@@ -36,7 +40,7 @@ export const ModalProvider = ({ children }) => {
   const openEnterSiteModal = useCallback(() => {
     setEnterSiteModalOpen(true);
     console.log("enterSiteModalOpen after open:", enterSiteModalOpen); // This will still show the old state due to closure
-}, []);
+  }, []);
 
   // Closes the "Enter site" modal
   const closeEnterSiteModal = useCallback(() => {

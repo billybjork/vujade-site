@@ -12,6 +12,7 @@ import {
 let animationFrameId = null;  // This will store the request ID for the animation frame
 let mouse = new THREE.Vector2(); // Vector2 for storing mouse coordinates
 let raycaster = new THREE.Raycaster(); // Raycaster for detecting intersects
+let isCameraRotating = true; // Track whether the camera is rotating
 
 // Define animate globally within the module
 const animate = (renderer, scene, camera, update, controls) => {
@@ -129,14 +130,18 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     // Function for making updates per tick
     const update = () => {
         const delta = clock.getDelta();
-
+    
+        if (isCameraRotating) {
+            camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), delta * 0.1); // Adjust the rotation speed as needed
+            camera.lookAt(scene.position); // Ensure the camera is always looking at the cube
+        }
+    
         controls.update();  // Update the controls with damping effect
-
         updateSpotlightPosition();  // Update spotlight position based on camera
-
+    
         if (!animating && moveBuffer.length > 0) {
             const move = moveBuffer.shift();
-
+    
             if (move === MoveFlags.SOLUTION_END) {
                 animating = false;
             } else {
@@ -144,7 +149,7 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
                 animating = true;
             }
         }
-
+    
         // if any cubie is animating, perform the animation
         cube.forEach((cubie) => {
             if (cubie.animating) {
@@ -165,7 +170,7 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
                 }
             }
         });
-    };
+    };    
 
     // Event handlers for keyboard and mouse events, resize, and touch
 
@@ -258,22 +263,19 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     const onTouchStart = (event) => {
         event.offsetX = event.touches[0].clientX;
         event.offsetY = event.touches[0].clientY - getHeaderSize();
-        onDocumentMouseDown(event); // Handle touch as mouse down
-        clickStartPosition = { x: event.offsetX, y: event.offsetY };
-        hasMoved = false;
+        onDocumentMouseDown(event);
     };
     document.addEventListener("touchstart", onTouchStart, false);
-    
+
     const onTouchEnd = (event) => {
-        onDocumentMouseUp(event); // Handle touch as mouse up
+        onDocumentMouseUp(event);
     };
     document.addEventListener("touchend", onTouchEnd, false);
-    
+
     const onTouchMove = (event) => {
         event.offsetX = event.touches[0].clientX;
         event.offsetY = event.touches[0].clientY - getHeaderSize();
-        onDocumentMouseMove(event); // Handle touch as mouse move
-        hasMoved = true;
+        onDocumentMouseMove(event);
     };
     document.addEventListener("touchmove", onTouchMove, false);
 
@@ -297,10 +299,10 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
         mouse.y = -(event.offsetY / getHeight()) * 2 + 1;
         clickStartPosition = { x: event.offsetX, y: event.offsetY };
         hasMoved = false; // Flag to check if the pointer has moved significantly
-    
+
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(cube.meshes, true);
-    
+
         if (intersects.length > 0) {
             controls.enabled = false;
             dragging = true;
@@ -317,7 +319,7 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
             selectedObject = ClickFlags.ROTATION;
         }
     };      
-    
+
     document.addEventListener("pointerdown", onDocumentMouseDown, false);
 
     /**
@@ -330,28 +332,28 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
         selectedObject = ClickFlags.NONE;
         chosenAxis = null;
         chosenDir = 0;
-    
+
         let moveX = Math.abs(clickStartPosition.x - event.offsetX);
         let moveY = Math.abs(clickStartPosition.y - event.offsetY);
         hasMoved = moveX > 5 || moveY > 5;
         console.log(`Mouse moved: ${moveX}px, ${moveY}px - Considered as 'moved': ${hasMoved}`);
-    
+
         if (activeSticker && !hasMoved) {
             console.log(`Click detected on sticker with videoID: ${activeSticker.videoid}`);
             openModal(activeSticker.videoid);
         } else {
             console.log('Click not detected or has moved:', hasMoved);
         }
-    
+
         if (activeSticker) {
             activeSticker.reset();
             activeSticker = null;
         }
-    
+
         clickStartPosition = null;
     };        
-    
-    document.addEventListener("pointerup", onDocumentMouseUp, false);     
+
+    document.addEventListener("pointerup", onDocumentMouseUp, false);   
 
     /**
      * Handle mouse move events by determining what

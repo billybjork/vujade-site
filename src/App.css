@@ -99,6 +99,7 @@ html, body {
   .header-menu button {
     padding: 6px 12px; /* Slightly smaller padding */
     font-size: 14px; /* Smaller font size for better fit */
+    margin-bottom: 10px;
   }
 
   .loading {

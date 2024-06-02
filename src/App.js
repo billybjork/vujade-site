@@ -128,6 +128,7 @@ function Modal() {
     async function fetchVideoInfo() {
       if (currentVideoID) {
         setLoading(true);
+        setVideoInfo(null);  // Reset video info when a new modal is being opened
         try {
           const { data } = await axios.get(`${BASE_URL}/api/video_info/${currentVideoID}`);
           setVideoInfo(data);
@@ -140,9 +141,9 @@ function Modal() {
     }
     fetchVideoInfo();
   }, [currentVideoID]);
-
+  
   // Handling the case where videoInfo is null or the modal is loading
-  if (!isModalOpen || loading) return null;
+  if (!isModalOpen || loading || !currentVideoID) return null; // Add check for currentVideoID  
 
   // Ensure that videoInfo is available before trying to access the URL
   if (!videoInfo) {
@@ -240,7 +241,9 @@ function AppWrapper() {
     if (videoID) {
       // Check if the modal needs to be opened
       if (!isModalOpen) {
-        openModal(videoID);
+        setTimeout(() => { // Add a small delay
+          openModal(videoID);
+        }, 100); // 100ms delay
       }
     } else {
       // When no videoID is present, handle modal states appropriately
@@ -248,7 +251,7 @@ function AppWrapper() {
         closeAndNavigate();
       }
     }
-  }, [videoID, openModal, closeModal, isModalOpen, closeAndNavigate]);
+  }, [videoID, openModal, closeModal, isModalOpen, closeAndNavigate]);  
 
   // Force re-render of HeaderMenu when CubeWithVideos finishes loading
   useEffect(() => {
