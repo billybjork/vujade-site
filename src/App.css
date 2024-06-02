@@ -22,6 +22,10 @@ html, body {
   color: #565656;
 }
 
+.cube-container {
+  z-index: 1000;
+}
+
 .header-menu {
   position: absolute;
   top: 0;
@@ -65,7 +69,7 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 1050;
   background: rgba(0,0,0,1); /* Dim background */
 }
 
@@ -79,7 +83,7 @@ html, body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  z-index: 1001;
+  z-index: 1051;
   padding: 80px 20px 20px 20px; /* Increased top padding to accommodate close button */
   box-sizing: border-box; /* Ensures padding is included in the width calculation */
 }
@@ -94,7 +98,7 @@ html, body {
 
   .header-menu button {
     padding: 6px 12px; /* Slightly smaller padding */
-    font-size: 17px; /* Smaller font size for better fit */
+    font-size: 14px; /* Smaller font size for better fit */
   }
 
   .loading {

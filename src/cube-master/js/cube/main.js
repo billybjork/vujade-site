@@ -258,19 +258,22 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     const onTouchStart = (event) => {
         event.offsetX = event.touches[0].clientX;
         event.offsetY = event.touches[0].clientY - getHeaderSize();
-        onDocumentMouseDown(event);
+        onDocumentMouseDown(event); // Handle touch as mouse down
+        clickStartPosition = { x: event.offsetX, y: event.offsetY };
+        hasMoved = false;
     };
     document.addEventListener("touchstart", onTouchStart, false);
-
+    
     const onTouchEnd = (event) => {
-        onDocumentMouseUp(event);
+        onDocumentMouseUp(event); // Handle touch as mouse up
     };
     document.addEventListener("touchend", onTouchEnd, false);
-
+    
     const onTouchMove = (event) => {
         event.offsetX = event.touches[0].clientX;
         event.offsetY = event.touches[0].clientY - getHeaderSize();
-        onDocumentMouseMove(event);
+        onDocumentMouseMove(event); // Handle touch as mouse move
+        hasMoved = true;
     };
     document.addEventListener("touchmove", onTouchMove, false);
 
@@ -294,10 +297,10 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
         mouse.y = -(event.offsetY / getHeight()) * 2 + 1;
         clickStartPosition = { x: event.offsetX, y: event.offsetY };
         hasMoved = false; // Flag to check if the pointer has moved significantly
-
+    
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(cube.meshes, true);
-
+    
         if (intersects.length > 0) {
             controls.enabled = false;
             dragging = true;
@@ -314,7 +317,7 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
             selectedObject = ClickFlags.ROTATION;
         }
     };      
-
+    
     document.addEventListener("pointerdown", onDocumentMouseDown, false);
 
     /**
@@ -327,28 +330,28 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
         selectedObject = ClickFlags.NONE;
         chosenAxis = null;
         chosenDir = 0;
-
+    
         let moveX = Math.abs(clickStartPosition.x - event.offsetX);
         let moveY = Math.abs(clickStartPosition.y - event.offsetY);
         hasMoved = moveX > 5 || moveY > 5;
         console.log(`Mouse moved: ${moveX}px, ${moveY}px - Considered as 'moved': ${hasMoved}`);
-
+    
         if (activeSticker && !hasMoved) {
             console.log(`Click detected on sticker with videoID: ${activeSticker.videoid}`);
             openModal(activeSticker.videoid);
         } else {
             console.log('Click not detected or has moved:', hasMoved);
         }
-
+    
         if (activeSticker) {
             activeSticker.reset();
             activeSticker = null;
         }
-
+    
         clickStartPosition = null;
     };        
-
-    document.addEventListener("pointerup", onDocumentMouseUp, false);   
+    
+    document.addEventListener("pointerup", onDocumentMouseUp, false);     
 
     /**
      * Handle mouse move events by determining what
