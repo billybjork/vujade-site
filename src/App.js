@@ -10,16 +10,13 @@ const BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://vujade-site-bd6c94750c62.herokuapp.com'
   : 'http://127.0.0.1:5000';
 
-
-function CubeWithVideos({ setCubeLoading, onEnterSite }) {
+function CubeWithVideos({ setCubeLoading }) {
   const [cubeVideos, setCubeVideos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState(0);  // Track loading progress
-  const [showEnterSite, setShowEnterSite] = useState(false);  // Initially set to false to not show enter site modal
-  const [autoplayFailed, setAutoplayFailed] = useState(false);  // State to track if any video failed to autoplay
   const cubeContainerRef = useRef(null);
   const cubeMasterInitialized = useRef(false);
-  const { openModal, closeModal, isModalOpen } = useModal();  // Retrieve openModal, closeModal and isModalOpen from context
+  const { openModal, closeModal, isModalOpen } = useModal();  // Retrieve openModal from context
   const location = useLocation(); // Get current location
 
   // Ref to store the rendering functions
@@ -48,15 +45,10 @@ function CubeWithVideos({ setCubeLoading, onEnterSite }) {
           () => {
             setIsLoading(false);
             setCubeLoading(false);
-            // Check if autoplay failed
-            if (autoplayFailed) {
-              setShowEnterSite(true);  // Show enter site button only if autoplay failed
-            }
           },
           (progress) => { setLoadProgress(progress); },
           cubeContainerRef.current,
-          openModal,
-          (failed) => { setAutoplayFailed(failed); }  // Callback to update if autoplay failed
+          openModal
       );
       renderingControl.current = controls;
       cubeMasterInitialized.current = true;
@@ -74,29 +66,16 @@ function CubeWithVideos({ setCubeLoading, onEnterSite }) {
       console.log('Effect trying to close modal...');
       closeModal();
     }
-
-  }, [isLoading, location, openModal, isModalOpen]);
+  }, [isLoading, location, openModal, closeModal, isModalOpen]);
 
   return (
     <div id="cube-container" ref={cubeContainerRef} className={isLoading ? 'hidden' : 'visible'}>
       {isLoading ? (
         <div className="loading">{"Loading..."}</div>
-      ) : showEnterSite && (
-        <div className="enter-site-backdrop">
-          <button 
-            className="enter-site-button" 
-            onClick={() => {
-              renderingControl.current.startRendering();
-              setShowEnterSite(false);
-              onEnterSite();  // Notifies that the site entry has occurred, showing the menu
-            }}>
-            🚪 Enter
-          </button>
-        </div>
-      )}
+      ) : null}
     </div>
   );
-}
+}  
 
 function HeaderMenu({ videos, onVideoSelect }) {
   // Access modal functions directly from the context
@@ -254,11 +233,6 @@ function AppWrapper() {
     fetchAllVideos();
   }, []);
 
-  // Function to trigger showing the menu when "Enter Site" is clicked in CubeWithVideos
-  const handleEnterSite = () => {
-    setShowMenu(true);
-  };
-
   // Enhanced closeModal that ensures navigation to the root path
   const closeAndNavigate = useCallback(() => {
     closeModal();
@@ -287,7 +261,7 @@ function AppWrapper() {
       {/* Conditional rendering of the HeaderMenu based on showMenu state */}
       {showMenu && <HeaderMenu videos={allVideos} onVideoSelect={handleVideoSelect} />}
   
-      <CubeWithVideos setCubeLoading={setCubeLoading} onEnterSite={handleEnterSite} />
+      <CubeWithVideos setCubeLoading={setCubeLoading} />
   
       <Routes>
         <Route path="/" element={null} />
