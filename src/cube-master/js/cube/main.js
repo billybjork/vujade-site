@@ -294,7 +294,6 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
      * Function to handle pointer down events
      */
     const onDocumentMouseDown = (event) => {
-        console.log('Pointer down, active sticker:', activeSticker);
         mouse.x = (event.offsetX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.offsetY / getHeight()) * 2 + 1;
         clickStartPosition = { x: event.offsetX, y: event.offsetY };
@@ -326,7 +325,6 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
      * Function to handle pointer up events
      */
     const onDocumentMouseUp = (event) => {
-        console.log('Pointer up, active sticker before reset check:', activeSticker);
         controls.enabled = true;
         dragging = false;
         selectedObject = ClickFlags.NONE;
@@ -336,13 +334,9 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
         let moveX = Math.abs(clickStartPosition.x - event.offsetX);
         let moveY = Math.abs(clickStartPosition.y - event.offsetY);
         hasMoved = moveX > 5 || moveY > 5;
-        console.log(`Mouse moved: ${moveX}px, ${moveY}px - Considered as 'moved': ${hasMoved}`);
 
         if (activeSticker && !hasMoved) {
-            console.log(`Click detected on sticker with videoID: ${activeSticker.videoid}`);
             openModal(activeSticker.videoid);
-        } else {
-            console.log('Click not detected or has moved:', hasMoved);
         }
 
         if (activeSticker) {
@@ -363,7 +357,6 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     
         // do nothing if not dragging
         if (!dragging || chosenAxis !== null) {
-            // console.log('Pointer move, hovered sticker:', hoveredSticker);
             return;
         }
     

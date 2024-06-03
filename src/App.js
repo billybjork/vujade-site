@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import './App.css';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MdMenu, MdClose } from 'react-icons/md';
 import { CubeMasterInit } from './cube-master/js/cube/main.js';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useModal, ModalProvider } from './ModalContext';
@@ -74,33 +76,88 @@ function CubeWithVideos({ setCubeLoading }) {
   }, [isLoading, location, openModal, closeModal, isModalOpen]);
 
   return (
-    <div id="cube-container" ref={cubeContainerRef} className={isLoading ? 'hidden' : 'visible'}>
-      {isLoading ? (
-        <div className="loading">{"Loading..."}</div>
-      ) : null}
-    </div>
+    <motion.div
+        id="cube-container"
+        ref={cubeContainerRef}
+        className={isLoading ? 'hidden' : 'visible'}
+        animate={{ opacity: isModalOpen ? 0.3 : 1 }} // Fades to 30% opacity when modal is open
+        transition={{ duration: 0.5 }} // Duration of the transition
+    >
+        {isLoading ? (
+            <div className="loading">{"Loading..."}</div>
+        ) : null}
+    </motion.div>
   );
-}  
+}
 
 function HeaderMenu({ videos, onVideoSelect }) {
-  const { openModal } = useModal();
+  const { openModal, isModalOpen } = useModal();
+  const [isOpen, setIsOpen] = useState(false); // State to manage menu visibility
 
   if (!videos.length) return null;
 
   const handleVideoClick = (videoId) => {
     console.log("Video selected via menu: ", videoId);
     openModal(videoId);
+    setIsOpen(false); // Close menu upon selection
+  };
+
+  // Variants for the menu container
+  const menuContainerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1, // Delay between animations of each child
+      }
+    }
+  };
+
+  // Variants for individual menu items
+  const menuItemVariants = {
+    hidden: {
+      y: -20,
+      opacity: 0
+    },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        y: { stiffness: 1000, velocity: -100 }
+      }
+    }
   };
 
   return (
-    <div className="header-menu">
-      {videos.map(video => (
-        <button key={video.id} onClick={() => handleVideoClick(video.id)}>
-          {video.name}
+    <motion.div>
+        <button className="hamburger-button" onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? <MdClose size={40} /> : <MdMenu size={40} />}
         </button>
-      ))}
-    </div>
-  );
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div
+                    className="header-menu"
+                    variants={menuContainerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="hidden"
+                >
+                    {videos.map((video, index) => (
+                        <motion.button
+                            key={video.id}
+                            variants={menuItemVariants}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => handleVideoClick(video.id)}
+                        >
+                            {video.name}
+                        </motion.button>
+                    ))}
+                </motion.div>
+            )}
+        </AnimatePresence>
+    </motion.div>
+);
 }
 
 function Modal() {
@@ -115,11 +172,11 @@ function Modal() {
 
     const date = new Date(dateString);
     if (isNaN(date)) return "[Invalid Date]"; // Check if the date is valid
-  
+
     const month = date.toLocaleString('en-US', { month: 'long' });
     const year = date.getFullYear();
     const formatted = `${month}, ${year}`;
-  
+
     return `[Published ${formatted}]`;
   }
 
@@ -141,11 +198,9 @@ function Modal() {
     }
     fetchVideoInfo();
   }, [currentVideoID]);
-  
-  // Handling the case where videoInfo is null or the modal is loading
-  if (!isModalOpen || loading || !currentVideoID) return null; // Add check for currentVideoID  
 
-  // Ensure that videoInfo is available before trying to access the URL
+  if (!isModalOpen || loading || !currentVideoID) return null;
+
   if (!videoInfo) {
     return (
       <div className="modal-backdrop">
@@ -154,41 +209,76 @@ function Modal() {
     );
   }
 
-  // Extract video ID from videoInfo URL
-  const videoID = videoInfo.URL.split("/")[3];
+  const videoID = videoInfo.URL.split("/")[3]; // Extract video ID from videoInfo URL
+
+  // Variants for modal animations
+  const modalVariants = {
+    hidden: {
+      y: '100vh',
+      opacity: 0
+    },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: 'spring',
+        damping: 25,
+        stiffness: 120
+      }
+    },
+    exit: {
+      y: '100vh',
+      opacity: 0,
+      transition: {
+        duration: 0.3,
+        ease: 'easeInOut'
+      }
+    }
+  };
 
   return (
-    <div className={`modal-backdrop ${isModalOpen ? 'open' : 'closed'}`} onClick={() => {
-      console.log('Backdrop clicked, closing modal...');
-      closeModal();
-      navigate('/'); // Navigate to root when modal is closed
-    }}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <span className="close" onClick={() => {
-          console.log('Closing modal...');
+    <AnimatePresence>
+      {isModalOpen && (
+        <div className="modal-backdrop" onClick={() => {
+          console.log('Backdrop clicked, closing modal...');
           closeModal();
           navigate('/'); // Navigate to root when modal is closed
-          setVideoInfo(null); // Reset video information on modal close
-        }}>&times;</span>
-        <div className="embed-container">
-          <iframe
-            key={videoID} // Assign key prop to force recreation on ID change
-            src={`https://player.vimeo.com/video/${videoID}`}
-            allow="autoplay; fullscreen"
-            allowFullScreen
-            title={videoInfo.videoName}
-          ></iframe>
+        }}>
+          <motion.div
+            className="modal"
+            onClick={e => e.stopPropagation()}
+            variants={modalVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
+            <span className="close" onClick={() => {
+              console.log('Closing modal...');
+              closeModal();
+              navigate('/'); // Navigate to root when modal is closed
+              setVideoInfo(null); // Reset video information on modal close
+            }}>&times;</span>
+            <div className="embed-container">
+              <iframe
+                key={videoID} // Assign key prop to force recreation on ID change
+                src={`https://player.vimeo.com/video/${videoID}`}
+                allow="autoplay; fullscreen"
+                allowFullScreen
+                title={videoInfo.videoName}
+              ></iframe>
+            </div>
+            <div className="text-container">
+              <h2>{videoInfo.videoName}</h2>
+              <br></br>
+              <p style={{ fontStyle: 'italic' }}>{formatDate(videoInfo.Published)}</p>
+              <br></br>
+              <div dangerouslySetInnerHTML={{ __html: videoInfo.Description }}></div>
+            </div>
+            <div className="gradient-overlay"></div>
+          </motion.div>
         </div>
-        <div className="text-container">
-          <h2>{videoInfo.videoName}</h2>
-          <br></br>
-          <p style={{ fontStyle: 'italic' }}>{formatDate(videoInfo.Published)}</p>
-          <br></br>
-          <div dangerouslySetInnerHTML={{ __html: videoInfo.Description }}></div>
-        </div>
-        <div className="gradient-overlay"></div>
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   );
 }
 

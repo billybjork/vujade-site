@@ -26,19 +26,33 @@ html, body {
   z-index: 1000;
 }
 
+.hamburger-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: fixed;
+  top: 30px;
+  left: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 50%;
+  color: #ffffff;
+}
+
 .header-menu {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%; /* Adjust the width as needed */
-  z-index: 999;
-  padding: 10px 0; /* Add vertical padding */
-  overflow-x: auto; /* Allows horizontal scrolling */
-  white-space: nowrap; /* Keeps buttons in a single line */
-  overflow-y: hidden; /* Hide vertical overflow */
-  white-space: normal; /* Allow wrapping */
-  text-align: center; /* Center align the buttons */
+  position: fixed;
+  top: 10px; /* Increased to give more space from the top of the screen */
+  left: 60px; /* Adjust based on the size of the hamburger button */
+  right: 0; /* Ensures it extends to the end of the screen */
+  display: flex;
+  max-height: 100vh; /* Prevents the menu from exceeding the viewport height */
+  overflow-y: auto; /* Enables vertical scrolling if necessary */
+  flex-wrap: wrap; /* Allows items to wrap to the next line */
+  align-items: center; /* Keeps items aligned vertically */
+  justify-content: center; /* Centers items horizontally */
+  padding: 10px; /* Padding to ensure items aren't too close to the screen edges */
 }
 
 .header-menu button {
@@ -53,7 +67,6 @@ html, body {
   border: none; /* Remove default button border */
   cursor: pointer;
   border-radius: 20px; /* Rounded corners */
-  transition: background-color 0.3s, color 0.3s, font-weight 0.3s; /* Smooth transitions for hover effects */
 }
 
 .header-menu button:hover {

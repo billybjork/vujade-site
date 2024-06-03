@@ -56,7 +56,6 @@ class Sticker {
         this.fixedFacingVector = new THREE.Vector3(facingVector.x, facingVector.y, facingVector.z);
         this.videoURL = videoURL;
         this.videoid = extractVideoID(videoURL);  // Extract and store the video ID
-        console.log(`Extracted videoID: ${this.videoid} from URL: ${videoURL}`);
     
         // Tweening properties
         this.isTweening = false;

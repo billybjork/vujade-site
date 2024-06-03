@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';  // Import useNavigate for handling URL changes
+import { useNavigate } from 'react-router-dom';
 
 const ModalContext = createContext();
 
