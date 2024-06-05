@@ -4,7 +4,6 @@ function SplashScreen() {
   return (
     <div id="splash-section" className="splash-screen">
       <div className="splash-screen">
-        <div className="splash-content">
           <div className="splash-text">
              <p style={{ textAlign: 'center' }}>
             </p>
@@ -34,7 +33,6 @@ function SplashScreen() {
           ></iframe>
           </div>
           </div>
-        </div>
       </div>
     </div>
   );

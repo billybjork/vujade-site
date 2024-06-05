@@ -307,25 +307,26 @@ function AppWrapper() {
   const [cubeLoading, setCubeLoading] = useState(true);
   const [menuVisible, setMenuVisible] = useState(true);
   const [previewVisible, setPreviewVisible] = useState(false); // Controls preview text visibility
-
-  // Enable or disable body scrolling
-  const toggleBodyScroll = (enable) => {
-    document.body.style.overflow = enable ? 'auto' : 'hidden';
-  };
+  const [fadeOut, setFadeOut] = useState(false); // Controls fade out effect
 
   // Handle scrolling to the About page
   useLayoutEffect(() => {
-    toggleBodyScroll(!previewVisible); // Disable scroll when preview is visible
     const handleScroll = () => {
-      const scrolledToAbout = window.scrollY + window.innerHeight > aboutSectionRef.current.offsetTop;
+      const aboutSectionTop = aboutSectionRef.current.offsetTop;
+      const scrollPosition = window.scrollY + window.innerHeight;
+
+      if (scrollPosition > aboutSectionTop) {
+        setFadeOut(true);
+      } else {
+        setFadeOut(false);
+      }
     };
-  
+
     window.addEventListener('scroll', handleScroll);
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      toggleBodyScroll(true); // Re-enable scrolling when component unmounts
     };
-  }, [previewVisible]);  
+  }, []);
 
   useEffect(() => {
     const fetchAllVideos = async () => {
@@ -358,7 +359,7 @@ function AppWrapper() {
       {menuVisible && <HeaderMenu videos={allVideos} onVideoSelect={handleVideoSelect} />}
       <CubeWithVideos setCubeLoading={setCubeLoading} />
       <button
-        className="question-mark-button"
+        className={`question-mark-button ${fadeOut ? 'fade-out' : ''}`}
         onMouseEnter={() => setPreviewVisible(true)} // For desktop
         onMouseLeave={() => setPreviewVisible(false)} // For desktop
         onClick={handlePreviewToggle} // For mobile
@@ -370,18 +371,9 @@ function AppWrapper() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="preview-text"
-          style={{
-            position: 'absolute',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            bottom: '100px',
-            color: 'white',
-            textAlign: 'center',
-            zIndex: 1001
-          }}
+          className={`preview-text ${fadeOut ? 'fade-out' : ''}`}
         >
-          This is an interactive Rubik's Cube.<br></br><br></br>Play with the cube, click a video to watch,<br></br>or scroll down to learn more 👇
+          This is an interactive Rubik's Cube.<br></br><br></br>Scroll down to learn more 👇
         </motion.div>
       )}
       <div ref={aboutSectionRef}>
@@ -389,7 +381,7 @@ function AppWrapper() {
       </div>
       <Modal />
     </ModalProvider>
-  );  
+  );
 }
 
 export default AppWrapper;
