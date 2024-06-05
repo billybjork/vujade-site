@@ -31,51 +31,52 @@ html, body {
   cursor: pointer;
   position: fixed;
   top: 30px;
-  left: 30px;
+  right: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 8px;
   border-radius: 50%;
   color: #ffffff;
+  z-index: 1000;
 }
 
 .header-menu {
   position: fixed;
-  top: 22px; /* Increased to give more space from the top of the screen */
-  left: 100px; /* Adjust based on the size of the hamburger button */
-  right: 0; /* Ensures it extends to the end of the screen */
+  top: 100px; /* Adjust according to the height of the hamburger button */
+  right: 10px; /* Space from the right edge of the viewport */
   display: flex;
+  flex-direction: column; /* Stacks items vertically */
+  align-items: flex-end; /* Aligns items to the right */
   max-height: 100vh; /* Prevents the menu from exceeding the viewport height */
   overflow-y: auto; /* Enables vertical scrolling if necessary */
-  flex-wrap: wrap; /* Allows items to wrap to the next line */
-  align-items: left; /* Keeps items aligned vertically */
-  justify-content: left; /* Centers items horizontally */
-  padding: 10px; /* Padding to ensure items aren't too close to the screen edges */
+  padding: 10px; /* Padding to ensure items aren't too close to the edges */
 }
 
 .header-menu button {
-  display: inline-block; /* Allows wrapping and maintains inline flow */
-  margin-right: 10px; /* Adds space between buttons */
-  margin-bottom: 10px; /* Adds space between lines of buttons */
-  padding: 8px 16px; /* Adequate padding for touch targets */
-  font-size: 20px; /* Larger font for better readability */
-  font-weight: normal;
-  color: #ffffff; /* White color for text */
-  background-color: transparent; /* No background initially */
-  border: none; /* Remove default button border */
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px 16px;
+  text-align: right;
+  font-size: 20px;
+  color: #ffffff;
+  background-color: transparent;
+  border: none;
   cursor: pointer;
-  border-radius: 20px; /* Rounded corners */
+  border-radius: 20px;
+  transition: font-size 0.3s ease, font-weight 0.3s ease; /* Smooth transition for font size and weight */
 }
 
 .header-menu button:hover {
   font-weight: bold;
+  font-size: 22px; /* Added px and increased slightly for noticeable effect */
 }
 
 .question-mark-button {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: 30px;
+  left: 30px;
   font-size: 50px;  /* Increased font size */
   border: none;
   background: none; /* Transparent background */
@@ -166,24 +167,6 @@ html, body {
 }
 
 @media (max-width: 768px) {
-  .hamburger-button {
-    top: 10px;
-    left: 10px;
-  }
-
-  .header-menu {
-    width: 100%; /* Full width on smaller screens */
-    left: 60px;
-    top: 10px;
-    transform: none;
-  }
-
-  .header-menu button {
-    padding: 6px 12px; /* Slightly smaller padding */
-    font-size: 15px; /* Smaller font size for better fit */
-    margin-bottom: 10px;
-  }
-
   .preview-text {
     font-size: medium;
     z-index: 500;
@@ -192,7 +175,6 @@ html, body {
   .splash-screen {
     width: 100%; /* Ensures full width */
     max-width: none; /* Removes max-width restriction */
-    padding: 20px; /* Reduces padding to avoid horizontal scrolling */
   }
 
   .loading {

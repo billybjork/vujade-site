@@ -13,7 +13,7 @@ const BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://vujade-site-bd6c94750c62.herokuapp.com'
   : 'http://127.0.0.1:5000';
 
-function CubeWithVideos({ setCubeLoading }) {
+function CubeWithVideos({ setCubeLoading, previewVisible }) {
   const [cubeVideos, setCubeVideos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState(0);  // Track loading progress
@@ -88,6 +88,31 @@ function CubeWithVideos({ setCubeLoading }) {
     };
   }, [location, openModal, closeModal, isModalOpen]);  
 
+  const handleTouchStart = (e) => {
+    // Assume the preview text takes up the bottom 25% of the screen
+    const touchY = e.touches[0].clientY; // Get the vertical position of the touch
+    const thresholdY = window.innerHeight * 0.75; // 75% from the top
+
+    if (previewVisible && touchY > thresholdY) {
+      // If the touch is in the lower 25% and preview is visible, allow default behavior (scrolling)
+    } else {
+      // Prevent swiping the cube when touch starts in the interactive area
+      e.preventDefault();
+    }
+  };
+
+  useEffect(() => {
+    const cubeContainer = cubeContainerRef.current;
+
+    // Add touch event listeners
+    cubeContainer.addEventListener('touchstart', handleTouchStart);
+
+    // Clean up event listeners
+    return () => {
+      cubeContainer.removeEventListener('touchstart', handleTouchStart);
+    };
+  }, [previewVisible]); // Depend on previewVisible to update event listeners correctly
+
   return (
     <motion.div
         id="cube-container"
@@ -104,7 +129,7 @@ function CubeWithVideos({ setCubeLoading }) {
 }
 
 function HeaderMenu({ videos, onVideoSelect }) {
-  const { openModal, isModalOpen } = useModal();
+  const { openModal } = useModal();
   const [isOpen, setIsOpen] = useState(false); // State to manage menu visibility
 
   if (!videos.length) return null;
@@ -115,13 +140,24 @@ function HeaderMenu({ videos, onVideoSelect }) {
     setIsOpen(false); // Close menu upon selection
   };
 
+  // Variants for the overlay
+  const overlayVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { duration: 0.3 }
+    }
+  };
+
   // Variants for the menu container
   const menuContainerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1, // Delay between animations of each child
+        when: "beforeChildren",
+        staggerChildren: 0.05, // Shorter stagger time for a smooth effect
+        ease: "linear" // Simpler ease for less pronounced effect
       }
     }
   };
@@ -129,48 +165,66 @@ function HeaderMenu({ videos, onVideoSelect }) {
   // Variants for individual menu items
   const menuItemVariants = {
     hidden: {
-      y: -20,
+      y: 5, // Very subtle movement
       opacity: 0
     },
     visible: {
       y: 0,
       opacity: 1,
       transition: {
-        y: { stiffness: 1000, velocity: -100 }
+        y: { type: 'spring', stiffness: 50, damping: 20 },
+        opacity: { duration: 0.2 } // Faster transition for opacity
       }
     }
   };
 
   return (
-    <motion.div>
-        <button className="hamburger-button" onClick={() => setIsOpen(!isOpen)}>
-            {isOpen ? <MdClose size={40} /> : <MdMenu size={40} />}
-        </button>
-        <AnimatePresence>
-            {isOpen && (
-                <motion.div
-                    className="header-menu"
-                    variants={menuContainerVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="hidden"
-                >
-                    {videos.map((video, index) => (
-                        <motion.button
-                            key={video.id}
-                            variants={menuItemVariants}
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => handleVideoClick(video.id)}
-                        >
-                            {video.name}
-                        </motion.button>
-                    ))}
-                </motion.div>
-            )}
-        </AnimatePresence>
-    </motion.div>
-);
+    <div>
+      <button className="hamburger-button" onClick={() => setIsOpen(!isOpen)}>
+        {isOpen ? <MdClose size={40} /> : <MdMenu size={40} />}
+      </button>
+      <AnimatePresence>
+        {isOpen && (
+            <motion.div
+            className="overlay"
+            variants={overlayVariants}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            }}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="header-menu"
+            variants={menuContainerVariants}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+          >
+            {videos.map((video, index) => (
+              <motion.button
+                key={video.id}
+                variants={menuItemVariants}
+                onClick={() => handleVideoClick(video.id)}
+              >
+                {video.name}
+              </motion.button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
 }
 
 function Modal() {
@@ -340,42 +394,38 @@ function AppWrapper() {
     fetchAllVideos();
   }, []);
 
-  // Function to handle video selection from the menu
   const handleVideoSelect = useCallback((videoId) => {
     console.log("Video selected: ", videoId);
-    if (!isModalOpen) {  // Only open modal if not already open
+    if (!isModalOpen) {
       openModal(videoId);
     }
-    navigate(`/${videoId}`, { replace: true }); // Navigate to the video ID
+    navigate(`/${videoId}`, { replace: true });
   }, [navigate, openModal, isModalOpen]);
-
-  // Show and hide preview text on hover or click
-  const handlePreviewToggle = () => {
-    setPreviewVisible(!previewVisible);
-  };
 
   return (
     <ModalProvider>
       {menuVisible && <HeaderMenu videos={allVideos} onVideoSelect={handleVideoSelect} />}
-      <CubeWithVideos setCubeLoading={setCubeLoading} />
+      <CubeWithVideos setCubeLoading={setCubeLoading} previewVisible={previewVisible} />
       <button
         className={`question-mark-button ${fadeOut ? 'fade-out' : ''}`}
-        onMouseEnter={() => setPreviewVisible(true)} // For desktop
-        onMouseLeave={() => setPreviewVisible(false)} // For desktop
-        onClick={handlePreviewToggle} // For mobile
+        onMouseEnter={() => setPreviewVisible(true)}
+        onMouseLeave={() => setPreviewVisible(false)}
+        onClick={() => setPreviewVisible(true)}
       >
         ?
       </button>
-      {previewVisible && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className={`preview-text ${fadeOut ? 'fade-out' : ''}`}
-        >
-          This is an interactive Rubik's Cube.<br></br><br></br>Scroll down to learn more 👇
-        </motion.div>
-      )}
+      <AnimatePresence>
+        {previewVisible && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            animate={{ opacity: fadeOut ? 0 : 1, transition: { duration: 0.5 } }}
+            exit={{ opacity: 0 }}
+            className="preview-text"
+          >
+            This is an interactive Rubik's Cube.<br></br><br></br>Scroll down to learn more 👇
+          </motion.div>
+        )}
+      </AnimatePresence>
       <div ref={aboutSectionRef}>
         <SplashScreen />
       </div>
