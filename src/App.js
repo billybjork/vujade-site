@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import axios from 'axios';
 import './App.css';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { MdMenu, MdClose } from 'react-icons/md';
 import { CubeMasterInit } from './cube-master/js/cube/main.js';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useModal, ModalProvider } from './ModalContext';
+import SplashScreen from './About';
 import _ from 'lodash';
 
 const BASE_URL = process.env.NODE_ENV === 'production'
@@ -66,14 +67,26 @@ function CubeWithVideos({ setCubeLoading }) {
   useEffect(() => {
     const path = location.pathname;
     const videoID = path.split('/')[1];
-    if (videoID && !isModalOpen) {
+  
+    // Check if the path is valid for opening a modal
+    const shouldOpenModal = videoID && !isModalOpen;
+    const shouldCloseModal = (!videoID) && isModalOpen;
+  
+    if (shouldOpenModal) {
       console.log('Effect trying to open modal...');
       openModal(videoID);
-    } else if (!videoID && isModalOpen) {
+    } else if (shouldCloseModal) {
       console.log('Effect trying to close modal...');
       closeModal();
     }
-  }, [isLoading, location, openModal, closeModal, isModalOpen]);
+  
+    // Cleanup function to ensure no unintended side effects
+    return () => {
+      if (isModalOpen) {
+        closeModal();
+      }
+    };
+  }, [location, openModal, closeModal, isModalOpen]);  
 
   return (
     <motion.div
@@ -198,6 +211,7 @@ function Modal() {
     }
     fetchVideoInfo();
   }, [currentVideoID]);
+  
 
   if (!isModalOpen || loading || !currentVideoID) return null;
 
@@ -285,27 +299,34 @@ function Modal() {
 function AppWrapper() {
   const { videoID } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { openModal, closeModal, isModalOpen } = useModal();
+  const aboutSectionRef = useRef(null);
 
-  // State to hold all videos for the header menu
   const [allVideos, setAllVideos] = useState([]);
-  
-  // State to track if the CubeWithVideos has finished loading
   const [cubeLoading, setCubeLoading] = useState(true);
-
-  // State to trigger re-render of HeaderMenu
   const [menuVisible, setMenuVisible] = useState(true);
+  const [previewVisible, setPreviewVisible] = useState(false); // Controls preview text visibility
 
-  // Function to handle video selection from the menu
-  const handleVideoSelect = useCallback((videoId) => {
-    console.log("Video selected: ", videoId);
-    if (!isModalOpen) {  // Only open modal if not already open
-      openModal(videoId);
-    }
-    navigate(`/${videoId}`, { replace: true }); // Navigate to the video ID
-  }, [navigate, openModal, isModalOpen]);
+  // Enable or disable body scrolling
+  const toggleBodyScroll = (enable) => {
+    document.body.style.overflow = enable ? 'auto' : 'hidden';
+  };
 
-  // Fetch all videos for the header menu
+  // Handle scrolling to the About page
+  useLayoutEffect(() => {
+    toggleBodyScroll(!previewVisible); // Disable scroll when preview is visible
+    const handleScroll = () => {
+      const scrolledToAbout = window.scrollY + window.innerHeight > aboutSectionRef.current.offsetTop;
+    };
+  
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      toggleBodyScroll(true); // Re-enable scrolling when component unmounts
+    };
+  }, [previewVisible]);  
+
   useEffect(() => {
     const fetchAllVideos = async () => {
       try {
@@ -318,51 +339,57 @@ function AppWrapper() {
     fetchAllVideos();
   }, []);
 
-  // Enhanced closeModal that ensures navigation to the root path
-  const closeAndNavigate = useCallback(() => {
-    closeModal();
-    if (window.location.pathname !== '/') {
-      navigate('/', { replace: true });
+  // Function to handle video selection from the menu
+  const handleVideoSelect = useCallback((videoId) => {
+    console.log("Video selected: ", videoId);
+    if (!isModalOpen) {  // Only open modal if not already open
+      openModal(videoId);
     }
-  }, [closeModal, navigate]);
+    navigate(`/${videoId}`, { replace: true }); // Navigate to the video ID
+  }, [navigate, openModal, isModalOpen]);
 
-  // Handle modal states based on URL changes
-  useEffect(() => {
-    if (videoID) {
-      // Check if the modal needs to be opened
-      if (!isModalOpen) {
-        setTimeout(() => { // Add a small delay
-          openModal(videoID);
-        }, 100); // 100ms delay
-      }
-    } else {
-      // When no videoID is present, handle modal states appropriately
-      if (isModalOpen) {
-        closeAndNavigate();
-      }
-    }
-  }, [videoID, openModal, closeModal, isModalOpen, closeAndNavigate]);  
-
-  // Force re-render of HeaderMenu when CubeWithVideos finishes loading
-  useEffect(() => {
-    if (!cubeLoading) {
-      setMenuVisible(false); // Trigger re-render of HeaderMenu
-      setTimeout(() => setMenuVisible(true), 0); // Re-show HeaderMenu immediately
-    }
-  }, [cubeLoading]);
+  // Show and hide preview text on hover or click
+  const handlePreviewToggle = () => {
+    setPreviewVisible(!previewVisible);
+  };
 
   return (
     <ModalProvider>
       {menuVisible && <HeaderMenu videos={allVideos} onVideoSelect={handleVideoSelect} />}
       <CubeWithVideos setCubeLoading={setCubeLoading} />
-      <Routes>
-        <Route path="/" element={null} />
-        <Route path="/:videoID" element={null} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <button
+        className="question-mark-button"
+        onMouseEnter={() => setPreviewVisible(true)} // For desktop
+        onMouseLeave={() => setPreviewVisible(false)} // For desktop
+        onClick={handlePreviewToggle} // For mobile
+      >
+        ?
+      </button>
+      {previewVisible && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="preview-text"
+          style={{
+            position: 'absolute',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            bottom: '100px',
+            color: 'white',
+            textAlign: 'center',
+            zIndex: 1001
+          }}
+        >
+          This is an interactive Rubik's Cube.<br></br><br></br>Play with the cube, click a video to watch,<br></br>or scroll down to learn more 👇
+        </motion.div>
+      )}
+      <div ref={aboutSectionRef}>
+        <SplashScreen />
+      </div>
       <Modal />
     </ModalProvider>
-  );
+  );  
 }
 
 export default AppWrapper;

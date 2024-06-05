@@ -78,7 +78,7 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enablePan = false;
-    controls.enableZoom = true; // Enable zoom but disable panning
+    controls.enableZoom = false; // Enable zoom but disable panning
     controls.enableRotate = true; // Allow rotation
 
     function updateSpotlightPosition() {

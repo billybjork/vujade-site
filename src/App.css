@@ -8,7 +8,6 @@
 
 html, body {
   height: 100%;
-  overflow: hidden;
   background-color: #000;
   color: #ffffff;
 }
@@ -73,6 +72,56 @@ html, body {
   font-weight: bold;
 }
 
+.question-mark-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  font-size: 50px;  /* Increased font size */
+  border: none;
+  background: none; /* Transparent background */
+  color: white;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 1000;
+  transition: font-weight 0.3s ease-in-out; /* Smooth transition for font-weight */
+}
+
+.question-mark-button:hover {
+  font-weight: bold; /* Bold font on hover */
+}
+
+.preview-text {
+  position: fixed; /* or absolute */
+  bottom: 5px; /* distance from the bottom of the page */
+  left: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.app-container {
+  position: relative;
+  min-height: 100vh;
+}
+
+.about-section {
+  opacity: 0; /* Initial state for animation */
+}
+
+/* Base styling for desktop */
+.splash-screen {
+  width: 100%; /* Ensures full width */
+  max-width: 860px; /* Maximum width to ensure content doesn't stretch too much on larger screens */
+  margin: 0 auto; /* Centers the splash screen in the viewport */
+  padding: 40px; /* Adds padding around the content */
+  box-sizing: border-box; /* Includes padding in width calculation */
+}
+
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -102,6 +151,11 @@ html, body {
 }
 
 @media (max-width: 768px) {
+  .hamburger-button {
+    top: 10px;
+    left: 10px;
+  }
+
   .header-menu {
     width: 100%; /* Full width on smaller screens */
     left: 0;
@@ -113,6 +167,13 @@ html, body {
     padding: 6px 12px; /* Slightly smaller padding */
     font-size: 14px; /* Smaller font size for better fit */
     margin-bottom: 10px;
+  }
+
+  .splash-screen {
+    width: 100%; /* Full width */
+    max-width: none; /* Removes max-width */
+    margin: 0; /* Remove margins to use full screen */
+    padding: 20px; /* Smaller padding on smaller screens */
   }
 
   .loading {
