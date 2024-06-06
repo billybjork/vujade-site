@@ -6,14 +6,13 @@ import { MdMenu, MdClose } from 'react-icons/md';
 import { CubeMasterInit } from './cube-master/js/cube/main.js';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useModal, ModalProvider } from './ModalContext';
-import SplashScreen from './About';
 import _ from 'lodash';
 
 const BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://vujade-site-bd6c94750c62.herokuapp.com'
   : 'http://127.0.0.1:5000';
 
-function CubeWithVideos({ setCubeLoading, previewVisible }) {
+function CubeWithVideos({ setCubeLoading }) {
   const [cubeVideos, setCubeVideos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState(0);  // Track loading progress
@@ -67,51 +66,18 @@ function CubeWithVideos({ setCubeLoading, previewVisible }) {
   useEffect(() => {
     const path = location.pathname;
     const videoID = path.split('/')[1];
-  
-    // Check if the path is valid for opening a modal
-    const shouldOpenModal = videoID && !isModalOpen;
-    const shouldCloseModal = (!videoID) && isModalOpen;
-  
-    if (shouldOpenModal) {
-      console.log('Effect trying to open modal...');
-      openModal(videoID);
-    } else if (shouldCloseModal) {
-      console.log('Effect trying to close modal...');
-      closeModal();
-    }
-  
-    // Cleanup function to ensure no unintended side effects
-    return () => {
-      if (isModalOpen) {
+
+    // Handle 'about' modal separately
+    if (videoID === 'about') {
+        if (!isModalOpen) openModal('about');
+    } else if (videoID && videoID !== 'about' && !isModalOpen) {
+        // Handle video modals
+        openModal(videoID);
+    } else if (!videoID && isModalOpen) {
+        // Close modal when no videoID or 'about' is in the path
         closeModal();
-      }
-    };
-  }, [location, openModal, closeModal, isModalOpen]);  
-
-  const handleTouchStart = (e) => {
-    // Assume the preview text takes up the bottom 25% of the screen
-    const touchY = e.touches[0].clientY; // Get the vertical position of the touch
-    const thresholdY = window.innerHeight * 0.75; // 75% from the top
-
-    if (previewVisible && touchY > thresholdY) {
-      // If the touch is in the lower 25% and preview is visible, allow default behavior (scrolling)
-    } else {
-      // Prevent swiping the cube when touch starts in the interactive area
-      e.preventDefault();
     }
-  };
-
-  useEffect(() => {
-    const cubeContainer = cubeContainerRef.current;
-
-    // Add touch event listeners
-    cubeContainer.addEventListener('touchstart', handleTouchStart);
-
-    // Clean up event listeners
-    return () => {
-      cubeContainer.removeEventListener('touchstart', handleTouchStart);
-    };
-  }, [previewVisible]); // Depend on previewVisible to update event listeners correctly
+}, [location, openModal, closeModal, isModalOpen]);
 
   return (
     <motion.div
@@ -130,51 +96,45 @@ function CubeWithVideos({ setCubeLoading, previewVisible }) {
 
 function HeaderMenu({ videos, onVideoSelect }) {
   const { openModal } = useModal();
-  const [isOpen, setIsOpen] = useState(false); // State to manage menu visibility
+  const [isOpen, setIsOpen] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false); // New state to manage transition
+  const menuRef = useRef(); // Reference to the menu DOM node
 
-  if (!videos.length) return null;
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsOpen(false);
+        setIsTransitioning(false); // Immediately remove overlay when clicking outside
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   const handleVideoClick = (videoId) => {
-    console.log("Video selected via menu: ", videoId);
     openModal(videoId);
-    setIsOpen(false); // Close menu upon selection
+    setIsTransitioning(true); // Start transition
+    setTimeout(() => {
+      setIsOpen(false);
+      setIsTransitioning(false); // End transition after 2 seconds
+    }, 2000);
   };
 
-  // Variants for the overlay
+  // Adjusted variants to consider `isTransitioning`
   const overlayVariants = {
-    hidden: { opacity: 0 },
+    hidden: { 
+      opacity: 0,
+      transition: { duration: 0.3 }
+    },
     visible: {
       opacity: 1,
       transition: { duration: 0.3 }
-    }
-  };
-
-  // Variants for the menu container
-  const menuContainerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        when: "beforeChildren",
-        staggerChildren: 0.05, // Shorter stagger time for a smooth effect
-        ease: "linear" // Simpler ease for less pronounced effect
-      }
-    }
-  };
-
-  // Variants for individual menu items
-  const menuItemVariants = {
-    hidden: {
-      y: 5, // Very subtle movement
-      opacity: 0
-    },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        y: { type: 'spring', stiffness: 50, damping: 20 },
-        opacity: { duration: 0.2 } // Faster transition for opacity
-      }
     }
   };
 
@@ -185,7 +145,7 @@ function HeaderMenu({ videos, onVideoSelect }) {
       </button>
       <AnimatePresence>
         {isOpen && (
-            <motion.div
+          <motion.div
             className="overlay"
             variants={overlayVariants}
             initial="hidden"
@@ -203,10 +163,10 @@ function HeaderMenu({ videos, onVideoSelect }) {
         )}
       </AnimatePresence>
       <AnimatePresence>
-        {isOpen && (
+        {(isOpen || isTransitioning) && (
           <motion.div
+            ref={menuRef}
             className="header-menu"
-            variants={menuContainerVariants}
             initial="hidden"
             animate="visible"
             exit="hidden"
@@ -214,7 +174,6 @@ function HeaderMenu({ videos, onVideoSelect }) {
             {videos.map((video, index) => (
               <motion.button
                 key={video.id}
-                variants={menuItemVariants}
                 onClick={() => handleVideoClick(video.id)}
               >
                 {video.name}
@@ -223,6 +182,44 @@ function HeaderMenu({ videos, onVideoSelect }) {
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+function RenderAboutContent() {
+  return (
+    <div id="about-section" className="about-screen">
+      <div className="about-screen">
+          <div className="about-text">
+             <p style={{ textAlign: 'center' }}>
+            </p>
+            <p>
+              The Rubik’s Cube has 43,000,000,000,000,000,000 possible combinations... and <i>one</i> solution.
+            </p>
+            <br></br>
+            <p>
+              It's easy to appreciate the puzzle in its solved form: a universe of possibility reduced to six harmonic faces. But <i>leaving</i> it solved would squander all that potential.
+            </p>
+            <br></br>
+            <p>
+              <b>VU JA DE</b> exists to scramble “solved” arrangements of cultural ephemera. To flip the switch from <i style={{ color: 'blue' }}>solving</i> to <i style={{ color: 'blue' }}>playing.</i> From <i style={{ color: 'blue' }}>I've been here before</i> to <i style={{ color: 'blue' }}>I've never seen this before.</i> From <i style={{ color: 'blue' }}>déjà vu</i> to <i style={{ color: 'blue' }}>vujà de.</i>
+            </p>
+            <br></br>
+            <p>
+              Like the 43 quintillion permutations of the Rubik's Cube, these stories are starting points, not resolutions. They're not made for an algorithmic feed or a distracted scroll, which is why they come to your email. Explore on your own time, at your own pace, with nobody trying to sell you something in the process.
+            </p>
+            <br></br>
+            <div className="about-embed" style={{ display: 'flex', justifyContent: 'center' }}>
+            <iframe
+            src="https://vujadeworld.substack.com/embed"
+            width="480"
+            height="150"
+            style={{ border: '0px solid #EEE', background: 'black' }}
+            title="VUJADE Substack"
+          ></iframe>
+          </div>
+          </div>
+      </div>
     </div>
   );
 }
@@ -236,38 +233,53 @@ function Modal() {
   // Local helper to format date
   function formatDate(dateString) {
     if (!dateString) return "[Date not available]"; // Handle undefined or null dates
-
     const date = new Date(dateString);
     if (isNaN(date)) return "[Invalid Date]"; // Check if the date is valid
-
     const month = date.toLocaleString('en-US', { month: 'long' });
     const year = date.getFullYear();
-    const formatted = `${month}, ${year}`;
-
-    return `[Published ${formatted}]`;
+    return `[Published ${month}, ${year}]`;
   }
 
   // Fetch video information based on currentVideoID
   useEffect(() => {
     async function fetchVideoInfo() {
-      if (currentVideoID) {
+      if (currentVideoID && currentVideoID !== 'about') {
         setLoading(true);
-        setVideoInfo(null);  // Reset video info when a new modal is being opened
+        setVideoInfo(null); // Reset video info when a new modal is being opened
         try {
           const { data } = await axios.get(`${BASE_URL}/api/video_info/${currentVideoID}`);
           setVideoInfo(data);
         } catch (error) {
           console.error('Error fetching video info:', error);
-          setVideoInfo(null);  // Reset video info on error
+          setVideoInfo(null); // Reset video info on error
         }
         setLoading(false);
       }
-    }
+    };
     fetchVideoInfo();
   }, [currentVideoID]);
   
-
   if (!isModalOpen || loading || !currentVideoID) return null;
+
+  if (currentVideoID === 'about') {
+    return (
+      <div className="about-modal" onClick={() => {
+        closeModal();
+        navigate('/');
+      }}>
+        <motion.div
+          className="about-screen"
+          onClick={e => e.stopPropagation()} // Prevent click from propagating to backdrop
+          initial={{ opacity: 0, y: 100 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 100 }}
+          transition={{ type: 'spring', stiffness: 100 }}
+        >
+          <RenderAboutContent />
+        </motion.div>
+      </div>
+    );
+  }
 
   if (!videoInfo) {
     return (
@@ -279,7 +291,6 @@ function Modal() {
 
   const videoID = videoInfo.URL.split("/")[3]; // Extract video ID from videoInfo URL
 
-  // Variants for modal animations
   const modalVariants = {
     hidden: {
       y: '100vh',
@@ -308,20 +319,18 @@ function Modal() {
     <AnimatePresence>
       {isModalOpen && (
         <div className="modal-backdrop" onClick={() => {
-          console.log('Backdrop clicked, closing modal...');
           closeModal();
           navigate('/'); // Navigate to root when modal is closed
         }}>
           <motion.div
             className="modal"
-            onClick={e => e.stopPropagation()}
+            onClick={e => e.stopPropagation()} // Prevent click from propagating to backdrop
             variants={modalVariants}
             initial="hidden"
             animate="visible"
             exit="exit"
           >
             <span className="close" onClick={() => {
-              console.log('Closing modal...');
               closeModal();
               navigate('/'); // Navigate to root when modal is closed
               setVideoInfo(null); // Reset video information on modal close
@@ -337,9 +346,9 @@ function Modal() {
             </div>
             <div className="text-container">
               <h2>{videoInfo.videoName}</h2>
-              <br></br>
+              <br />
               <p style={{ fontStyle: 'italic' }}>{formatDate(videoInfo.Published)}</p>
-              <br></br>
+              <br />
               <div dangerouslySetInnerHTML={{ __html: videoInfo.Description }}></div>
             </div>
             <div className="gradient-overlay"></div>
@@ -351,36 +360,31 @@ function Modal() {
 }
 
 function AppWrapper() {
-  const { videoID } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { openModal, closeModal, isModalOpen } = useModal();
-  const aboutSectionRef = useRef(null);
-
+  const { openModal, closeModal, isModalOpen, currentVideoID } = useModal();
   const [allVideos, setAllVideos] = useState([]);
   const [cubeLoading, setCubeLoading] = useState(true);
   const [menuVisible, setMenuVisible] = useState(true);
-  const [previewVisible, setPreviewVisible] = useState(false); // Controls preview text visibility
-  const [fadeOut, setFadeOut] = useState(false); // Controls fade out effect
 
-  // Handle scrolling to the About page
-  useLayoutEffect(() => {
-    const handleScroll = () => {
-      const aboutSectionTop = aboutSectionRef.current.offsetTop;
-      const scrollPosition = window.scrollY + window.innerHeight;
+  // This function toggles the About modal and updates the URL accordingly
+  const toggleAbout = () => {
+    if (currentVideoID !== 'about') {
+      openModal('about');  // Open About modal if not currently about
+      navigate('/about');  // Navigate to /about when opening the modal
+    } else {
+      closeModal();  // Close the modal
+      navigate('/');  // Navigate to root when closing the modal
+    }
+  };
 
-      if (scrollPosition > aboutSectionTop) {
-        setFadeOut(true);
-      } else {
-        setFadeOut(false);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
+  useEffect(() => {
+    if (location.pathname === '/about' && !isModalOpen) {
+      openModal('about');  // Open About modal if URL is /about but modal isn't open
+    } else if (location.pathname !== '/about' && isModalOpen && currentVideoID === 'about') {
+      closeModal();  // Close any modal if URL is not /about but a modal is still open
+    }
+  }, [location, isModalOpen, currentVideoID, openModal, closeModal]);
 
   useEffect(() => {
     const fetchAllVideos = async () => {
@@ -395,7 +399,6 @@ function AppWrapper() {
   }, []);
 
   const handleVideoSelect = useCallback((videoId) => {
-    console.log("Video selected: ", videoId);
     if (!isModalOpen) {
       openModal(videoId);
     }
@@ -405,30 +408,13 @@ function AppWrapper() {
   return (
     <ModalProvider>
       {menuVisible && <HeaderMenu videos={allVideos} onVideoSelect={handleVideoSelect} />}
-      <CubeWithVideos setCubeLoading={setCubeLoading} previewVisible={previewVisible} />
+      <CubeWithVideos setCubeLoading={setCubeLoading} />
       <button
-        className={`question-mark-button ${fadeOut ? 'fade-out' : ''}`}
-        onMouseEnter={() => setPreviewVisible(true)}
-        onMouseLeave={() => setPreviewVisible(false)}
-        onClick={() => setPreviewVisible(true)}
+        className={`question-mark-button ${currentVideoID === 'about' ? 'x-style' : ''}`} // Change style and text based on the modal state
+        onClick={toggleAbout}
       >
-        ?
+        {currentVideoID === 'about' ? 'X' : '?'}
       </button>
-      <AnimatePresence>
-        {previewVisible && (
-          <motion.div
-            initial={{ opacity: 1 }}
-            animate={{ opacity: fadeOut ? 0 : 1, transition: { duration: 0.5 } }}
-            exit={{ opacity: 0 }}
-            className="preview-text"
-          >
-            This is an interactive Rubik's Cube.<br></br><br></br>Scroll down to learn more 👇
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <div ref={aboutSectionRef}>
-        <SplashScreen />
-      </div>
       <Modal />
     </ModalProvider>
   );

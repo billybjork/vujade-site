@@ -8,52 +8,38 @@ export const useModal = () => useContext(ModalContext);
 export const ModalProvider = ({ children }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideoID, setCurrentVideoID] = useState(null);
-  const [enterSiteModalOpen, setEnterSiteModalOpen] = useState(false);
   const navigate = useNavigate();  // Hook to navigate programmatically
 
-  // Opens the video modal and sets the current video ID
+  // Opens the modal and sets the current video ID or 'about'
   const openModal = useCallback((videoID) => {
     console.log(`Opening modal for video ID: ${videoID}`);
-    setIsModalOpen(false); // Close the modal first
-    setCurrentVideoID(null); // Reset the video ID
-    setTimeout(() => { // Add a small delay
-      setIsModalOpen(true);
-      setCurrentVideoID(videoID);
-      if (window.location.pathname !== `/${videoID}`) {
-        navigate(`/${videoID}`, { replace: true });  // Navigate only if not already on this path
-      }
-    }, 100); // 100ms delay
-  }, [navigate]);  
+    setIsModalOpen(true);
+    setCurrentVideoID(videoID);
 
-  // Closes the video modal and resets the video ID
+    // Adjust navigation logic to properly handle 'about' page
+    if (videoID === 'about') {
+        if (window.location.pathname !== '/about')
+            navigate('/about', { replace: true });
+    } else {
+        if (window.location.pathname !== `/${videoID}`)
+            navigate(`/${videoID}`, { replace: true });
+    }
+}, [navigate]);
+
+  // Closes the modal and resets the video ID
   const closeModal = useCallback(() => {
-    console.log('Attempting to close modal...');
-    setIsModalOpen(false);
-    setCurrentVideoID(null);
+    setIsModalOpen(false);  // Set the modal open state to false
+    setCurrentVideoID(null);  // Reset the current video ID
     if (window.location.pathname !== '/') {
-      console.log('Navigating back to root...');
-      navigate('/', { replace: true });
+      navigate('/', { replace: true });  // Navigate to the root path
     }
   }, [navigate]);  
-
-  // Opens the "Enter site" modal
-  const openEnterSiteModal = useCallback(() => {
-    setEnterSiteModalOpen(true);
-    console.log("enterSiteModalOpen after open:", enterSiteModalOpen); // This will still show the old state due to closure
-  }, []);
-
-  // Closes the "Enter site" modal
-  const closeEnterSiteModal = useCallback(() => {
-    setEnterSiteModalOpen(false);
-  }, []);
 
   // Memoize the context value to avoid unnecessary re-renders
   const providerValue = useMemo(() => ({
     isModalOpen, currentVideoID, openModal, closeModal,
-    enterSiteModalOpen, openEnterSiteModal, closeEnterSiteModal
   }), [
     isModalOpen, currentVideoID, openModal, closeModal,
-    enterSiteModalOpen, openEnterSiteModal, closeEnterSiteModal
   ]);
 
   return (
@@ -62,3 +48,5 @@ export const ModalProvider = ({ children }) => {
     </ModalContext.Provider>
   );
 };
+
+export default ModalProvider;

@@ -10,6 +10,7 @@ html, body {
   height: 100%;
   background-color: #000;
   color: #ffffff;
+  overflow: hidden;
 }
 
 .loading {
@@ -25,13 +26,24 @@ html, body {
   z-index: 1000;
 }
 
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* semi-transparent black background */
+  backdrop-filter: blur(5px); /* Blurring the background */
+  -webkit-backdrop-filter: blur(5px); /* For Safari */
+}
+
 .hamburger-button {
   background: none;
   border: none;
   cursor: pointer;
   position: fixed;
   top: 30px;
-  right: 30px;
+  left: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -44,7 +56,7 @@ html, body {
 .header-menu {
   position: fixed;
   top: 100px; /* Adjust according to the height of the hamburger button */
-  right: 10px; /* Space from the right edge of the viewport */
+  left: 10px; /* Space from the right edge of the viewport */
   display: flex;
   flex-direction: column; /* Stacks items vertically */
   align-items: flex-end; /* Aligns items to the right */
@@ -58,7 +70,7 @@ html, body {
   width: 100%;
   margin-bottom: 10px;
   padding: 8px 16px;
-  text-align: right;
+  text-align: left;
   font-size: 20px;
   color: #ffffff;
   background-color: transparent;
@@ -76,7 +88,7 @@ html, body {
 .question-mark-button {
   position: fixed;
   bottom: 30px;
-  left: 30px;
+  right: 30px;
   font-size: 50px;  /* Increased font size */
   border: none;
   background: none; /* Transparent background */
@@ -88,7 +100,7 @@ html, body {
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  z-index: 1000;
+  z-index: 1500;
   transition: font-weight 0.3s ease-in-out; /* Smooth transition for font-weight */
 }
 
@@ -96,28 +108,9 @@ html, body {
   font-weight: bold; /* Bold font on hover */
 }
 
-.preview-text {
-  position: absolute; /* or absolute */
-  text-align: center;
-  font-size: large;
-  bottom: 90px; /* distance from the bottom of the page */
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  transition: opacity 0.5s ease-in-out;
-}
-
-.preview-text.fade-out {
-  opacity: 0;
-}
-
 .app-container {
   position: relative;
   min-height: 100vh;
-}
-
-.about-section {
-  opacity: 0; /* Initial state for animation */
 }
 
 .fade-out {
@@ -125,17 +118,17 @@ html, body {
   transition: opacity 0.5s ease-in-out;
 }
 
-/* Base styling for desktop */
-.splash-screen {
-  width: 100%; /* Ensures full width */
-  max-width: 860px; /* Maximum width to ensure content doesn't stretch too much on larger screens */
-  margin: 0 auto; /* Centers the splash screen in the viewport */
-  padding: 40px; /* Adds padding around the content */
-  box-sizing: border-box; /* Includes padding in width calculation */
-}
-
-.splash-text {
-  font-size: large;
+.about-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  padding: 20px;
+  box-sizing: border-box;
+  max-width: 800px; /* Set a max width for better readability */
+  margin: auto; /* Horizontally center the modal */
+  overflow: auto; /* Add scroll for overflow content */
 }
 
 .modal-backdrop {
@@ -147,7 +140,7 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1050;
+  z-index: 2050;
   background: rgba(0,0,0,1); /* Dim background */
 }
 
@@ -161,18 +154,24 @@ html, body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  z-index: 1051;
+  z-index: 2051;
   padding: 80px 20px 20px 20px; /* Increased top padding to accommodate close button */
   box-sizing: border-box; /* Ensures padding is included in the width calculation */
 }
 
 @media (max-width: 768px) {
-  .preview-text {
-    font-size: medium;
-    z-index: 500;
+  .hamburger-button {
+    left: 15px;
+    top: 15px;
   }
 
-  .splash-screen {
+  .question-mark-button {
+    right: 15px;
+    bottom: 15px;
+  }
+
+
+  .about-screen {
     width: 100%; /* Ensures full width */
     max-width: none; /* Removes max-width restriction */
   }
