@@ -5,7 +5,7 @@ const ModalContext = createContext();
 
 export const useModal = () => useContext(ModalContext);
 
-export const ModalProvider = ({ children }) => {
+export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideoID, setCurrentVideoID] = useState(null);
   const [overlayVisible, setOverlayVisible] = useState(false);  // State to manage overlay visibility
@@ -13,12 +13,13 @@ export const ModalProvider = ({ children }) => {
 
   // Opens the modal and sets the current video ID or 'about'
   const openModal = useCallback((videoID) => {
-    console.log(`Opening modal for video ID: ${videoID}`);
+    console.log(`Opening modal for video ID: ${videoID}`); // Log statement to observe which video ID triggers the modal
     setIsModalOpen(true);
     setOverlayVisible(true);  // Ensure the overlay is visible when any modal is opened
     setCurrentVideoID(videoID);
+    if (onModalOpen) onModalOpen();  // Trigger custom callback when modal opens
 
-    // Adjust navigation logic to properly handle 'about' page
+    // Adjust navigation logic to properly handle 'about' page or other video IDs
     if (videoID === 'about') {
       if (window.location.pathname !== '/about')
           navigate('/about', { replace: true });
@@ -26,17 +27,19 @@ export const ModalProvider = ({ children }) => {
       if (window.location.pathname !== `/${videoID}`)
           navigate(`/${videoID}`, { replace: true });
     }
-  }, [navigate]);
+  }, [navigate, onModalOpen]);
 
   // Closes the modal and resets the video ID
   const closeModal = useCallback(() => {
+    console.log('Closing modal'); // Log statement for debugging when the modal is closed
     setIsModalOpen(false);
     setOverlayVisible(false);  // Hide overlay when modal is closed
     setCurrentVideoID(null);
+    if (onModalClose) onModalClose();  // Trigger custom callback when modal closes
     if (window.location.pathname !== '/') {
-      navigate('/', { replace: true });  // Navigate to the root path
+      navigate('/', { replace: true });  // Navigate to the root path after closing the modal
     }
-  }, [navigate]);
+  }, [navigate, onModalClose]);
 
   // Memoize the context value to avoid unnecessary re-renders
   const providerValue = useMemo(() => ({

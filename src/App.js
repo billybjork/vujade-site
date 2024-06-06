@@ -6,7 +6,8 @@ import { MdMenu, MdClose } from 'react-icons/md';
 import { CubeMasterInit } from './cube-master/js/cube/main.js';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useModal, ModalProvider } from './ModalContext';
-import splashCubeGif from './assets/splashcube.gif';
+import splashCubeGif from './assets/splashcube_small.gif';
+import { formatDate } from './dateUtils';
 import _ from 'lodash';
 
 const BASE_URL = process.env.NODE_ENV === 'production'
@@ -28,7 +29,7 @@ const fadeInVariants = {
   }
 };  
 
-function CubeWithVideos({ setCubeLoading }) {
+function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
   const [cubeVideos, setCubeVideos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState(0);  // Track loading progress
@@ -63,6 +64,7 @@ function CubeWithVideos({ setCubeLoading }) {
           () => {
             setIsLoading(false);
             setCubeLoading(false);
+            setIsLoadingExternal(false);
           },
           (progress) => { setLoadProgress(progress); },
           cubeContainerRef.current,
@@ -76,7 +78,7 @@ function CubeWithVideos({ setCubeLoading }) {
       renderingControl.current = controls;
       cubeMasterInitialized.current = true;
     }
-  }, [cubeVideos, setCubeLoading, openModal]);
+  }, [cubeVideos, setCubeLoading, openModal, setIsLoadingExternal]);
 
   // Handling the initial loading modal
   useEffect(() => {
@@ -96,23 +98,27 @@ function CubeWithVideos({ setCubeLoading }) {
 }, [location, openModal, closeModal, isModalOpen]);
 
 return (
-  <motion.div
-      id="cube-container"
-      ref={cubeContainerRef}
-      className={isLoading ? 'hidden' : 'visible'}
-      animate={{ opacity: isModalOpen ? 0.3 : 1 }}
-      transition={{ duration: 0.5 }}
-  >
-      {isLoading ? (
-          <div className="loading">
-              <img src={splashCubeGif} alt="Loading..." />
-          </div>
-      ) : null}
-  </motion.div>
+  <>
+    {isLoading && (
+      <div className="loading">
+          <p>{loadProgress}% Loaded</p>  {/* Dynamic text reflecting the loading progress */}
+          <img src={splashCubeGif} alt="Loading..." />
+      </div>
+    )}
+    <motion.div
+        id="cube-container"
+        ref={cubeContainerRef}
+        initial={{ opacity: 0 }}  // Start with an invisible container
+        animate={{ opacity: isLoading ? 0 : 1 }}  // Animate to visible when loading is complete
+        transition={{ duration: 0.5 }}
+    >
+        {/* Cube content here */}
+    </motion.div>
+  </>
 );
 }
 
-function HeaderMenu({ videos, onVideoSelect }) {
+function HeaderMenu({ videos, onVideoSelect, isLoading }) {
   const { openModal } = useModal();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(); // Reference to the menu DOM node
@@ -140,11 +146,11 @@ function HeaderMenu({ videos, onVideoSelect }) {
   const handleVideoClick = (videoId) => {
     openModal(videoId);
     setIsOpen(false);
-  };  
+  };
 
   // Define motion variants for animation
   const overlayVariants = {
-    hidden: { 
+    hidden: {
       opacity: 0,
       transition: { duration: 0.3 }
     },
@@ -156,7 +162,7 @@ function HeaderMenu({ videos, onVideoSelect }) {
       opacity: 0,
       transition: { duration: 0.3, delay: 2 }  // Delaying the fade-out process
     }
-  };  
+  };
 
   const menuContainerVariants = {
     hidden: { opacity: 0 },
@@ -165,7 +171,7 @@ function HeaderMenu({ videos, onVideoSelect }) {
       transition: {
         when: "beforeChildren",
         staggerChildren: 0.05,
-        duration: 0.1, 
+        duration: 0.1,
         ease: "easeOut"
       }
     }
@@ -194,46 +200,46 @@ function HeaderMenu({ videos, onVideoSelect }) {
           onClick={() => setIsOpen(!isOpen)}
           variants={fadeInVariants}
           initial="hidden"
-          animate="visible"
+          animate={isLoading ? "hidden" : "visible"}  // Control animation based on isLoading
         >
           {isOpen ? <MdClose size={40} /> : <MdMenu size={40} />}
         </motion.button>
       </AnimatePresence>
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            className="overlay"
-            variants={overlayVariants}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-          />
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            ref={menuRef}
-            className="header-menu"
-            variants={menuContainerVariants}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-          >
-            {videos.map((video, index) => (
-              <motion.button
-                key={video.id}
-                variants={menuItemVariants}
-                onClick={() => handleVideoClick(video.id)}
-              >
-                {video.name}
-              </motion.button>
-            ))}
-          </motion.div>
+          <>
+            <motion.div
+              className="overlay"
+              variants={overlayVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+            />
+            <motion.div
+              ref={menuRef}
+              className="header-menu"
+              variants={menuContainerVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+            >
+              {videos.map((video) => (
+                <motion.button
+                  key={video.id}
+                  variants={menuItemVariants}
+                  onClick={() => handleVideoClick(video.id)}
+                >
+                  <span className="video-name">{video.name}</span>
+                  <span className="separator"> | </span>
+                  <span className="video-date">{formatDate(video.published)}</span>
+                </motion.button>
+              ))}
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </div>
-  );  
+  );
 }
 
 function RenderAboutContent() {
@@ -280,16 +286,6 @@ function Modal() {
   const [videoInfo, setVideoInfo] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Local helper to format date
-  function formatDate(dateString) {
-    if (!dateString) return "[Date not available]"; // Handle undefined or null dates
-    const date = new Date(dateString);
-    if (isNaN(date)) return "[Invalid Date]"; // Check if the date is valid
-    const month = date.toLocaleString('en-US', { month: 'long' });
-    const year = date.getFullYear();
-    return `[Published ${month}, ${year}]`;
-  }
-
   // Fetch video information based on currentVideoID
   useEffect(() => {
     async function fetchVideoInfo() {
@@ -308,7 +304,7 @@ function Modal() {
     };
     fetchVideoInfo();
   }, [currentVideoID]);
-  
+
   if (!isModalOpen || loading || !currentVideoID) return null;
 
   if (currentVideoID === 'about') {
@@ -397,8 +393,6 @@ function Modal() {
             <div className="text-container">
               <h2>{videoInfo.videoName}</h2>
               <br />
-              <p style={{ fontStyle: 'italic' }}>{formatDate(videoInfo.Published)}</p>
-              <br />
               <div dangerouslySetInnerHTML={{ __html: videoInfo.Description }}></div>
             </div>
             <div className="gradient-overlay"></div>
@@ -415,6 +409,7 @@ function AppWrapper() {
   const { openModal, closeModal, isModalOpen, currentVideoID, overlayVisible } = useModal();
   const [allVideos, setAllVideos] = useState([]);
   const [cubeLoading, setCubeLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [menuVisible, setMenuVisible] = useState(true);
 
   // This function toggles the About modal and updates the URL accordingly
@@ -440,7 +435,11 @@ function AppWrapper() {
     const fetchAllVideos = async () => {
       try {
         const response = await axios.get(`${BASE_URL}/api/videos`);
-        setAllVideos(response.data.map(video => ({ id: video.videoID, name: video.videoName })));
+        setAllVideos(response.data.map(video => ({
+          id: video.videoID,
+          name: video.videoName,
+          published: video.Published, // Ensure this matches your API response
+        })));
       } catch (error) {
         console.error('Error fetching all videos:', error);
       }
@@ -457,8 +456,8 @@ function AppWrapper() {
 
   return (
     <ModalProvider>
-      {menuVisible && <HeaderMenu videos={allVideos} onVideoSelect={handleVideoSelect} />}
-      <CubeWithVideos setCubeLoading={setCubeLoading} />
+      {menuVisible && <HeaderMenu videos={allVideos} isLoading={isLoading} />}
+      <CubeWithVideos setCubeLoading={setCubeLoading} setIsLoadingExternal={setIsLoading} />
       {overlayVisible && (
         <div className="overlay" style={{
           position: 'fixed',
@@ -477,7 +476,7 @@ function AppWrapper() {
           onClick={toggleAbout}
           variants={fadeInVariants}
           initial="hidden"
-          animate="visible"
+          animate={isLoading ? "hidden" : "visible"}  // Animate based on isLoading
         >
           {currentVideoID === 'about' ? 'X' : '?'}
         </motion.button>
