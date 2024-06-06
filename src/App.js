@@ -6,11 +6,27 @@ import { MdMenu, MdClose } from 'react-icons/md';
 import { CubeMasterInit } from './cube-master/js/cube/main.js';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useModal, ModalProvider } from './ModalContext';
+import splashCubeGif from './assets/splashcube.gif';
 import _ from 'lodash';
 
 const BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://vujade-site-bd6c94750c62.herokuapp.com'
   : 'http://127.0.0.1:5000';
+
+const fadeInVariants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.95  // Start slightly scaled down for a more dynamic entrance
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 0.8,  // Adjust the timing to your liking
+      ease: "easeInOut"
+    }
+  }
+};  
 
 function CubeWithVideos({ setCubeLoading }) {
   const [cubeVideos, setCubeVideos] = useState([]);
@@ -79,54 +95,54 @@ function CubeWithVideos({ setCubeLoading }) {
     }
 }, [location, openModal, closeModal, isModalOpen]);
 
-  return (
-    <motion.div
-        id="cube-container"
-        ref={cubeContainerRef}
-        className={isLoading ? 'hidden' : 'visible'}
-        animate={{ opacity: isModalOpen ? 0.3 : 1 }} // Fades to 30% opacity when modal is open
-        transition={{ duration: 0.5 }} // Duration of the transition
-    >
-        {isLoading ? (
-            <div className="loading">{"Loading..."}</div>
-        ) : null}
-    </motion.div>
-  );
+return (
+  <motion.div
+      id="cube-container"
+      ref={cubeContainerRef}
+      className={isLoading ? 'hidden' : 'visible'}
+      animate={{ opacity: isModalOpen ? 0.3 : 1 }}
+      transition={{ duration: 0.5 }}
+  >
+      {isLoading ? (
+          <div className="loading">
+              <img src={splashCubeGif} alt="Loading..." />
+          </div>
+      ) : null}
+  </motion.div>
+);
 }
 
 function HeaderMenu({ videos, onVideoSelect }) {
   const { openModal } = useModal();
   const [isOpen, setIsOpen] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(false); // New state to manage transition
   const menuRef = useRef(); // Reference to the menu DOM node
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setIsOpen(false);
-        setIsTransitioning(false); // Immediately remove overlay when clicking outside
+        setIsOpen(false); // Close the menu if the click is outside
       }
     };
 
     if (isOpen) {
+      // Add when the menu is open
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
+      // Clean up
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen]); // Effect dependencies include isOpen
+
+  if (!videos.length) return null;
 
   const handleVideoClick = (videoId) => {
     openModal(videoId);
-    setIsTransitioning(true); // Start transition
-    setTimeout(() => {
-      setIsOpen(false);
-      setIsTransitioning(false); // End transition after 2 seconds
-    }, 2000);
-  };
+    setIsOpen(false);
+  };  
 
-  // Adjusted variants to consider `isTransitioning`
+  // Define motion variants for animation
   const overlayVariants = {
     hidden: { 
       opacity: 0,
@@ -135,14 +151,54 @@ function HeaderMenu({ videos, onVideoSelect }) {
     visible: {
       opacity: 1,
       transition: { duration: 0.3 }
+    },
+    exit: {
+      opacity: 0,
+      transition: { duration: 0.3, delay: 2 }  // Delaying the fade-out process
+    }
+  };  
+
+  const menuContainerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        when: "beforeChildren",
+        staggerChildren: 0.05,
+        duration: 0.1, 
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const menuItemVariants = {
+    hidden: {
+      y: 20,
+      opacity: 0
+    },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        y: { type: 'spring', stiffness: 50, damping: 20 },
+        opacity: { duration: 0.2 }
+      }
     }
   };
 
   return (
     <div>
-      <button className="hamburger-button" onClick={() => setIsOpen(!isOpen)}>
-        {isOpen ? <MdClose size={40} /> : <MdMenu size={40} />}
-      </button>
+      <AnimatePresence>
+        <motion.button
+          className="hamburger-button"
+          onClick={() => setIsOpen(!isOpen)}
+          variants={fadeInVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {isOpen ? <MdClose size={40} /> : <MdMenu size={40} />}
+        </motion.button>
+      </AnimatePresence>
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -151,22 +207,15 @@ function HeaderMenu({ videos, onVideoSelect }) {
             initial="hidden"
             animate="visible"
             exit="hidden"
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            }}
           />
         )}
       </AnimatePresence>
       <AnimatePresence>
-        {(isOpen || isTransitioning) && (
+        {isOpen && (
           <motion.div
             ref={menuRef}
             className="header-menu"
+            variants={menuContainerVariants}
             initial="hidden"
             animate="visible"
             exit="hidden"
@@ -174,6 +223,7 @@ function HeaderMenu({ videos, onVideoSelect }) {
             {videos.map((video, index) => (
               <motion.button
                 key={video.id}
+                variants={menuItemVariants}
                 onClick={() => handleVideoClick(video.id)}
               >
                 {video.name}
@@ -183,7 +233,7 @@ function HeaderMenu({ videos, onVideoSelect }) {
         )}
       </AnimatePresence>
     </div>
-  );
+  );  
 }
 
 function RenderAboutContent() {
@@ -362,7 +412,7 @@ function Modal() {
 function AppWrapper() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { openModal, closeModal, isModalOpen, currentVideoID } = useModal();
+  const { openModal, closeModal, isModalOpen, currentVideoID, overlayVisible } = useModal();
   const [allVideos, setAllVideos] = useState([]);
   const [cubeLoading, setCubeLoading] = useState(true);
   const [menuVisible, setMenuVisible] = useState(true);
@@ -409,15 +459,32 @@ function AppWrapper() {
     <ModalProvider>
       {menuVisible && <HeaderMenu videos={allVideos} onVideoSelect={handleVideoSelect} />}
       <CubeWithVideos setCubeLoading={setCubeLoading} />
-      <button
-        className={`question-mark-button ${currentVideoID === 'about' ? 'x-style' : ''}`} // Change style and text based on the modal state
-        onClick={toggleAbout}
-      >
-        {currentVideoID === 'about' ? 'X' : '?'}
-      </button>
+      {overlayVisible && (
+        <div className="overlay" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(5px)',
+          WebkitBackdropFilter: 'blur(5px)',
+        }}></div>
+      )}
+      <AnimatePresence>
+        <motion.button
+          className={`question-mark-button ${currentVideoID === 'about' ? 'x-style' : ''}`}
+          onClick={toggleAbout}
+          variants={fadeInVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {currentVideoID === 'about' ? 'X' : '?'}
+        </motion.button>
+      </AnimatePresence>
       <Modal />
     </ModalProvider>
-  );
+  );  
 }
 
 export default AppWrapper;

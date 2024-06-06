@@ -140,8 +140,8 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: #000;
   z-index: 2050;
-  background: rgba(0,0,0,1); /* Dim background */
 }
 
 .modal {
@@ -150,7 +150,6 @@ html, body {
   max-width: 800px; /* Max width for desktop */
   height: 100vh;
   border-radius: 8px;
-  background: #000;
   overflow: hidden;
   display: flex;
   flex-direction: column;
