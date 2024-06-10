@@ -297,27 +297,24 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
         mouse.x = (event.offsetX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.offsetY / getHeight()) * 2 + 1;
         clickStartPosition = { x: event.offsetX, y: event.offsetY };
-        hasMoved = false; // Flag to check if the pointer has moved significantly
-
+        hasMoved = false;
+    
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(cube.meshes, true);
-
+    
         if (intersects.length > 0) {
             controls.enabled = false;
             dragging = true;
             let clickedMesh = intersects[0].object;
             if (cube.stickersMap.has(clickedMesh.uuid)) {
                 selectedObject = intersects[0];
-            }
-            if (hoveredSticker) {
-                hoveredSticker.reset();
-                hoveredSticker = null;
+                activeSticker = cube.stickersMap.get(clickedMesh.uuid);  // Set activeSticker immediately on click
             }
         } else {
             controls.enabled = true;
             selectedObject = ClickFlags.ROTATION;
         }
-    };      
+    };   
 
     document.addEventListener("pointerdown", onDocumentMouseDown, false);
 
@@ -325,27 +322,27 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
      * Function to handle pointer up events
      */
     const onDocumentMouseUp = (event) => {
+        let moveX = Math.abs(clickStartPosition.x - event.offsetX);
+        let moveY = Math.abs(clickStartPosition.y - event.offsetY);
+        hasMoved = moveX > 5 || moveY > 5;
+    
+        if (!hasMoved && activeSticker) {
+            openModal(activeSticker.videoid); // Open modal only if there was no significant move (click)
+        }
+    
         controls.enabled = true;
         dragging = false;
         selectedObject = ClickFlags.NONE;
         chosenAxis = null;
         chosenDir = 0;
-
-        let moveX = Math.abs(clickStartPosition.x - event.offsetX);
-        let moveY = Math.abs(clickStartPosition.y - event.offsetY);
-        hasMoved = moveX > 5 || moveY > 5;
-
-        if (activeSticker && !hasMoved) {
-            openModal(activeSticker.videoid);
-        }
-
+    
         if (activeSticker) {
             activeSticker.reset();
             activeSticker = null;
         }
-
+    
         clickStartPosition = null;
-    };        
+    };
 
     document.addEventListener("pointerup", onDocumentMouseUp, false);   
 
