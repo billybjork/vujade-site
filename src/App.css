@@ -66,10 +66,10 @@ html, body {
 .header-menu {
   position: fixed;
   top: 100px; /* Adjust according to the height of the hamburger button */
-  left: 10px; /* Space from the right edge of the viewport */
+  left: 10px; /* Space from the left edge of the viewport */
   display: flex;
   flex-direction: column; /* Stacks items vertically */
-  align-items: flex-end; /* Aligns items to the right */
+  align-items: flex-start; /* Aligns items to the left */
   max-height: 100vh; /* Prevents the menu from exceeding the viewport height */
   overflow-y: auto; /* Enables vertical scrolling if necessary */
   padding: 10px; /* Padding to ensure items aren't too close to the edges */
@@ -77,41 +77,58 @@ html, body {
 
 .header-menu button {
   display: flex;
-  align-items: center;
+  align-items: center; /* Ensures vertical centering of all elements */
   width: 100%;
   margin-bottom: 10px;
   padding: 8px 16px;
   text-align: left;
-  font-size: 20px;
-  color: #ffffff;
   background-color: transparent;
   border: none;
   cursor: pointer;
   border-radius: 20px;
-  transition: font-size 0.3s ease, color 0.3s ease, font-weight 0.3s ease; /* Smooth transition for font size and weight */
+  transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transitions for background and transform */
 }
 
-.video-date {
-  font-size: 14px;
-  color: #ccc;
-  margin-right: 10px; /* Space between date and separator */
+.header-menu button:hover {
+  transform: translateY(-2px); /* Slight raise effect on hover */
 }
 
-.separator {
-  font-size: 18px;
-  color: #ccc;
-  margin: 0 8px;
+.header-menu button:hover .video-name {
+  font-size: 26px; /* Slightly larger font size on hover */
+  font-weight: bold;
+}
+
+.video-item {
+  display: flex;
+  align-items: center; /* Keeps all content aligned in the center */
+  width: 100%;
 }
 
 .video-name {
-  font-size: 20px;
-  font-weight: bold;
+  font-size: 24px;
+  font-weight: normal;
   color: #ffffff;
-  transition: font-size 0.3s ease;
+  flex-grow: 0;
+  transition: font-size 0.3s, font-weight 0.3s ease-in-out; 
 }
 
-.video-name:hover{
-  font-size: 22px;
+.separator {
+  font-size: 24px;
+  color: #ccc;
+  margin: 0 10px;
+}
+
+.video-date {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: 12px;
+  color: #ccc;
+}
+
+.video-month,
+.video-year {
+  line-height: 1;
 }
 
 .question-mark-button {
@@ -156,9 +173,16 @@ html, body {
   z-index: 1000;
   padding: 20px;
   box-sizing: border-box;
-  max-width: 800px; /* Set a max width for better readability */
+  font-size: 20px;
+  background-color: #000;
   margin: auto; /* Horizontally center the modal */
   overflow: auto; /* Add scroll for overflow content */
+  width: 55%; /* Adjust this value as needed */
+  max-width: 800px; /* Set a max-width if necessary */
+}
+
+.headline {
+  font-weight: bold;
 }
 
 .modal-backdrop {
@@ -194,19 +218,26 @@ html, body {
     top: 15px;
   }
 
+  .video-name {
+    font-size: 20px; /* Fixed font size on mobile */
+  }
+
+  .header-menu button:hover .video-name {
+    font-size: 20px; /* Keep font size consistent on hover for mobile */
+  }
+
   .question-mark-button {
     right: 15px;
     bottom: 15px;
   }
 
-
-  .about-screen {
-    width: 100%; /* Ensures full width */
-    max-width: none; /* Removes max-width restriction */
+  .video-name {
+    font-size: 20px;
   }
 
-  .loading {
-    font-size: 16px; /* Adjust font size for readability */
+  .about-modal {
+    width: 95%; /* Nearly full width on very small devices */
+    padding: 10px; /* Reduce padding to save space */
   }
 
   .modal {

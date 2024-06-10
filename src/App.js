@@ -101,7 +101,7 @@ return (
   <>
     {isLoading && (
       <div className="loading">
-          <p>{loadProgress}% Loaded</p>  {/* Dynamic text reflecting the loading progress */}
+          <p>Loading...</p>  {/* Dynamic text reflecting the loading progress */}
           <img src={splashCubeGif} alt="Loading..." />
       </div>
     )}
@@ -223,17 +223,21 @@ function HeaderMenu({ videos, onVideoSelect, isLoading }) {
               animate="visible"
               exit="hidden"
             >
-              {videos.map((video) => (
-                <motion.button
-                  key={video.id}
-                  variants={menuItemVariants}
-                  onClick={() => handleVideoClick(video.id)}
-                >
-                  <span className="video-name">{video.name}</span>
-                  <span className="separator"> | </span>
-                  <span className="video-date">{formatDate(video.published)}</span>
-                </motion.button>
-              ))}
+            {videos.map((video) => (
+              <motion.button
+                key={video.id}
+                variants={menuItemVariants}
+                onClick={() => handleVideoClick(video.id)}
+                className="video-item"
+              >
+                <span className="video-name">{video.name}</span>
+                <span className="separator"> | </span>
+                <div className="video-date">
+                  <span className="video-month">{formatDate(video.published).split(',')[0]},</span>
+                  <span className="video-year">{formatDate(video.published).split(',')[1]}</span>
+                </div>
+              </motion.button>
+            ))}
             </motion.div>
           </>
         )}
@@ -243,38 +247,69 @@ function HeaderMenu({ videos, onVideoSelect, isLoading }) {
 }
 
 function RenderAboutContent() {
+  const [displayNumber, setDisplayNumber] = useState('0');
+
+  useEffect(() => {
+    // Define the widget configuration
+    window.CustomSubstackWidget = {
+      substackUrl: "vujadeworld.substack.com",
+      placeholder: "example@gmail.com",
+      buttonText: "Subscribe",
+      theme: "custom",
+      colors: {
+        primary: "#FFFFFF",
+        input: "#000000",
+        email: "#FFFFFF",
+        text: "#000000"
+      }
+    };
+
+    // Create the script element for the Substack widget
+    const script = document.createElement('script');
+    script.src = 'https://substackapi.com/widget.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    // Start the simulated counting animation
+    let maxNum = 1; // Start with smaller numbers
+    const interval = setInterval(() => {
+      const randomNum = Math.floor(Math.random() * maxNum).toLocaleString();
+      setDisplayNumber(randomNum);
+      maxNum *= 10; // Increase max range for random number generation
+      if (maxNum > 1e19) maxNum = 1e19; // Cap maxNum to avoid going over the intended final number
+    }, 50);
+
+    setTimeout(() => {
+      clearInterval(interval);
+      setDisplayNumber("43,000,000,000,000,000,000"); // Final display number
+    }, 2000);
+
+    return () => {
+      // Cleanup the script and interval when the component unmounts
+      document.body.removeChild(script);
+      clearInterval(interval);
+    };
+  }, []);
+
   return (
     <div id="about-section" className="about-screen">
-      <div className="about-screen">
-          <div className="about-text">
-             <p style={{ textAlign: 'center' }}>
-            </p>
-            <p>
-              The Rubik’s Cube has 43,000,000,000,000,000,000 possible combinations... and <i>one</i> solution.
-            </p>
-            <br></br>
-            <p>
-              It's easy to appreciate the puzzle in its solved form: a universe of possibility reduced to six harmonic faces. But <i>leaving</i> it solved would squander all that potential.
-            </p>
-            <br></br>
-            <p>
-              <b>VU JA DE</b> exists to scramble “solved” arrangements of cultural ephemera. To flip the switch from <i style={{ color: 'blue' }}>solving</i> to <i style={{ color: 'blue' }}>playing.</i> From <i style={{ color: 'blue' }}>I've been here before</i> to <i style={{ color: 'blue' }}>I've never seen this before.</i> From <i style={{ color: 'blue' }}>déjà vu</i> to <i style={{ color: 'blue' }}>vujà de.</i>
-            </p>
-            <br></br>
-            <p>
-              Like the 43 quintillion permutations of the Rubik's Cube, these stories are starting points, not resolutions. They're not made for an algorithmic feed or a distracted scroll, which is why they come to your email. Explore on your own time, at your own pace, with nobody trying to sell you something in the process.
-            </p>
-            <br></br>
-            <div className="about-embed" style={{ display: 'flex', justifyContent: 'center' }}>
-            <iframe
-            src="https://vujadeworld.substack.com/embed"
-            width="480"
-            height="150"
-            style={{ border: '0px solid #EEE', background: 'black' }}
-            title="VUJADE Substack"
-          ></iframe>
-          </div>
-          </div>
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <img src={splashCubeGif} alt="Splash Cube" />
+      </div>
+      <br></br>
+      <div className="about-text">
+        <p className="headline">
+          The Rubik’s Cube has <span style={{ color: '#4e74ff' }}>{displayNumber}</span> <br></br>possible combinations... and one solution.
+        </p>
+        <br />
+        <p><b>VU JA DE</b> exists to scramble “solved” arrangements of cultural ephemera. To flip the switch from <i>solving</i> to <i>playing.</i> From <i>I've been here before</i> to <i>I've never seen this before.</i> From <i>déjà vu</i> to <i>vujà de.</i></p>
+        <br />
+        <p>Like the 43 quintillion permutations of the Rubik's Cube, these stories are starting points, not resolutions. They're not made for an algorithmic feed or a distracted scroll, which is why they come to your email. Explore on your own time, at your own pace, with nobody trying to sell you something in the process.</p>
+        <br></br>
+        <br />
+        <div className="about-embed" style={{ display: 'flex', justifyContent: 'center' }}>
+          <div id="custom-substack-embed"></div>
+        </div>
       </div>
     </div>
   );
