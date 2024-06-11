@@ -248,6 +248,7 @@ function HeaderMenu({ videos, onVideoSelect, isLoading }) {
 
 function RenderAboutContent() {
   const [displayNumber, setDisplayNumber] = useState('0');
+  const [contentVisible, setContentVisible] = useState(false);
 
   useEffect(() => {
     // Define the widget configuration
@@ -288,11 +289,11 @@ function RenderAboutContent() {
       const displayNum = newNum.toLocaleString();
       setDisplayNumber(displayNum);
       lastNum = newNum;
-      
+
       if (maxNum < 1e19) {
         maxNum *= 10; // Gradually increase max range for random number generation
       }
-      
+
       if (newNum === 43000000000000000000) { // If reached the final number, clear interval
         clearInterval(interval);
       }
@@ -302,36 +303,49 @@ function RenderAboutContent() {
     setTimeout(() => {
       clearInterval(interval);
       setDisplayNumber("43,000,000,000,000,000,000"); // Final display number
-    }, 30000); // Increase to 30 seconds for a longer animation
+      setContentVisible(true); // Make the rest of the content visible
+    }, 1800); // Increase to 30 seconds for a longer animation
 
     return () => {
       // Cleanup the script and interval when the component unmounts
       clearInterval(interval);
     };
-    }, []);
+  }, []);
 
   return (
     <div id="about-section" className="about-screen">
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <img src={splashCubeGif} alt="Splash Cube" />
       </div>
-      <br></br>
+      <br />
       <div className="about-text">
-        <p className="headline">
-          The Rubik’s Cube has <br></br><span style={{ color: '#4e74ff' }}>{displayNumber}</span> <br></br>possible combinations...<br></br><br></br>... and one solution.
-        </p>
+        <div style={{ display: 'flex', justifyContent: 'left' }}>
+          <div style={{ width: '470px', textAlign: 'left', fontWeight: 'bold', fontSize: '1.5em', padding: '0', margin: '0' }}>
+            <div style={{ textAlign: 'left', margin: '0', padding: '0' }}>
+              The Rubik’s Cube has <br />
+              <span style={{ color: '#4e74ff' }}>{displayNumber}</span> <br />
+              possible combinations...
+            </div>
+          </div>
+        </div>
         <br />
-        <p><b>VU JA DE</b> exists to scramble the “solved” arrangements of internet ephemera. To turn <i>solving</i> into <i>playing.</i> <i>I've been here before</i> to <i>I've never seen this before.</i> <i>Déjà vu</i> to <i>vujà de.</i></p>
         <br />
-        <p>Like the 43 quintillion permutations of the Rubik's Cube, these stories are starting points, not resolutions. They're not made for an algorithmic feed or a distracted scroll, which is why they come to your email.</p>
-        <br></br>
-        <br />
-        <div className="about-embed" style={{ display: 'flex', justifyContent: 'center' }}>
-          <div id="custom-substack-embed"></div>
+        <div style={{ opacity: contentVisible ? 1 : 0, transition: 'opacity 2s' }}>
+          ... and one solution.
+          <br />
+          <br />
+          <p><b>VU JA DE</b> exists to scramble the “solved” arrangements of internet ephemera. To turn <i>solving</i> into <i>playing.</i> To go from <i>been here before</i> to <i>never seen this before.</i> From <i>déjà vu</i> to <i>vujà de.</i></p>
+          <br />
+          <p>Like the 43 quintillion permutations of the Rubik's Cube, these stories are starting points, not resolutions. They're not made for an algorithmic feed or a distracted scroll, which is why they come to your email.</p>
+          <br />
+          <br />
+          <div className="about-embed" style={{ display: 'flex', justifyContent: 'center' }}>
+            <div id="custom-substack-embed"></div>
+          </div>
         </div>
       </div>
     </div>
-  );
+  );  
 }
 
 function Modal() {
@@ -355,7 +369,7 @@ function Modal() {
         }
         setLoading(false);
       }
-    };
+    }
     fetchVideoInfo();
   }, [currentVideoID]);
 
@@ -363,21 +377,27 @@ function Modal() {
 
   if (currentVideoID === 'about') {
     return (
-      <div className="about-modal" onClick={() => {
-        closeModal();
-        navigate('/');
-      }}>
-        <motion.div
-          className="about-screen"
-          onClick={e => e.stopPropagation()} // Prevent click from propagating to backdrop
-          initial={{ opacity: 0, y: 100 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 100 }}
-          transition={{ type: 'spring', stiffness: 100 }}
-        >
-          <RenderAboutContent />
-        </motion.div>
-      </div>
+      <AnimatePresence>
+        <div className="modal-backdrop" onClick={() => {
+          closeModal();
+          navigate('/');
+        }}>
+          <motion.div
+            className="modal"
+            onClick={e => e.stopPropagation()} // Prevent click from propagating to backdrop
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 100 }}
+            transition={{ type: 'spring', stiffness: 100 }}
+          >
+            <span className="close" onClick={() => {
+              closeModal();
+              navigate('/');
+            }}>&times;</span>
+            <RenderAboutContent />
+          </motion.div>
+        </div>
+      </AnimatePresence>
     );
   }
 
@@ -519,13 +539,13 @@ function AppWrapper() {
       )}
       <AnimatePresence>
         <motion.button
-          className={`question-mark-button ${currentVideoID === 'about' ? 'x-style' : ''}`}
+          className="question-mark-button"
           onClick={toggleAbout}
           variants={fadeInVariants}
           initial="hidden"
           animate={isLoading ? "hidden" : "visible"}  // Animate based on isLoading
         >
-          {currentVideoID === 'about' ? 'X' : '?'}
+          ?
         </motion.button>
       </AnimatePresence>
       <Modal />
