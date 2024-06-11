@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const ModalContext = createContext();
@@ -38,6 +38,15 @@ export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
       navigate('/', { replace: true });  // Navigate to the root path after closing the modal
     }
   }, [navigate, onModalClose]);
+
+  // Effect to toggle body overflow
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = 'hidden'; // Disable scrolling on body
+    } else {
+      document.body.style.overflow = 'visible'; // Enable scrolling on body
+    }
+  }, [isModalOpen]);
 
   // Memoize the context value to avoid unnecessary re-renders
   const providerValue = useMemo(() => ({

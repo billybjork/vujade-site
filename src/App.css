@@ -86,7 +86,7 @@ html, body {
   border: none;
   cursor: pointer;
   border-radius: 20px;
-  transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transitions for background and transform */
+  transition: background-color 0.3s ease; /* Smooth transitions for background and transform */
 }
 
 .header-menu button:hover {
@@ -222,6 +222,12 @@ html, body {
     font-size: 20px; /* Fixed font size on mobile */
   }
 
+  .separator {
+    font-size: 20px;
+    color: #ccc;
+    margin: 0 5px;
+  }
+
   .header-menu button:hover .video-name {
     font-size: 20px; /* Keep font size consistent on hover for mobile */
   }
@@ -232,7 +238,7 @@ html, body {
   }
 
   .video-name {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .about-modal {
@@ -306,7 +312,7 @@ html, body {
   height: 100px;  /* Ensure this matches the extra padding added to the bottom of the text-container */
   background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
   pointer-events: none;
-  z-index: 2;
+  z-index: 1500;
 }
 
 .close {

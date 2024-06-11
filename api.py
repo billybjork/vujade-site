@@ -57,8 +57,8 @@ def serve(path):
 @app.route('/api/videos')
 def get_videos():
     try:
-        # Order by 'published' date
-        videos = Video.query.order_by(Video.published).all()
+        # Order by 'published' date in descending order
+        videos = Video.query.order_by(Video.published.desc()).all()
         return jsonify([{ 'videoID': video.videoid, 'videoName': video.videoname, 'URL': video.url, 'Description': video.description, 'Sources': video.sources, 'Published': video.published.isoformat() if video.published else None, 'Scenes': [{'sceneURL': scene.sceneurl} for scene in video.scenes] } for video in videos])
     except Exception as e:
         print(f"Error in get_videos: {e}")
