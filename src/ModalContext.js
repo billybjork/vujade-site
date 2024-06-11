@@ -13,20 +13,21 @@ export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
 
   // Opens the modal and sets the current video ID or 'about'
   const openModal = useCallback((videoID) => {
-    setIsModalOpen(true);
-    setOverlayVisible(true);  // Ensure the overlay is visible when any modal is opened
-    setCurrentVideoID(videoID);
-    if (onModalOpen) onModalOpen();  // Trigger custom callback when modal opens
-
-    // Adjust navigation logic to properly handle 'about' page or other video IDs
-    if (videoID === 'about') {
-      if (window.location.pathname !== '/about')
-          navigate('/about', { replace: true });
-    } else {
-      if (window.location.pathname !== `/${videoID}`)
-          navigate(`/${videoID}`, { replace: true });
+    if (!isModalOpen) {
+      setIsModalOpen(true);
+      setOverlayVisible(true); // Ensure the overlay is visible when any modal is opened
+      setCurrentVideoID(videoID);
+      if (onModalOpen) onModalOpen(); // Trigger custom callback when modal opens
+  
+      if (videoID === 'about') {
+        if (window.location.pathname !== '/about')
+            navigate('/about', { replace: true });
+      } else {
+        if (window.location.pathname !== `/${videoID}`)
+            navigate(`/${videoID}`, { replace: true });
+      }
     }
-  }, [navigate, onModalOpen]);
+  }, [isModalOpen, navigate, onModalOpen]);  
 
   // Closes the modal and resets the video ID
   const closeModal = useCallback(() => {

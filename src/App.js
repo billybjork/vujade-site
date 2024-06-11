@@ -272,24 +272,43 @@ function RenderAboutContent() {
 
     // Start the simulated counting animation
     let maxNum = 1; // Start with smaller numbers
-    const interval = setInterval(() => {
-      const randomNum = Math.floor(Math.random() * maxNum).toLocaleString();
-      setDisplayNumber(randomNum);
-      maxNum *= 10; // Increase max range for random number generation
-      if (maxNum > 1e19) maxNum = 1e19; // Cap maxNum to avoid going over the intended final number
-    }, 50);
+    let lastNum = 0; // Track the last number to ensure it always counts up
+    let intervalTime = 50; // Initial interval time in milliseconds, doubled from previous 50ms
 
+    const updateIntervalTime = () => {
+      // Adjust the interval time based on how close we are to the final number
+      const fraction = lastNum / 43000000000000000000;
+      intervalTime = 100 + (900 * fraction); // Slows down more as it approaches the final number
+    };
+
+    const interval = setInterval(() => {
+      updateIntervalTime(); // Update the interval timing dynamically
+      const increment = Math.floor(Math.random() * maxNum) + 1;
+      const newNum = Math.min(lastNum + increment, 43000000000000000000);
+      const displayNum = newNum.toLocaleString();
+      setDisplayNumber(displayNum);
+      lastNum = newNum;
+      
+      if (maxNum < 1e19) {
+        maxNum *= 10; // Gradually increase max range for random number generation
+      }
+      
+      if (newNum === 43000000000000000000) { // If reached the final number, clear interval
+        clearInterval(interval);
+      }
+    }, intervalTime);
+
+    // Extend the total duration to match the desired length of the animation
     setTimeout(() => {
       clearInterval(interval);
       setDisplayNumber("43,000,000,000,000,000,000"); // Final display number
-    }, 2000);
+    }, 30000); // Increase to 30 seconds for a longer animation
 
     return () => {
       // Cleanup the script and interval when the component unmounts
-      document.body.removeChild(script);
       clearInterval(interval);
     };
-  }, []);
+    }, []);
 
   return (
     <div id="about-section" className="about-screen">
@@ -299,12 +318,12 @@ function RenderAboutContent() {
       <br></br>
       <div className="about-text">
         <p className="headline">
-          The Rubik’s Cube has <span style={{ color: '#4e74ff' }}>{displayNumber}</span> <br></br>possible combinations... and one solution.
+          The Rubik’s Cube has <br></br><span style={{ color: '#4e74ff' }}>{displayNumber}</span> <br></br>possible combinations...<br></br><br></br>... and one solution.
         </p>
         <br />
-        <p><b>VU JA DE</b> exists to scramble “solved” arrangements of cultural ephemera. To flip the switch from <i>solving</i> to <i>playing.</i> From <i>I've been here before</i> to <i>I've never seen this before.</i> From <i>déjà vu</i> to <i>vujà de.</i></p>
+        <p><b>VU JA DE</b> exists to scramble the “solved” arrangements of internet ephemera. To turn <i>solving</i> into <i>playing.</i> <i>I've been here before</i> to <i>I've never seen this before.</i> <i>Déjà vu</i> to <i>vujà de.</i></p>
         <br />
-        <p>Like the 43 quintillion permutations of the Rubik's Cube, these stories are starting points, not resolutions. They're not made for an algorithmic feed or a distracted scroll, which is why they come to your email. Explore on your own time, at your own pace, with nobody trying to sell you something in the process.</p>
+        <p>Like the 43 quintillion permutations of the Rubik's Cube, these stories are starting points, not resolutions. They're not made for an algorithmic feed or a distracted scroll, which is why they come to your email.</p>
         <br></br>
         <br />
         <div className="about-embed" style={{ display: 'flex', justifyContent: 'center' }}>
@@ -481,13 +500,6 @@ function AppWrapper() {
     };
     fetchAllVideos();
   }, []);
-
-  const handleVideoSelect = useCallback((videoId) => {
-    if (!isModalOpen) {
-      openModal(videoId);
-    }
-    navigate(`/${videoId}`, { replace: true });
-  }, [navigate, openModal, isModalOpen]);
 
   return (
     <ModalProvider>
