@@ -341,6 +341,10 @@ function RenderAboutContent() {
           <br />
           <div className="about-embed" style={{ display: 'flex', justifyContent: 'center' }}>
             <div id="custom-substack-embed"></div>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
           </div>
         </div>
       </div>

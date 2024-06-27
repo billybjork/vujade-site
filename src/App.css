@@ -85,7 +85,6 @@ html, body {
   background-color: transparent;
   border: none;
   cursor: pointer;
-  border-radius: 20px;
   transition: background-color 0.3s ease; /* Smooth transitions for background and transform */
 }
 
@@ -102,7 +101,6 @@ html, body {
   display: flex;
   align-items: center; /* Keeps all content aligned in the center */
   width: 100%;
-  flex-wrap: wrap;
 }
 
 .video-name {
@@ -110,21 +108,24 @@ html, body {
   font-weight: normal;
   color: #ffffff;
   flex-grow: 0;
-  transition: font-size 0.3s, font-weight 0.3s ease-in-out; 
+  transition: font-size 0.3s, font-weight 0.3s ease-in-out;
+  overflow-wrap: break-word;
 }
 
 .separator {
   font-size: 24px;
   color: #ccc;
   margin: 0 10px;
+  white-space: nowrap;
 }
 
 .video-date {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: left;
   font-size: 12px;
   color: #ccc;
+  white-space: nowrap;
 }
 
 .video-month,
@@ -197,7 +198,6 @@ html, body {
   justify-content: center;
   align-items: center;
   background-color: rgba(0, 0, 0, 1);
-  z-index: 2200;
 }
 
 .about-modal-backdrop {
@@ -209,7 +209,7 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 1);
   z-index: 2050;
   transition: backdrop-filter 0.3s ease-in-out; /* Add this line */
 }
@@ -229,7 +229,7 @@ html, body {
 }
 
 .about-screen {
-  padding: 20px;
+  padding: 0px 20px 20px 20px;
   border-radius: 8px;
   font-size: large;
   width: 90%;
@@ -245,17 +245,13 @@ html, body {
   }
 
   .video-name {
-    font-size: 18px; /* Fixed font size on mobile */
+    font-size: 20px; /* Fixed font size on mobile */
   }
 
   .separator {
-    font-size: 18px;
+    font-size: 20px;
     color: #ccc;
     margin: 0 5px;
-  }
-
-  .video-date {
-    font-size: 8px
   }
 
   .header-menu button:hover .video-name {
@@ -347,9 +343,9 @@ html, body {
 .close {
   position: absolute;
   right: 20px;
-  top: 20px; /* Fixed position from the top right of the modal */
+  top: 10px; /* Fixed position from the top right of the modal */
   font-size: 55px;
-  color: #ccc;
+  color: #ffffff;
   cursor: pointer;
 }
 
