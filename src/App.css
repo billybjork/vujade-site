@@ -102,6 +102,7 @@ html, body {
   display: flex;
   align-items: center; /* Keeps all content aligned in the center */
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .video-name {
@@ -244,13 +245,17 @@ html, body {
   }
 
   .video-name {
-    font-size: 20px; /* Fixed font size on mobile */
+    font-size: 18px; /* Fixed font size on mobile */
   }
 
   .separator {
-    font-size: 20px;
+    font-size: 18px;
     color: #ccc;
     margin: 0 5px;
+  }
+
+  .video-date {
+    font-size: 8px
   }
 
   .header-menu button:hover .video-name {
