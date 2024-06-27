@@ -319,13 +319,13 @@ function RenderAboutContent() {
       </div>
       <br />
       <div className="about-text">
-        <div style={{ display: 'flex', justifyContent: 'left' }}>
-          <div style={{ width: '470px', textAlign: 'left', fontWeight: 'bold', fontSize: '1.5em', padding: '0', margin: '0' }}>
-            <div style={{ textAlign: 'left', margin: '0', padding: '0' }}>
-              The Rubik’s Cube has <br />
-              <span style={{ color: '#4e74ff' }}>{displayNumber}</span> <br />
-              possible combinations...
-            </div>
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <div style={{ width: '470px', textAlign: 'center', fontWeight: 'bold', fontSize: '1.2em', padding: '0', margin: '0' }}>
+          <div style={{ textAlign: 'center', margin: '0', padding: '0', whiteSpace: 'nowrap' }}>
+            The Rubik’s Cube has <br />
+            <span style={{ color: '#4e74ff' }}>{displayNumber}</span> <br />
+            possible combinations...
+          </div>
           </div>
         </div>
         <br />
@@ -374,29 +374,45 @@ function Modal() {
   }, [currentVideoID]);
 
   if (!isModalOpen || loading || !currentVideoID) return null;
+  
+  // Motion Variants for the modal backdrop and the modal itself
+  const modalBackdropVariants = {
+    hidden: { opacity: 0 }, // Start invisible
+    visible: { opacity: 1, transition: { duration: 0.3, ease: "easeInOut" } },
+    exit: { opacity: 0, transition: { duration: 0.3, ease: "easeInOut" } },
+  };
+
+  const modalVariants = {
+    hidden: { y: '100vh', opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { type: 'spring', damping: 25, stiffness: 120 } },
+    exit: { y: '100vh', opacity: 0, transition: { duration: 0.3, ease: 'easeInOut' } }
+  };
 
   if (currentVideoID === 'about') {
     return (
       <AnimatePresence>
-        <div className="modal-backdrop" onClick={() => {
-          closeModal();
-          navigate('/');
-        }}>
-          <motion.div
+        <motion.div
+          className="about-modal-backdrop" // Added class about-modal-backdrop for styling
+          variants={modalBackdropVariants} 
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          onClick={() => { 
+            closeModal();
+            navigate('/'); 
+          }}
+        >
+          <motion.div 
             className="modal"
             onClick={e => e.stopPropagation()} // Prevent click from propagating to backdrop
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 100 }}
-            transition={{ type: 'spring', stiffness: 100 }}
+            transition={{ type: 'spring', stiffness: 100 }} 
           >
-            <span className="close" onClick={() => {
-              closeModal();
-              navigate('/');
-            }}>&times;</span>
             <RenderAboutContent />
           </motion.div>
-        </div>
+        </motion.div>
       </AnimatePresence>
     );
   }
@@ -404,45 +420,28 @@ function Modal() {
   if (!videoInfo) {
     return (
       <div className="modal-backdrop">
-        <div className="loading-container"></div>
+        <div className="loading-container"></div> 
       </div>
     );
   }
 
   const videoID = videoInfo.URL.split("/")[3]; // Extract video ID from videoInfo URL
 
-  const modalVariants = {
-    hidden: {
-      y: '100vh',
-      opacity: 0
-    },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: 'spring',
-        damping: 25,
-        stiffness: 120
-      }
-    },
-    exit: {
-      y: '100vh',
-      opacity: 0,
-      transition: {
-        duration: 0.3,
-        ease: 'easeInOut'
-      }
-    }
-  };
-
   return (
     <AnimatePresence>
       {isModalOpen && (
-        <div className="modal-backdrop" onClick={() => {
-          closeModal();
-          navigate('/'); // Navigate to root when modal is closed
-        }}>
-          <motion.div
+        <motion.div // Added the modalBackdropVariants for transitions
+          className="modal-backdrop" 
+          variants={modalBackdropVariants} 
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          onClick={() => {
+            closeModal();
+            navigate('/'); // Navigate to root when modal is closed
+          }}
+        >
+          <motion.div 
             className="modal"
             onClick={e => e.stopPropagation()} // Prevent click from propagating to backdrop
             variants={modalVariants}
@@ -450,11 +449,14 @@ function Modal() {
             animate="visible"
             exit="exit"
           >
-            <span className="close" onClick={() => {
-              closeModal();
-              navigate('/'); // Navigate to root when modal is closed
-              setVideoInfo(null); // Reset video information on modal close
-            }}>&times;</span>
+            <span className="close" onClick={() => { 
+              closeModal(); 
+              navigate('/');
+              setVideoInfo(null); // Reset video information on modal close 
+            }}>
+              &times;
+            </span>
+
             <div className="embed-container">
               <iframe
                 key={videoID} // Assign key prop to force recreation on ID change
@@ -471,7 +473,7 @@ function Modal() {
             </div>
             <div className="gradient-overlay"></div>
           </motion.div>
-        </div>
+          </motion.div>
       )}
     </AnimatePresence>
   );
@@ -485,23 +487,27 @@ function AppWrapper() {
   const [cubeLoading, setCubeLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [menuVisible, setMenuVisible] = useState(true);
+  const [isCloseVisible, setIsCloseVisible] = useState(false); // State to manage button appearance
 
-  // This function toggles the About modal and updates the URL accordingly
   const toggleAbout = () => {
-    if (currentVideoID !== 'about') {
-      openModal('about');  // Open About modal if not currently about
-      navigate('/about');  // Navigate to /about when opening the modal
+    if (!isCloseVisible) {
+      openModal('about');
+      navigate('/about');
+      setIsCloseVisible(true); // Change button to "X"
     } else {
-      closeModal();  // Close the modal
-      navigate('/');  // Navigate to root when closing the modal
+      closeModal();
+      navigate('/');
+      setIsCloseVisible(false); // Change button to "?"
     }
   };
 
   useEffect(() => {
     if (location.pathname === '/about' && !isModalOpen) {
-      openModal('about');  // Open About modal if URL is /about but modal isn't open
-    } else if (location.pathname !== '/about' && isModalOpen && currentVideoID === 'about') {
-      closeModal();  // Close any modal if URL is not /about but a modal is still open
+      openModal('about');
+      setIsCloseVisible(true); // Ensure button is "X" when modal is open
+    } else if (location.pathname !== '/about' && isModalOpen && currentVideoID !== 'about') {
+      closeModal();
+      setIsCloseVisible(false); // Change button to "?"
     }
   }, [location, isModalOpen, currentVideoID, openModal, closeModal]);
 
@@ -539,13 +545,12 @@ function AppWrapper() {
       )}
       <AnimatePresence>
         <motion.button
-          className="question-mark-button"
+          className={`question-mark-button ${isCloseVisible ? 'is-close' : ''}`}
           onClick={toggleAbout}
           variants={fadeInVariants}
           initial="hidden"
-          animate={isLoading ? "hidden" : "visible"}  // Animate based on isLoading
+          animate={(!isModalOpen || currentVideoID === 'about') ? "visible" : "hidden"}
         >
-          ?
         </motion.button>
       </AnimatePresence>
       <Modal />

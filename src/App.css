@@ -131,6 +131,15 @@ html, body {
   line-height: 1;
 }
 
+@keyframes subtle-rotate-and-scale {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
 .question-mark-button {
   position: fixed;
   bottom: 30px;
@@ -138,7 +147,7 @@ html, body {
   font-size: 50px;
   font-weight: bold;
   border: none;
-  background: none; /* Transparent background */
+  background: none;
   color: white;
   border-radius: 50%;
   width: 50px;
@@ -147,11 +156,24 @@ html, body {
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  transition: color 0.3s, font-weight 0.3s ease-in-out; /* Smooth transition for font-weight */
+  transition: transform 0.3s ease-in-out;
+  z-index: 2051;
+}
+
+.question-mark-button:before {
+  content: '?';
+}
+
+.question-mark-button.is-close:before {
+  content: 'X';
 }
 
 .question-mark-button:hover {
   color: #7e7e7e;
+}
+
+.question-mark-button.is-close {
+  animation: subtle-rotate-and-scale 0.3s ease-in-out forwards;
 }
 
 .app-container {
@@ -174,7 +196,21 @@ html, body {
   justify-content: center;
   align-items: center;
   background-color: rgba(0, 0, 0, 1);
+  z-index: 2200;
+}
+
+.about-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 2050;
+  transition: backdrop-filter 0.3s ease-in-out; /* Add this line */
 }
 
 .modal {
@@ -197,6 +233,8 @@ html, body {
   font-size: large;
   width: 90%;
   margin: 0 auto;
+  max-height: 100vh;
+  overflow: auto;
 }
 
 @media (max-width: 768px) {
@@ -305,7 +343,7 @@ html, body {
   position: absolute;
   right: 20px;
   top: 20px; /* Fixed position from the top right of the modal */
-  font-size: 45px;
+  font-size: 55px;
   color: #ccc;
   cursor: pointer;
 }
