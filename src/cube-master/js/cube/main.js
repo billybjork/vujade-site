@@ -309,6 +309,7 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
             if (cube.stickersMap.has(clickedMesh.uuid)) {
                 selectedObject = intersects[0];
                 activeSticker = cube.stickersMap.get(clickedMesh.uuid);  // Set activeSticker immediately on click
+                activeSticker.dim();
             }
         } else {
             controls.enabled = true;

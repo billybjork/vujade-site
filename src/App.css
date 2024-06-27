@@ -77,7 +77,7 @@ html, body {
 
 .header-menu button {
   display: flex;
-  align-items: center; /* Ensures vertical centering of all elements */
+  align-items: flex-start;
   width: 100%;
   margin-bottom: 10px;
   padding: 8px 16px;
@@ -99,7 +99,8 @@ html, body {
 
 .video-item {
   display: flex;
-  align-items: center; /* Keeps all content aligned in the center */
+  flex-direction: column; 
+  align-items: flex-start; /* Align items to the start (left) */
   width: 100%;
 }
 
@@ -107,25 +108,17 @@ html, body {
   font-size: 24px;
   font-weight: normal;
   color: #ffffff;
-  flex-grow: 0;
   transition: font-size 0.3s, font-weight 0.3s ease-in-out;
   overflow-wrap: break-word;
-}
-
-.separator {
-  font-size: 24px;
-  color: #ccc;
-  margin: 0 10px;
-  white-space: nowrap;
+  text-align: left;
 }
 
 .video-date {
-  display: flex;
-  flex-direction: column;
-  justify-content: left;
-  font-size: 12px;
+  font-size: 12px; /* Smaller font size for date */
   color: #ccc;
   white-space: nowrap;
+  margin-top: 5px; /* Adds a little space between name and date */
+  text-align: left;
 }
 
 .video-month,
@@ -198,6 +191,7 @@ html, body {
   justify-content: center;
   align-items: center;
   background-color: rgba(0, 0, 0, 1);
+  z-index: 2051;
 }
 
 .about-modal-backdrop {
@@ -248,12 +242,6 @@ html, body {
     font-size: 20px; /* Fixed font size on mobile */
   }
 
-  .separator {
-    font-size: 20px;
-    color: #ccc;
-    margin: 0 5px;
-  }
-
   .header-menu button:hover .video-name {
     font-size: 20px; /* Keep font size consistent on hover for mobile */
   }
@@ -265,10 +253,6 @@ html, body {
 
   .about-screen {
     width: 100%;
-  }
-
-  .video-name {
-    font-size: 18px;
   }
 
   .modal {

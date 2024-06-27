@@ -101,18 +101,21 @@ return (
   <>
     {isLoading && (
       <div className="loading">
-          <p>Loading...</p>  {/* Dynamic text reflecting the loading progress */}
-          <img src={splashCubeGif} alt="Loading..." />
+        <p>Loading...</p> 
+        <img src={splashCubeGif} alt="Loading..." />
       </div>
     )}
     <motion.div
-        id="cube-container"
-        ref={cubeContainerRef}
-        initial={{ opacity: 0 }}  // Start with an invisible container
-        animate={{ opacity: isLoading ? 0 : 1 }}  // Animate to visible when loading is complete
-        transition={{ duration: 0.5 }}
+      id="cube-container"
+      ref={cubeContainerRef}
+      initial="hidden" 
+      animate={isLoading ? "hidden" : "visible"} // Hide while loading, show when ready
+      variants={{
+        hidden: { opacity: 0, scale: 0.95 }, // Start hidden and slightly scaled down
+        visible: { opacity: isModalOpen ? 0.2 : 1, scale: 1, transition: { duration: 0.5 } } // Fade on modal open/close
+      }}
     >
-        {/* Cube content here */}
+      {/* Cube content here */}
     </motion.div>
   </>
 );
@@ -231,7 +234,6 @@ function HeaderMenu({ videos, onVideoSelect, isLoading }) {
                 className="video-item"
               >
                 <span className="video-name">{video.name}</span>
-                <span className="separator"> | </span>
                 <div className="video-date">
                   <span className="video-month">{formatDate(video.published).split(',')[0]},</span>
                   <span className="video-year">{formatDate(video.published).split(',')[1]}</span>
@@ -553,7 +555,7 @@ function AppWrapper() {
           onClick={toggleAbout}
           variants={fadeInVariants}
           initial="hidden"
-          animate={(!isModalOpen || currentVideoID === 'about') ? "visible" : "hidden"}
+          animate={isLoading ? "hidden" : "visible"} // Now linked to the hamburger button's visibility logic
         >
         </motion.button>
       </AnimatePresence>
