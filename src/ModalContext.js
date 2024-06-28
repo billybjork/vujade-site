@@ -66,11 +66,13 @@ export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
   // Disable body scrolling when the modal is open
   useEffect(() => {
     if (isModalOpen) {
+      const originalStyle = window.getComputedStyle(document.body).overflow;  
       document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'visible';
+      return () => {
+        document.body.style.overflow = originalStyle;
+      };
     }
-  }, [isModalOpen]);
+  }, [isModalOpen]);  
 
   // Prevent touchmove on overlay to stop scrolling underneath
   useEffect(() => {

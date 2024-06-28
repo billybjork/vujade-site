@@ -52,12 +52,10 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
   // Function to disable pointer events for the cube container when modal is open
   useEffect(() => {
     const cubeContainer = cubeContainerRef.current;
-    if (cubeContainer) {
-      if (isAnyModalOpen) {
-        cubeContainer.style.pointerEvents = 'none'; // Disable pointer events
-      } else {
-        cubeContainer.style.pointerEvents = 'auto'; // Enable pointer events
-      }
+    if (isAnyModalOpen) {
+      cubeContainer.classList.add('modal-active');
+    } else {
+      cubeContainer.classList.remove('modal-active');
     }
   }, [isAnyModalOpen]);
 

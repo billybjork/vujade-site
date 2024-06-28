@@ -31,6 +31,10 @@ html, body {
   z-index: 1000;
 }
 
+.cube-container.modal-active {
+  pointer-events: none;
+}
+
 .overlay {
   position: fixed;
   top: 0;
