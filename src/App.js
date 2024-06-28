@@ -442,27 +442,34 @@ function Modal() {
     exit: { y: '100vh', opacity: 0, transition: { duration: 0.3, ease: 'easeInOut' } }
   };
 
+  // Function to handle backdrop click
+  const handleBackdropClick = (e) => {
+    closeModal();
+    navigate('/');
+    e.stopPropagation(); // Stop click event from propagating
+  };
+
   if (currentVideoID === 'about') {
     return (
       <AnimatePresence>
         <motion.div
-          className="about-modal-backdrop" // Added class about-modal-backdrop for styling
+          className="about-modal-backdrop"
           variants={modalBackdropVariants} 
           initial="hidden"
           animate="visible"
           exit="exit"
-          onClick={() => { 
-            closeModal();
-            navigate('/'); 
-          }}
+          onClick={handleBackdropClick}
+          onTouchMove={e => e.preventDefault()}
+          onTouchStart={e => e.stopPropagation()}
         >
           <motion.div 
             className="modal"
             onClick={e => e.stopPropagation()} // Prevent click from propagating to backdrop
+            onTouchStart={e => e.stopPropagation()} // Stop touch events from propagating
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 100 }}
-            transition={{ type: 'spring', stiffness: 100 }} 
+            transition={{ type: 'spring', stiffness: 100 }}
           >
             <RenderAboutContent />
           </motion.div>
@@ -484,20 +491,20 @@ function Modal() {
   return (
     <AnimatePresence>
       {isModalOpen && (
-        <motion.div // Added the modalBackdropVariants for transitions
-          className="modal-backdrop" 
+        <motion.div
+          className="modal-backdrop"
           variants={modalBackdropVariants} 
           initial="hidden"
           animate="visible"
           exit="exit"
-          onClick={() => {
-            closeModal();
-            navigate('/'); // Navigate to root when modal is closed
-          }}
+          onClick={handleBackdropClick}
+          onTouchMove={e => e.preventDefault()}
+          onTouchStart={e => e.stopPropagation()}
         >
           <motion.div 
             className="modal"
             onClick={e => e.stopPropagation()} // Prevent click from propagating to backdrop
+            onTouchStart={e => e.stopPropagation()} // Stop touch events from propagating
             variants={modalVariants}
             initial="hidden"
             animate="visible"
@@ -513,7 +520,7 @@ function Modal() {
 
             <div className="embed-container">
               <iframe
-                key={videoID} // Assign key prop to force recreation on ID change
+                key={videoID}
                 src={`https://player.vimeo.com/video/${videoID}`}
                 allow="autoplay; fullscreen"
                 allowFullScreen
@@ -527,7 +534,7 @@ function Modal() {
             </div>
             <div className="gradient-overlay"></div>
           </motion.div>
-          </motion.div>
+        </motion.div>
       )}
     </AnimatePresence>
   );
