@@ -371,11 +371,11 @@ function RenderAboutContent() {
       <div className="about-text">
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <div style={{ width: '470px', textAlign: 'center', fontWeight: 'bold', fontSize: '1.2em', padding: '0', margin: '0' }}>
-          <div style={{ textAlign: 'center', margin: '0', padding: '0', whiteSpace: 'nowrap' }}>
-            The Rubik’s Cube has <br />
-            <span style={{ color: '#4e74ff' }}>{displayNumber}</span> <br />
-            possible combinations...
-          </div>
+            <div style={{ textAlign: 'center', margin: '0', padding: '0', whiteSpace: 'nowrap' }}>
+              The Rubik’s Cube has <br />
+              <span style={{ color: '#4e74ff' }}>{displayNumber}</span> <br />
+              possible combinations...
+            </div>
           </div>
         </div>
         <br />
@@ -395,11 +395,18 @@ function RenderAboutContent() {
             <br></br>
             <br></br>
             <br></br>
+            <br></br>
           </div>
         </div>
       </div>
+      <div style={{ textAlign: 'center', color: 'grey', fontSize: 'small', opacity: contentVisible ? 1 : 0, transition: 'opacity 2s' }}>
+        © VU JA DE
+        <br />
+        <br />
+        Rubik's Cube source code: <a href="https://github.com/KeatonMueller/cube" target="_blank" rel="noopener noreferrer" style={{ color: 'grey' }}>Keaton Muller</a>
+      </div>
     </div>
-  );  
+  );    
 }
 
 function Modal() {
