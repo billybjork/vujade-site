@@ -35,7 +35,7 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
   const [loadProgress, setLoadProgress] = useState(0);  
   const cubeContainerRef = useRef(null);
   const cubeMasterInitialized = useRef(false);
-  const { openModal, closeModal, isModalOpen } = useModal(); 
+  const { openModal, closeModal, isModalOpen, isScrolling } = useModal(); 
   const location = useLocation(); 
 
   // Ref to store the rendering functions
@@ -127,12 +127,16 @@ return (
         <img src={splashCubeGif} alt="Loading..." />
       </div>
     )}
-      <div
-        pointerEvents={isAnyModalOpen ? 'none' : 'auto'}
-        onClick={closeModal} 
-        style={{ width: '100%', height: '100%' }}
+      <div 
+        pointerEvents={isAnyModalOpen ? 'none' : 'auto'} 
+        onClick={(e) => {
+          if (!isModalOpen && !isScrolling) { // Prevent clicks if modal open or scrolling
+            closeModal(); 
+          }
+        }} 
+        style={{ width: '100%', height: '100%' }} 
       > 
-        <motion.div // Cube container motion div
+        <motion.div 
           id="cube-container"
           ref={cubeContainerRef}
           initial="hidden" 
