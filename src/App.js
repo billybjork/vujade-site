@@ -32,14 +32,22 @@ const fadeInVariants = {
 function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
   const [cubeVideos, setCubeVideos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [loadProgress, setLoadProgress] = useState(0);  // Track loading progress
+  const [loadProgress, setLoadProgress] = useState(0);  
   const cubeContainerRef = useRef(null);
   const cubeMasterInitialized = useRef(false);
-  const { openModal, closeModal, isModalOpen } = useModal();  // Retrieve openModal from context
-  const location = useLocation(); // Get current location
+  const { openModal, closeModal, isModalOpen } = useModal(); 
+  const location = useLocation(); 
 
   // Ref to store the rendering functions
   const renderingControl = useRef({ startRendering: null, stopRendering: null });
+
+  // Add a state variable to track modal visibility
+  const [isAnyModalOpen, setIsAnyModalOpen] = useState(false);
+
+  // Update setIsAnyModalOpen when modal state changes
+  useEffect(() => {
+    setIsAnyModalOpen(isModalOpen);
+  }, [isModalOpen]); // Dependency on isModalOpen
 
   // Fetch video URLs to be used as textures on the cube
   useEffect(() => {
@@ -106,26 +114,31 @@ return (
         <img src={splashCubeGif} alt="Loading..." />
       </div>
     )}
-    <motion.div
-      id="cube-container"
-      ref={cubeContainerRef}
-      initial="hidden" 
-      animate={isLoading ? "hidden" : "visible"} 
-      variants={{
-        hidden: { opacity: 0, scale: 0.95 }, 
-        visible: { 
-          opacity: isModalOpen ? 0.2 : 1, 
-          scale: 1, 
-          transition: { duration: 0.5 }
-        }
-      }}
-      // Disable pointer events when modal is open:
-      pointerEvents={isModalOpen ? 'none' : 'auto'}
-    >
-      {/* Cube content here */}
-    </motion.div>
-  </>
-);
+      <div
+        pointerEvents={isAnyModalOpen ? 'none' : 'auto'}
+        onClick={closeModal} 
+        style={{ width: '100%', height: '100%' }}
+      > 
+        <motion.div // Cube container motion div
+          id="cube-container"
+          ref={cubeContainerRef}
+          initial="hidden" 
+          animate={isLoading ? "hidden" : "visible"} 
+          variants={{
+            hidden: { opacity: 0, scale: 0.95 }, 
+            visible: { 
+              opacity: isModalOpen ? 0.2 : 1, 
+              scale: 1, 
+              transition: { duration: 0.5 }
+            }
+          }}
+          onClick={(e) => e.stopPropagation()} // Prevent clicks from bubbling up
+        >
+          {/* Cube content here */}
+        </motion.div>
+      </div>
+    </>
+  );
 }
 
 function HeaderMenu({ videos, onVideoSelect, isLoading }) {
