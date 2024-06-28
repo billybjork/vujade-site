@@ -49,6 +49,14 @@ export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
     }
   }, [isModalOpen]);
 
+  useEffect(() => {
+    const overlay = document.querySelector('.overlay');
+    if (overlay && isModalOpen) {
+      overlay.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+      return () => overlay.removeEventListener('touchmove', (e) => e.preventDefault(), { passive: false }); 
+    }
+  }, [isModalOpen]); // Re-add listener if isModalOpen changes
+
   // Memoize the context value to avoid unnecessary re-renders
   const providerValue = useMemo(() => ({
     isModalOpen, currentVideoID, openModal, closeModal, overlayVisible

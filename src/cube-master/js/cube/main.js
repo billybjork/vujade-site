@@ -294,44 +294,28 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
      * Function to handle pointer down events
      */
     const onDocumentMouseDown = (event) => {
-
-        // 1. Check Modal State: If any modal is open, disable OrbitControls and return
-        if (isAnyModalOpen()) { 
-            controls.enabled = false;
-            controls.enableRotate = false;
-            controls.enablePan = false;
-            controls.enableZoom = false;
-            return; 
-        }
-    
-        // 2. Store Initial Mouse Position:
         mouse.x = (event.offsetX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.offsetY / getHeight()) * 2 + 1;
         clickStartPosition = { x: event.offsetX, y: event.offsetY };
         hasMoved = false;
     
-        // 3. Raycasting:
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(cube.meshes, true);
     
-        // 4. Handle Intersections (if any):
         if (intersects.length > 0) {
             controls.enabled = false;
             dragging = true;
             let clickedMesh = intersects[0].object;
-    
-            // Check if the clicked mesh is a sticker:
             if (cube.stickersMap.has(clickedMesh.uuid)) {
                 selectedObject = intersects[0];
-                activeSticker = cube.stickersMap.get(clickedMesh.uuid);
-                activeSticker.dim(); // Dim the clicked sticker for visual feedback
+                activeSticker = cube.stickersMap.get(clickedMesh.uuid);  // Set activeSticker immediately on click
+                activeSticker.dim();
             }
         } else {
-            // If no intersection, it's likely a cube rotation attempt:
             controls.enabled = true;
-            selectedObject = ClickFlags.ROTATION; // Indicate cube rotation mode
+            selectedObject = ClickFlags.ROTATION;
         }
-    };  
+    };   
 
     document.addEventListener("pointerdown", onDocumentMouseDown, false);
     if (isAnyModalOpen()) { return; }
@@ -363,6 +347,7 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     };
 
     document.addEventListener("pointerup", onDocumentMouseUp, false);   
+
     if (isAnyModalOpen()) { return; }
 
     /**
