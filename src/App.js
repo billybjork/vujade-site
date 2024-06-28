@@ -49,6 +49,18 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
     setIsAnyModalOpen(isModalOpen);
   }, [isModalOpen]); // Dependency on isModalOpen
 
+  // Function to disable pointer events for the cube container when modal is open
+  useEffect(() => {
+    const cubeContainer = cubeContainerRef.current;
+    if (cubeContainer) {
+      if (isAnyModalOpen) {
+        cubeContainer.style.pointerEvents = 'none'; // Disable pointer events
+      } else {
+        cubeContainer.style.pointerEvents = 'auto'; // Enable pointer events
+      }
+    }
+  }, [isAnyModalOpen]);
+
   // Fetch video URLs to be used as textures on the cube
   useEffect(() => {
     const fetchCubeVideos = async () => {
