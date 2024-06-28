@@ -30,7 +30,7 @@ const render = (renderer, scene, camera, update, controls) => {
     animate(renderer, scene, camera, update, controls); // Use the globally defined animate function
 };
 
-export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallback, domElement, openModal) {
+export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallback, domElement, openModal, isAnyModalOpen) {
 
     const getHeaderSize = () => {
         // Height of header for embedding in other websites
@@ -318,6 +318,7 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     };   
 
     document.addEventListener("pointerdown", onDocumentMouseDown, false);
+    if (isAnyModalOpen()) { return; }
 
     /**
      * Function to handle pointer up events
@@ -346,12 +347,22 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     };
 
     document.addEventListener("pointerup", onDocumentMouseUp, false);   
+    if (isAnyModalOpen()) { return; }
 
     /**
      * Handle mouse move events by determining what
      * move is being requested, and pushing it to the moveBuffer.
      */
     const onDocumentMouseMove = (event) => {
+
+        if (isAnyModalOpen()) {
+            // If a modal is open, prevent hover effects
+            if (hoveredSticker) {
+              hoveredSticker.reset();
+              hoveredSticker = null;
+            }
+            return; 
+        }
     
         // do nothing if not dragging
         if (!dragging || chosenAxis !== null) {

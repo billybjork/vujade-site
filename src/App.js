@@ -81,12 +81,13 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
             if (!videoLoadedSuccess) {
                 // Handle autoplay failure if needed
             }
-        }
+        },
+        isAnyModalOpen
       );
       renderingControl.current = controls;
       cubeMasterInitialized.current = true;
     }
-  }, [cubeVideos, setCubeLoading, openModal, setIsLoadingExternal]);
+  }, [cubeVideos, setCubeLoading, openModal, setIsLoadingExternal, isAnyModalOpen]);
 
   // Handling the initial loading modal
   useEffect(() => {
