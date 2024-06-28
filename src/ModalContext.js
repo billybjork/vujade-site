@@ -30,7 +30,7 @@ export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
         if (window.location.pathname !== `/${videoID}`) navigate(`/${videoID}`, { replace: true });
       }
     }
-  }, [isModalOpen, navigate, onModalOpen]);
+  }, [isModalOpen, navigate, onModalOpen]); 
 
   // Function to close the modal
   const closeModal = useCallback(() => {
@@ -79,8 +79,10 @@ export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
     const overlay = document.querySelector('.overlay');
     if (overlay && isModalOpen) {
       overlay.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
+      overlay.style.touchAction = 'none'; // Prevent default touch actions
       return () => {
         overlay.removeEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
+        overlay.style.touchAction = ''; // Reset touch action when modal is closed
       };
     }
   }, [isModalOpen]);
