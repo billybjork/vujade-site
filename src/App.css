@@ -41,6 +41,7 @@ html, body {
   backdrop-filter: blur(5px); /* Blurring the background */
   -webkit-backdrop-filter: blur(5px); /* For Safari */
   touch-action: none;
+  z-index: 1001;
 }
 
 .hamburger-button {
@@ -56,7 +57,7 @@ html, body {
   padding: 8px;
   border-radius: 50%;
   color: #ffffff;
-  z-index: 1000;
+  z-index: 1003;
   transition: color 0.3s ease;
 }
 
@@ -74,6 +75,7 @@ html, body {
   max-height: 100vh; /* Prevents the menu from exceeding the viewport height */
   overflow-y: auto; /* Enables vertical scrolling if necessary */
   padding: 10px; /* Padding to ensure items aren't too close to the edges */
+  z-index: 1002;
 }
 
 .header-menu button {
