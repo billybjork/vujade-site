@@ -97,6 +97,7 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
     }
 }, [location, openModal, closeModal, isModalOpen]);
 
+
 return (
   <>
     {isLoading && (
@@ -109,11 +110,17 @@ return (
       id="cube-container"
       ref={cubeContainerRef}
       initial="hidden" 
-      animate={isLoading ? "hidden" : "visible"} // Hide while loading, show when ready
+      animate={isLoading ? "hidden" : "visible"} 
       variants={{
-        hidden: { opacity: 0, scale: 0.95 }, // Start hidden and slightly scaled down
-        visible: { opacity: isModalOpen ? 0.2 : 1, scale: 1, transition: { duration: 0.5 } } // Fade on modal open/close
+        hidden: { opacity: 0, scale: 0.95 }, 
+        visible: { 
+          opacity: isModalOpen ? 0.2 : 1, 
+          scale: 1, 
+          transition: { duration: 0.5 }
+        }
       }}
+      // Disable pointer events when modal is open:
+      pointerEvents={isModalOpen ? 'none' : 'auto'}
     >
       {/* Cube content here */}
     </motion.div>
@@ -122,9 +129,12 @@ return (
 }
 
 function HeaderMenu({ videos, onVideoSelect, isLoading }) {
-  const { openModal } = useModal();
+  const { openModal, isModalOpen } = useModal(); // Get modal context
   const [isOpen, setIsOpen] = useState(false);
-  const menuRef = useRef(); // Reference to the menu DOM node
+  const menuRef = useRef();
+
+  // Animation Controls for the Hamburger Button
+  const menuButtonControls = useAnimation();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -142,9 +152,7 @@ function HeaderMenu({ videos, onVideoSelect, isLoading }) {
       // Clean up
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isOpen]); // Effect dependencies include isOpen
-
-  if (!videos.length) return null;
+  }, [isOpen]);
 
   const handleVideoClick = (videoId) => {
     openModal(videoId);
@@ -195,6 +203,18 @@ function HeaderMenu({ videos, onVideoSelect, isLoading }) {
     }
   };
 
+  // Local state to track the menu button's visibility 
+  const [isMenuButtonVisible, setIsMenuButtonVisible] = useState(false);
+
+  // Trigger animation based on isLoading and isModalOpen
+  useEffect(() => {
+    if (!isLoading && !isModalOpen) { 
+      setIsMenuButtonVisible(true); // Show button when not loading and modal is closed
+    } else {
+      setIsMenuButtonVisible(false); // Hide button when loading or modal is open
+    }
+  }, [isLoading, isModalOpen]); 
+
   return (
     <div>
       <AnimatePresence>
@@ -202,8 +222,8 @@ function HeaderMenu({ videos, onVideoSelect, isLoading }) {
           className="hamburger-button"
           onClick={() => setIsOpen(!isOpen)}
           variants={fadeInVariants}
-          initial="hidden"
-          animate={isLoading ? "hidden" : "visible"}  // Control animation based on isLoading
+          initial="hidden" 
+          animate={isMenuButtonVisible ? "visible" : "hidden"} 
         >
           {isOpen ? <MdClose size={40} /> : <MdMenu size={40} />}
         </motion.button>
@@ -336,7 +356,7 @@ function RenderAboutContent() {
           ... and one solution.
           <br />
           <br />
-          <p><b>VU JA DE</b> exists to scramble the “solved” arrangements of internet ephemera. To turn <i>solving</i> into <i>playing.</i> To go from <i>been here before</i> to <i>never seen this before.</i> From <i>déjà vu</i> to <i>vujà de.</i></p>
+          <p><b>VU JA DE</b> exists to scramble the “solved” arrangements of internet ephemera. To turn <i>been here before</i> into <i>never seen this before.</i> From <i>déjà vu</i> to <i>vujà de.</i></p>
           <br />
           <p>Like the 43 quintillion permutations of the Rubik's Cube, these stories are starting points, not resolutions. They're not made for an algorithmic feed or a distracted scroll, which is why they come to your email.</p>
           <br />
@@ -493,7 +513,9 @@ function AppWrapper() {
   const [cubeLoading, setCubeLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [menuVisible, setMenuVisible] = useState(true);
-  const [isCloseVisible, setIsCloseVisible] = useState(false); // State to manage button appearance
+  const [isCloseVisible, setIsCloseVisible] = useState(false);
+  const [isQuestionMarkVisible, setIsQuestionMarkVisible] = useState(false);
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
 
   const toggleAbout = () => {
     if (!isCloseVisible) {
@@ -506,6 +528,12 @@ function AppWrapper() {
       setIsCloseVisible(false); // Change button to "?"
     }
   };
+
+  // Updated useEffect for the question mark button visibility
+  useEffect(() => {
+    const shouldShowQuestionMark = !cubeLoading && (!isModalOpen || (isModalOpen && !isAboutModalOpen));
+    setIsQuestionMarkVisible(shouldShowQuestionMark); 
+  }, [cubeLoading, isModalOpen, isAboutModalOpen]);
 
   useEffect(() => {
     if (location.pathname === '/about' && !isModalOpen) {
@@ -535,7 +563,8 @@ function AppWrapper() {
 
   return (
     <ModalProvider>
-      {menuVisible && <HeaderMenu videos={allVideos} isLoading={isLoading} />}
+      {/* Pass isLoading to HeaderMenu */}
+      {menuVisible && <HeaderMenu videos={allVideos} isLoading={cubeLoading} />} 
       <CubeWithVideos setCubeLoading={setCubeLoading} setIsLoadingExternal={setIsLoading} />
       {overlayVisible && (
         <div className="overlay" style={{
@@ -555,7 +584,8 @@ function AppWrapper() {
           onClick={toggleAbout}
           variants={fadeInVariants}
           initial="hidden"
-          animate={isLoading ? "hidden" : "visible"} // Now linked to the hamburger button's visibility logic
+          // Animate based on cubeLoading, same as the hamburger button
+          animate={cubeLoading ? "hidden" : "visible"} 
         >
         </motion.button>
       </AnimatePresence>

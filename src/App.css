@@ -65,7 +65,7 @@ html, body {
 
 .header-menu {
   position: fixed;
-  top: 100px; /* Adjust according to the height of the hamburger button */
+  top: 80px; /* Adjust according to the height of the hamburger button */
   left: 10px; /* Space from the left edge of the viewport */
   display: flex;
   flex-direction: column; /* Stacks items vertically */
@@ -151,7 +151,7 @@ html, body {
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  transition: transform 0.3s ease-in-out;
+  transition: transform 0.3s ease-in-out, color 0.3s ease-in-out;
   z-index: 2051;
 }
 
