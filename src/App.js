@@ -443,16 +443,23 @@ function Modal() {
   // Prevent scrolling on touch devices while the modal is open
   useEffect(() => {
     const touchHandler = (e) => {
-      e.stopPropagation();  // Stop the event from bubbling up
-      e.preventDefault();   // Prevent default behavior (scrolling, etc.)
+        e.stopPropagation();
+
+        // Allow scrolling if the touch target is the modal content or its descendants
+        const allowedTargets = [
+            document.querySelector('.modal'),
+            document.querySelector('.about-screen'),
+        ];
+        if (!allowedTargets.some(target => target && target.contains(e.target))) {
+            e.preventDefault(); 
+        }
     };
-  
+
     if (isModalOpen) {
       document.addEventListener('touchstart', touchHandler, { passive: false });
       document.addEventListener('touchmove', touchHandler, { passive: false });
       document.addEventListener('touchend', touchHandler, { passive: false });
     }
-  
     return () => {
       document.removeEventListener('touchstart', touchHandler);
       document.removeEventListener('touchmove', touchHandler);

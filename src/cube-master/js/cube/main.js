@@ -185,7 +185,10 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     }
 };
 
-document.addEventListener("touchmove", handleTouchMove, {passive: false});
+document.addEventListener("touchmove", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+}, { passive: false });
 
     // Event handlers for keyboard and mouse events, resize, and touch...
     document.addEventListener("pointermove", (event) => {

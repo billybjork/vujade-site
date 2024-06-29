@@ -201,7 +201,7 @@ html, body {
   touch-action: none;
   pointer-events: all;
   background-color: rgba(0, 0, 0, 1);
-  z-index: 2051;
+  z-index: 2051 !important;
 }
 
 .about-modal-backdrop {
@@ -214,7 +214,7 @@ html, body {
   justify-content: center;
   align-items: center;
   background-color: rgba(0, 0, 0, 1);
-  z-index: 2050;
+  z-index: 2050 !important;
   transition: backdrop-filter 0.3s ease-in-out; /* Add this line */
   touch-action: none;
   pointer-events: all;
@@ -229,12 +229,12 @@ html, body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  z-index: 2051;
+  z-index: 2051 !important;
   padding: 80px 20px 20px 20px; /* Increased top padding to accommodate close button */
   box-sizing: border-box; /* Ensures padding is included in the width calculation */
   overflow-y: auto;
   pointer-events: all;
-  touch-action: none;
+  touch-action: auto;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -247,6 +247,7 @@ html, body {
   max-height: 100vh;
   overflow: auto;
   pointer-events: auto;
+  touch-action: auto;
 }
 
 @media (max-width: 768px) {
@@ -363,7 +364,7 @@ html, body {
   height: 100px;  /* Ensure this matches the extra padding added to the bottom of the text-container */
   background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
   pointer-events: none;
-  z-index: 1500;
+  z-index: 1500 !important;
 }
 
 .close {
