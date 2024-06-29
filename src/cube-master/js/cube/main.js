@@ -289,18 +289,17 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     let hasMoved = false;
 
     /**
-     * Function to handle pointer down events
+     * Function to handle pointer mouse events
      */
-
-    document.addEventListener("pointerdown", (event) => {
+    const onDocumentMouseDown = (event) => {
         mouse.x = (event.offsetX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.offsetY / getHeight()) * 2 + 1;
         clickStartPosition = { x: event.offsetX, y: event.offsetY };
         hasMoved = false;
-    
+
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(cube.meshes, true);
-    
+
         if (intersects.length > 0) {
             controls.enabled = false;
             dragging = true;
@@ -314,7 +313,9 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
             controls.enabled = true;
             selectedObject = ClickFlags.ROTATION;
         }
-    }, false);
+    };
+
+    document.addEventListener("pointerdown", onDocumentMouseDown, false);
 
     /**
      * Function to handle pointer up events
