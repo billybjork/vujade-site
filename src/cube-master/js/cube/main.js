@@ -30,7 +30,7 @@ const render = (renderer, scene, camera, update, controls) => {
     animate(renderer, scene, camera, update, controls); // Use the globally defined animate function
 };
 
-export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallback, domElement, openModal, isModalOpen) {
+export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallback, domElement, openModal, isModalOpen, isAnyModalOpen) {
 
     const getHeaderSize = () => {
         // Height of header for embedding in other websites
@@ -347,12 +347,12 @@ document.addEventListener("touchmove", handleTouchMove, {passive: false});
         chosenAxis = null;
         chosenDir = 0;
     
-        if (activeSticker) {
-            console.log("Trying to open modal with videoID:", activeSticker.videoid); 
-            openModal(activeSticker.videoid); // Always attempt to open the modal
-            activeSticker.reset();
-            activeSticker = null;
-        }
+    if (activeSticker) {
+        console.log("Trying to open modal with videoID:", activeSticker.videoid); 
+        openModal(activeSticker.videoid); // Always attempt to open the modal
+        activeSticker.reset();
+        activeSticker = null;
+    }
     
         clickStartPosition = null;
     };
