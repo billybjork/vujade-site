@@ -443,15 +443,9 @@ function Modal() {
   // Prevent scrolling on touch devices while the modal is open
   useEffect(() => {
     const touchHandler = (e) => {
-        e.stopPropagation();
-
-        // Allow scrolling if the touch target is the modal content or its descendants
-        const allowedTargets = [
-            document.querySelector('.modal'),
-            document.querySelector('.about-screen'),
-        ];
-        if (!allowedTargets.some(target => target && target.contains(e.target))) {
-            e.preventDefault(); 
+        if (e.target !== document.querySelector('.modal') && e.target !== document.querySelector('.about-screen') && e.target !== document.querySelector('.close')) {
+          e.stopPropagation();
+          e.preventDefault(); 
         }
     };
 
