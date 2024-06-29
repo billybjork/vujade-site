@@ -327,10 +327,10 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
         console.log('onDocumentMouseUp: Mouse release detected:', event, 'hasMoved:', hasMoved);
         let moveX = Math.abs(clickStartPosition.x - event.offsetX);
         let moveY = Math.abs(clickStartPosition.y - event.offsetY);
-        hasMoved = moveX > 5 || moveY > 5;
+        hasMoved = moveX > 15 || moveY > 15;
     
-        if (!hasMoved && activeSticker) {
-            openModal(activeSticker.videoid); // Open modal only if there was no significant move (click)
+        if (!hasMoved && timeDifference < 100 && activeSticker) { // Time check to determine significant enough move
+            openModal(activeSticker.videoid); 
         }
     
         controls.enabled = true;

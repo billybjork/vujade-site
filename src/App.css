@@ -45,6 +45,7 @@ html, body {
   backdrop-filter: blur(5px); /* Blurring the background */
   -webkit-backdrop-filter: blur(5px); /* For Safari */
   touch-action: none;
+  pointer-events: all;
   z-index: 1001;
 }
 
@@ -198,6 +199,7 @@ html, body {
   justify-content: center;
   align-items: center;
   touch-action: none;
+  pointer-events: all;
   background-color: rgba(0, 0, 0, 1);
   z-index: 2051;
 }
@@ -215,6 +217,7 @@ html, body {
   z-index: 2050;
   transition: backdrop-filter 0.3s ease-in-out; /* Add this line */
   touch-action: none;
+  pointer-events: all;
 }
 
 .modal {
@@ -230,6 +233,8 @@ html, body {
   padding: 80px 20px 20px 20px; /* Increased top padding to accommodate close button */
   box-sizing: border-box; /* Ensures padding is included in the width calculation */
   overflow-y: auto;
+  pointer-events: all;
+  touch-action: none;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -241,6 +246,7 @@ html, body {
   margin: 0 auto;
   max-height: 100vh;
   overflow: auto;
+  pointer-events: auto;
 }
 
 @media (max-width: 768px) {
@@ -295,6 +301,7 @@ html, body {
   padding: 20px;
   padding-bottom: 120px;  /* Ensure this is sufficient to scroll out of the gradient */
   color: #fff;
+  pointer-events: auto;
 
   /* Styles for the scrollbar */
   scrollbar-width: thin;  /* For Firefox */

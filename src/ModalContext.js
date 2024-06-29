@@ -82,9 +82,11 @@ export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
     if (overlay && isModalOpen) {
       overlay.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
       overlay.style.touchAction = 'none'; // Prevent default touch actions
+      overlay.addEventListener('click', (event) => event.stopPropagation(), false);
       return () => {
         overlay.removeEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
         overlay.style.touchAction = ''; // Reset touch action when modal is closed
+        overlay.removeEventListener('click', (event) => event.stopPropagation(), false);
       };
     }
   }, [isModalOpen]);
