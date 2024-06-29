@@ -443,23 +443,52 @@ function Modal() {
   // Prevent scrolling on touch devices while the modal is open
   useEffect(() => {
     const touchHandler = (e) => {
-        if (e.target !== document.querySelector('.modal') && e.target !== document.querySelector('.about-screen') && e.target !== document.querySelector('.close')) {
-          e.stopPropagation();
-          e.preventDefault(); 
+        e.stopPropagation(); 
+
+        // Allow scrolling/clicking only within these containers
+        const allowedTargets = [
+            document.querySelector('.modal'),
+            document.querySelector('.about-screen'),
+            document.querySelector('.close') // Add the close button
+        ];
+        if (!allowedTargets.some(target => target && target.contains(e.target))) {
+            e.preventDefault(); 
         }
+    };
+    const onTouchStart = (event) => {
+      event.offsetX = event.touches[0].clientX;
+      event.offsetY = event.touches[0].clientY - getHeaderSize();
+      onDocumentMouseDown(event);
+    };
+
+    const onTouchEnd = (event) => {
+      onDocumentMouseUp(event);
+    };
+
+    const onTouchMove = (event) => {
+      event.offsetX = event.touches[0].clientX;
+      event.offsetY = event.touches[0].clientY - getHeaderSize();
+      onDocumentMouseMove(event);
     };
 
     if (isModalOpen) {
       document.addEventListener('touchstart', touchHandler, { passive: false });
       document.addEventListener('touchmove', touchHandler, { passive: false });
       document.addEventListener('touchend', touchHandler, { passive: false });
+      document.addEventListener("touchstart", onTouchStart, false);
+      document.addEventListener("touchend", onTouchEnd, false);
+      document.addEventListener("touchmove", onTouchMove, false);
     }
+
     return () => {
       document.removeEventListener('touchstart', touchHandler);
       document.removeEventListener('touchmove', touchHandler);
       document.removeEventListener('touchend', touchHandler);
+      document.removeEventListener("touchstart", onTouchStart, false);
+      document.removeEventListener("touchend", onTouchEnd, false);
+      document.removeEventListener("touchmove", onTouchMove, false);
     };
-  }, [isModalOpen]);
+  }, [isModalOpen]); // Dependency added 
 
   if (!isModalOpen || loading || !currentVideoID) return null;
   

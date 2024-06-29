@@ -179,17 +179,6 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     // Variable to hold the sticker that might be clicked
     let activeSticker = null;
 
-    const handleTouchMove = (e) => {
-    if (isAnyModalOpen) {
-        e.stopPropagation();
-    }
-};
-
-document.addEventListener("touchmove", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-}, { passive: false });
-
     // Event handlers for keyboard and mouse events, resize, and touch...
     document.addEventListener("pointermove", (event) => {
         if (!dragging) {
