@@ -23,13 +23,14 @@ export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
       setOverlayVisible(true); // Show overlay when opening modal
       setCurrentVideoID(videoID);
       if (onModalOpen) onModalOpen(); // Custom callback on open
-      
       // Update URL for deep linking
       if (videoID === 'about') {
         if (window.location.pathname !== '/about') navigate('/about', { replace: true });
       } else {
         if (window.location.pathname !== `/${videoID}`) navigate(`/${videoID}`, { replace: true });
       }
+    } else {
+      console.log("Modal already open, not opening another one");
     }
   }, [isModalOpen, navigate, onModalOpen]); 
 

@@ -29,7 +29,7 @@ const fadeInVariants = {
   }
 };  
 
-function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
+function CubeWithVideos({ setCubeLoading, setIsLoadingExternal, onModalClose }) {
   const [cubeVideos, setCubeVideos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState(0);  
@@ -103,18 +103,17 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
   useEffect(() => {
     const path = location.pathname;
     const videoID = path.split('/')[1];
-
-    // Handle 'about' modal separately
+    
+    if (isModalOpen) {
+      onModalClose(); // This ensures that any open modal is closed when the route changes
+    } 
+    
     if (videoID === 'about') {
-        if (!isModalOpen) openModal('about');
-    } else if (videoID && videoID !== 'about' && !isModalOpen) {
-        // Handle video modals
-        openModal(videoID);
-    } else if (!videoID && isModalOpen) {
-        // Close modal when no videoID or 'about' is in the path
-        closeModal();
+      openModal('about');
+    } else if (videoID && videoID !== 'about') {
+      openModal(videoID);
     }
-}, [location, openModal, closeModal, isModalOpen]);
+  }, [location, openModal, onModalClose, isModalOpen, isScrolling]);
 
 
 return (
@@ -127,18 +126,12 @@ return (
     )}
       <div 
           pointerEvents={isAnyModalOpen || isScrolling ? 'none' : 'auto'} // Disable when modal is open OR scrolling
-          onClick={(e) => {
-            if (!isModalOpen && !isScrolling) { // Prevent clicks if modal open or scrolling
-              console.log("CubeWithVideos clicked, isModalOpen:", isModalOpen, "isScrolling:", isScrolling);
-              // Instead of closeModal(), you want to check if a video has been clicked:
-              if (e.target.classList.contains('video')) { // Check if it's a video cube face
-                  const videoId = e.target.getAttribute('data-videoid'); // Get the video ID
-                  openModal(videoId); // Open the modal
-              } else {
-                  closeModal(); // Close any open modal if clicking elsewhere on the cube
-              }
-            }
-          }}
+        onClick={(e) => {
+          if (!isModalOpen && !isScrolling) { // Prevent clicks if modal open or scrolling
+            console.log("CubeWithVideos clicked, isModalOpen:", isModalOpen, "isScrolling:", isScrolling);
+            closeModal(); 
+          }
+        }} 
         style={{ width: '100%', height: '100%' }} 
       > 
         <motion.div 
@@ -421,7 +414,6 @@ function Modal() {
   const navigate = useNavigate();
   const [videoInfo, setVideoInfo] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [videoLoading, setVideoLoading] = useState(true);
 
   // Fetch video information based on currentVideoID
   useEffect(() => {
@@ -534,17 +526,13 @@ function Modal() {
             </span>
 
             <div className="embed-container">
-              {/* IFRAME WRAPPER: */}
-              <div style={{ pointerEvents: videoLoading ? 'all' : 'none', touchAction: 'none' }}>
-                <iframe
-                  key={videoID}
+              <iframe
+                key={videoID}
                 src={`https://player.vimeo.com/video/${videoID}`}
                 allow="autoplay; fullscreen"
                 allowFullScreen
                 title={videoInfo.videoName}
-                onLoad={() => setVideoLoading(false)}
               ></iframe>
-              </div>
             </div>
             <div className="text-container">
               <h2>{videoInfo.videoName}</h2>
@@ -583,6 +571,11 @@ function AppWrapper() {
     }
   };
 
+  const handleModalClose = useCallback(() => {
+    closeModal();
+    navigate('/'); 
+  }, [closeModal, navigate]);
+
   // Updated useEffect for the question mark button visibility
   useEffect(() => {
     const shouldShowQuestionMark = !cubeLoading && (!isModalOpen || (isModalOpen && !isAboutModalOpen));
@@ -619,7 +612,7 @@ function AppWrapper() {
     <ModalProvider>
       {/* Pass isLoading to HeaderMenu */}
       {menuVisible && <HeaderMenu videos={allVideos} isLoading={cubeLoading} />} 
-      <CubeWithVideos setCubeLoading={setCubeLoading} setIsLoadingExternal={setIsLoading} />
+      <CubeWithVideos setCubeLoading={setCubeLoading} setIsLoadingExternal={setIsLoading} onModalClose={handleModalClose}/>
       {overlayVisible && (
         <div className="overlay" style={{
           position: 'fixed',
