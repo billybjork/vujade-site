@@ -18,6 +18,7 @@ export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
   // Function to open the modal with the video ID
   const openModal = useCallback((videoID) => {
     if (!isModalOpen) {
+      console.log("Opening modal with videoID:", videoID);
       setIsModalOpen(true);
       setOverlayVisible(true); // Show overlay when opening modal
       setCurrentVideoID(videoID);
@@ -34,6 +35,7 @@ export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
 
   // Function to close the modal
   const closeModal = useCallback(() => {
+    console.log("Closing modal");
     setIsModalOpen(false);
     setOverlayVisible(false); // Hide overlay when closing modal
     setCurrentVideoID(null);

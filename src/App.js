@@ -129,6 +129,7 @@ return (
           pointerEvents={isAnyModalOpen || isScrolling ? 'none' : 'auto'} // Disable when modal is open OR scrolling
         onClick={(e) => {
           if (!isModalOpen && !isScrolling) { // Prevent clicks if modal open or scrolling
+            console.log("CubeWithVideos clicked, isModalOpen:", isModalOpen, "isScrolling:", isScrolling);
             closeModal(); 
           }
         }} 
