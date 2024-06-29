@@ -148,7 +148,6 @@ return (
               transition: { duration: 0.5 }
             }
           }}
-          onClick={(e) => e.stopPropagation()} // Prevent clicks from bubbling up
         >
           {/* Cube content here */}
         </motion.div>

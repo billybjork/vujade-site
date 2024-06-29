@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from "../three/OrbitControls.js";
 import Cube from "./Cube.js";
-import _ from 'lodash';
 import {
     Axes,
     KeysToMoves,
@@ -180,6 +179,14 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     // Variable to hold the sticker that might be clicked
     let activeSticker = null;
 
+    const handleTouchMove = (e) => {
+    if (isAnyModalOpen) {
+        e.stopPropagation();
+    }
+};
+
+document.addEventListener("touchmove", handleTouchMove, {passive: false});
+
     // Event handlers for keyboard and mouse events, resize, and touch...
     document.addEventListener("pointermove", (event) => {
         if (!dragging) {
@@ -329,10 +336,8 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
         let moveY = Math.abs(clickStartPosition.y - event.offsetY);
         hasMoved = moveX > 15 || moveY > 15;
     
-        if (!hasMoved && activeSticker) {
-            if (!isModalOpen) { // Ensure no modal is open before opening a new one
-              openModal(activeSticker.videoid); 
-            }
+        if (!hasMoved && activeSticker && !isModalOpen) {
+            openModal(activeSticker.videoid);
         }
     
         // Reset interactions
@@ -343,6 +348,8 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
         chosenDir = 0;
     
         if (activeSticker) {
+            console.log("Trying to open modal with videoID:", activeSticker.videoid); 
+            openModal(activeSticker.videoid); // Always attempt to open the modal
             activeSticker.reset();
             activeSticker = null;
         }
@@ -507,7 +514,7 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
         // set dragging to false to not trigger another move
         dragging = false;
     };
-    document.addEventListener("pointermove", _.throttle(onDocumentMouseMove, 10), false);
+    document.addEventListener("pointermove", onDocumentMouseMove, false);
 
     // Start the animation loop with update function integrated
     render(renderer, scene, camera, update);
