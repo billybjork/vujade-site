@@ -133,8 +133,11 @@ return (
                     console.log("CubeWithVideos clicked, isModalOpen:", isModalOpen, "isScrolling:", isScrolling);
                     // Trigger modal open function here based on the clicked element
                 }
+              } else {
+                e.preventDefault();
+                e.stopPropagation();
             }
-        }} 
+        }}
         style={{ width: '100%', height: '100%' }} 
     > 
       <motion.div 
@@ -439,19 +442,23 @@ function Modal() {
 
   // Prevent scrolling on touch devices while the modal is open
   useEffect(() => {
-    const touchMoveHandler = (e) => {
-      e.preventDefault();  // Prevent scrolling the background
-      e.stopPropagation(); // Prevent further event propagation
+    const touchHandler = (e) => {
+      e.stopPropagation();  // Stop the event from bubbling up
+      e.preventDefault();   // Prevent default behavior (scrolling, etc.)
     };
-
+  
     if (isModalOpen) {
-      document.addEventListener('touchmove', touchMoveHandler, { passive: false });
+      document.addEventListener('touchstart', touchHandler, { passive: false });
+      document.addEventListener('touchmove', touchHandler, { passive: false });
+      document.addEventListener('touchend', touchHandler, { passive: false });
     }
-
+  
     return () => {
-      document.removeEventListener('touchmove', touchMoveHandler);
+      document.removeEventListener('touchstart', touchHandler);
+      document.removeEventListener('touchmove', touchHandler);
+      document.removeEventListener('touchend', touchHandler);
     };
-  }, [isModalOpen]); // Only add/remove the event listener when isModalOpen changes
+  }, [isModalOpen]);
 
   if (!isModalOpen || loading || !currentVideoID) return null;
   

@@ -279,6 +279,30 @@ html, body {
   }
 }
 
+/* Media query to target touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .cube-sticker:hover { /* Or the actual class name you're using for stickers */
+    opacity: 1; /* No dimming on hover for touch devices */
+  }
+  
+  .hamburger-button:hover {
+    color: #ffffff; /* No color change on hover for touch devices */
+  }
+
+  .header-menu button:hover {
+    transform: none; /* No transform (raise) on hover for touch devices */
+  }
+
+  .header-menu button:hover .video-name {
+    font-size: 24px; /* No font size change on hover for touch devices */
+    font-weight: normal;
+  }
+
+  .question-mark-button:hover {
+    color: #ffffff;
+  }
+}
+
 .embed-container {
   width: 100%; /* Ensures the video container takes up the full width of the modal */
   padding-top: 56.25%; /* 16:9 Aspect Ratio, calculates height based on the width */
