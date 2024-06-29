@@ -294,7 +294,6 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
      * Function to handle pointer down events
      */
     const onDocumentMouseDown = (event) => {
-        console.log('onDocumentMouseDown: Mouse click detected:', event);
         mouse.x = (event.offsetX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.offsetY / getHeight()) * 2 + 1;
         clickStartPosition = { x: event.offsetX, y: event.offsetY };
@@ -324,13 +323,12 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
      * Function to handle pointer up events
      */
     const onDocumentMouseUp = (event) => {
-        console.log('onDocumentMouseUp: Mouse release detected:', event, 'hasMoved:', hasMoved);
         let moveX = Math.abs(clickStartPosition.x - event.offsetX);
         let moveY = Math.abs(clickStartPosition.y - event.offsetY);
-        hasMoved = moveX > 15 || moveY > 15;
+        hasMoved = moveX > 5 || moveY > 5;
     
-        if (!hasMoved && timeDifference < 100 && activeSticker) { // Time check to determine significant enough move
-            openModal(activeSticker.videoid); 
+        if (!hasMoved && activeSticker) {
+            openModal(activeSticker.videoid); // Open modal only if there was no significant move (click)
         }
     
         controls.enabled = true;
@@ -354,7 +352,7 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
      * move is being requested, and pushing it to the moveBuffer.
      */
     const onDocumentMouseMove = (event) => {
-        console.log('onDocumentMouseMove: Mouse move detected:', event, 'dragging:', dragging);
+    
         // do nothing if not dragging
         if (!dragging || chosenAxis !== null) {
             return;
