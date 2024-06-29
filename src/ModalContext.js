@@ -11,13 +11,16 @@ export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideoID, setCurrentVideoID] = useState(null);
   const [overlayVisible, setOverlayVisible] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
   const navigate = useNavigate();
 
-  const [isScrolling, setIsScrolling] = useState(false); 
+  // Flag to track if any modal is open
+  const [isAnyModalOpen, setIsAnyModalOpen] = useState(false);
 
   // Function to open the modal with the video ID
   const openModal = useCallback((videoID) => {
-    if (!isModalOpen) { // Only allow opening a new modal if none is already open
+    if (!isAnyModalOpen) { // Only allow opening a new modal if none is already open
+      setIsAnyModalOpen(true);
       console.log("Opening modal with videoID:", videoID);
       setIsModalOpen(true);
       setOverlayVisible(true);
@@ -30,10 +33,11 @@ export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
         navigate(`/${videoID}`, { replace: true });
       }
     }
-  }, [isModalOpen, navigate, onModalOpen]);   
+  }, [isAnyModalOpen, navigate, onModalOpen]);
 
   // Function to close the modal
   const closeModal = useCallback(() => {
+    setIsAnyModalOpen(false);
     console.log("Closing modal");
     setIsModalOpen(false);
     setOverlayVisible(false); // Hide overlay when closing modal
@@ -91,9 +95,9 @@ export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
   }, [isModalOpen]);
 
   const providerValue = useMemo(() => ({
-    isModalOpen, currentVideoID, openModal, closeModal, overlayVisible, isScrolling
+    isModalOpen, currentVideoID, openModal, closeModal, overlayVisible, isScrolling, isAnyModalOpen // Add isAnyModalOpen to the context value
   }), [
-    isModalOpen, currentVideoID, openModal, closeModal, overlayVisible, isScrolling
+    isModalOpen, currentVideoID, openModal, closeModal, overlayVisible, isScrolling, isAnyModalOpen
   ]);
 
   return (
@@ -102,5 +106,3 @@ export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
     </ModalContext.Provider>
   );
 };
-
-export default ModalProvider;

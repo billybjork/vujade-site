@@ -116,49 +116,48 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
     }
 }, [location, openModal, closeModal, isModalOpen]);
 
-
-return (
-  <>
-    {isLoading && (
-      <div className="loading">
-        <p>Loading...</p> 
-        <img src={splashCubeGif} alt="Loading..." />
-      </div>
-    )}
-    <div 
+  return (
+    <>
+      {isLoading && (
+        <div className="loading">
+          <p>Loading...</p> 
+          <img src={splashCubeGif} alt="Loading..." />
+        </div>
+      )}
+      <div 
         onClick={(e) => {
-            if (!isModalOpen && !isScrolling) {
-                const clickedElement = e.target; 
-                if (clickedElement.closest('#cube-container')) { // Only process clicks on the cube
-                    console.log("CubeWithVideos clicked, isModalOpen:", isModalOpen, "isScrolling:", isScrolling);
-                    // Trigger modal open function here based on the clicked element
-                }
-              } else {
-                e.preventDefault();
-                e.stopPropagation();
+          if (!isAnyModalOpen && !isScrolling) {
+            const clickedElement = e.target;
+            if (clickedElement.closest('#cube-container')) { // Only process clicks on the cube
+              console.log("CubeWithVideos clicked, isModalOpen:", isModalOpen, "isScrolling:", isScrolling);
+              // Trigger modal open function here based on the clicked element
             }
-        }}
-        style={{ width: '100%', height: '100%' }} 
-    > 
-      <motion.div 
-        id="cube-container"
-        ref={cubeContainerRef}
-        initial="hidden" 
-        animate={isLoading ? "hidden" : "visible"} 
-        variants={{
-          hidden: { opacity: 0, scale: 0.95 }, 
-          visible: { 
-            opacity: isModalOpen ? 0.2 : 1, 
-            scale: 1, 
-            transition: { duration: 0.5 }
+          } else {
+            e.preventDefault();
+            e.stopPropagation();
           }
         }}
-      >
-        {/* Cube content here */}
-      </motion.div>
-    </div>
-  </>
-);
+        style={{ width: '100%', height: '100%' }} 
+      > 
+        <motion.div 
+          id="cube-container"
+          ref={cubeContainerRef}
+          initial="hidden" 
+          animate={isLoading ? "hidden" : "visible"} 
+          variants={{
+            hidden: { opacity: 0, scale: 0.95 }, 
+            visible: { 
+              opacity: isModalOpen ? 0.2 : 1, 
+              scale: 1, 
+              transition: { duration: 0.5 }
+            }
+          }}
+        >
+          {/* Cube content here */}
+        </motion.div>
+      </div>
+    </>
+  );
 }
 
 function HeaderMenu({ videos, onVideoSelect, isLoading }) {
