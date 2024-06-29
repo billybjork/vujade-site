@@ -35,7 +35,7 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
   const [loadProgress, setLoadProgress] = useState(0);  
   const cubeContainerRef = useRef(null);
   const cubeMasterInitialized = useRef(false);
-  const { openModal, closeModal, isModalOpen, isScrolling, isRootURL } = useModal(); 
+  const { openModal, closeModal, isModalOpen, isScrolling } = useModal(); 
   const location = useLocation(); 
 
   // Ref to store the rendering functions
@@ -127,9 +127,12 @@ return (
     )}
       <div 
           pointerEvents={isAnyModalOpen || isScrolling ? 'none' : 'auto'} // Disable when modal is open OR scrolling
-          onClick={(e) => {
-            if (isRootURL) closeModal();
-        }}
+        onClick={(e) => {
+          if (!isModalOpen && !isScrolling) { // Prevent clicks if modal open or scrolling
+            console.log("CubeWithVideos clicked, isModalOpen:", isModalOpen, "isScrolling:", isScrolling);
+            closeModal(); 
+          }
+        }} 
         style={{ width: '100%', height: '100%' }} 
       > 
         <motion.div 
@@ -556,7 +559,6 @@ function AppWrapper() {
   const [isCloseVisible, setIsCloseVisible] = useState(false);
   const [isQuestionMarkVisible, setIsQuestionMarkVisible] = useState(false);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
-  const { isRootURL } = useModal();
 
   const toggleAbout = () => {
     if (!isCloseVisible) {
@@ -606,7 +608,7 @@ function AppWrapper() {
     <ModalProvider>
       {/* Pass isLoading to HeaderMenu */}
       {menuVisible && <HeaderMenu videos={allVideos} isLoading={cubeLoading} />} 
-      <CubeWithVideos setCubeLoading={setCubeLoading} setIsLoadingExternal={setIsLoading} /> {/* Remove isRootURL here */}
+      <CubeWithVideos setCubeLoading={setCubeLoading} setIsLoadingExternal={setIsLoading} />
       {overlayVisible && (
         <div className="overlay" style={{
           position: 'fixed',

@@ -1,65 +1,47 @@
 import React, {
-  createContext,
-  useContext,
-  useState,
-  useMemo,
-  useCallback,
-  useEffect,
+  createContext, useContext, useState, useMemo, useCallback, useEffect
 } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom'; // Import useLocation
+import { useNavigate } from 'react-router-dom';
 
-// Create context for managing modal state and functionality
 const ModalContext = createContext();
 
-// Custom hook to easily access the modal context
 export const useModal = () => useContext(ModalContext);
 
 export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideoID, setCurrentVideoID] = useState(null);
   const [overlayVisible, setOverlayVisible] = useState(false);
-  const [isScrolling, setIsScrolling] = useState(false);
   const navigate = useNavigate();
 
-  // Track if the current URL is the root URL ('/')
-  const location = useLocation(); // Get location object
-  const [isRootURL, setIsRootURL] = useState(location.pathname === '/');
-
-  useEffect(() => {
-      setIsRootURL(location.pathname === '/'); // Update isRootURL whenever location changes
-  }, [location]);
+  const [isScrolling, setIsScrolling] = useState(false); 
 
   // Function to open the modal with the video ID
   const openModal = useCallback((videoID) => {
-      // Only open modal if it's currently closed AND we are on the root URL
-      if (!isModalOpen && isRootURL) {
-          console.log('Opening modal with videoID:', videoID);
-          setIsModalOpen(true);
-          setOverlayVisible(true); // Show overlay when opening modal
-          setCurrentVideoID(videoID);
-          if (onModalOpen) onModalOpen(); // Call the optional callback function passed as a prop
-
-          // Update URL for deep linking (optional)
-          if (videoID === 'about') {
-              if (window.location.pathname !== '/about') navigate('/about', { replace: true });
-          } else {
-              if (window.location.pathname !== `/${videoID}`) navigate(`/${videoID}`, { replace: true });
-          }
-      } else {
-          console.log('Modal already open, or not on root URL. Not opening another one.');
+    if (!isModalOpen) { // Only allow opening a new modal if none is already open
+      console.log("Opening modal with videoID:", videoID);
+      setIsModalOpen(true);
+      setOverlayVisible(true);
+      setCurrentVideoID(videoID);
+      if (onModalOpen) onModalOpen();
+      // Conditionally update the URL if not already updated
+      if (videoID === 'about' && window.location.pathname !== '/about') {
+        navigate('/about', { replace: true });
+      } else if (window.location.pathname !== `/${videoID}`) {
+        navigate(`/${videoID}`, { replace: true });
       }
-  }, [isModalOpen, isRootURL, navigate, onModalOpen]);
+    }
+  }, [isModalOpen, navigate, onModalOpen]);   
 
   // Function to close the modal
   const closeModal = useCallback(() => {
-      console.log('Closing modal');
-      setIsModalOpen(false);
-      setOverlayVisible(false); // Hide overlay when closing modal
-      setCurrentVideoID(null);
-      if (onModalClose) onModalClose();
-      if (window.location.pathname !== '/') {
-          navigate('/', { replace: true }); // Navigate back to home on close
-      }
+    console.log("Closing modal");
+    setIsModalOpen(false);
+    setOverlayVisible(false); // Hide overlay when closing modal
+    setCurrentVideoID(null);
+    if (onModalClose) onModalClose(); // Custom callback on close
+    if (window.location.pathname !== '/') {
+      navigate('/', { replace: true }); // Navigate back to home on close
+    }
   }, [navigate, onModalClose]);
 
   // Manage scrolling state
@@ -109,9 +91,9 @@ export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
   }, [isModalOpen]);
 
   const providerValue = useMemo(() => ({
-    isModalOpen, currentVideoID, openModal, closeModal, overlayVisible, isScrolling, isRootURL
+    isModalOpen, currentVideoID, openModal, closeModal, overlayVisible, isScrolling
   }), [
-    isModalOpen, currentVideoID, openModal, closeModal, overlayVisible, isScrolling, isRootURL
+    isModalOpen, currentVideoID, openModal, closeModal, overlayVisible, isScrolling
   ]);
 
   return (

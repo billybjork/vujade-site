@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from "../three/OrbitControls.js";
 import Cube from "./Cube.js";
+import _ from 'lodash';
 import {
     Axes,
     KeysToMoves,
@@ -273,10 +274,11 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     document.addEventListener("touchend", onTouchEnd, false);
 
     const onTouchMove = (event) => {
+        event.preventDefault(); // Prevents scrolling the page while touching the cube
         event.offsetX = event.touches[0].clientX;
         event.offsetY = event.touches[0].clientY - getHeaderSize();
         onDocumentMouseMove(event);
-    };
+      };      
     document.addEventListener("touchmove", onTouchMove, false);
 
     /**
@@ -328,9 +330,12 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
         hasMoved = moveX > 15 || moveY > 15;
     
         if (!hasMoved && activeSticker) {
-            openModal(activeSticker.videoid); // Open modal only if there was no significant move (click)
+            if (!isModalOpen) { // Ensure no modal is open before opening a new one
+              openModal(activeSticker.videoid); 
+            }
         }
     
+        // Reset interactions
         controls.enabled = true;
         dragging = false;
         selectedObject = ClickFlags.NONE;
@@ -502,7 +507,7 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
         // set dragging to false to not trigger another move
         dragging = false;
     };
-    document.addEventListener("pointermove", onDocumentMouseMove, false);
+    document.addEventListener("pointermove", _.throttle(onDocumentMouseMove, 10), false);
 
     // Start the animation loop with update function integrated
     render(renderer, scene, camera, update);
