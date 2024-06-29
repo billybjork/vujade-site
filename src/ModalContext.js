@@ -12,12 +12,16 @@ export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
   const [currentVideoID, setCurrentVideoID] = useState(null);
   const [overlayVisible, setOverlayVisible] = useState(false);
   const navigate = useNavigate();
-
   const [isScrolling, setIsScrolling] = useState(false); 
+  const [isRootURL, setIsRootURL] = useState(location.pathname === '/');
+
+  useEffect(() => {
+    setIsRootURL(location.pathname === '/'); // Update on location change
+  }, [location]);
 
   // Function to open the modal with the video ID
   const openModal = useCallback((videoID) => {
-    if (!isModalOpen) {
+    if (!isModalOpen && isRootURL) {
       console.log("Opening modal with videoID:", videoID);
       setIsModalOpen(true);
       setOverlayVisible(true); // Show overlay when opening modal
@@ -32,7 +36,7 @@ export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
     } else {
       console.log("Modal already open, not opening another one");
     }
-  }, [isModalOpen, navigate, onModalOpen]); 
+  }, [isModalOpen, isRootURL, navigate, onModalOpen]); 
 
   // Function to close the modal
   const closeModal = useCallback(() => {

@@ -29,7 +29,7 @@ const fadeInVariants = {
   }
 };  
 
-function CubeWithVideos({ setCubeLoading, setIsLoadingExternal, onModalClose }) {
+function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
   const [cubeVideos, setCubeVideos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState(0);  
@@ -103,17 +103,18 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal, onModalClose }) 
   useEffect(() => {
     const path = location.pathname;
     const videoID = path.split('/')[1];
-    
-    if (isModalOpen) {
-      onModalClose(); // This ensures that any open modal is closed when the route changes
-    } 
-    
+
+    // Handle 'about' modal separately
     if (videoID === 'about') {
-      openModal('about');
-    } else if (videoID && videoID !== 'about') {
-      openModal(videoID);
+        if (!isModalOpen) openModal('about');
+    } else if (videoID && videoID !== 'about' && !isModalOpen) {
+        // Handle video modals
+        openModal(videoID);
+    } else if (!videoID && isModalOpen) {
+        // Close modal when no videoID or 'about' is in the path
+        closeModal();
     }
-  }, [location, openModal, onModalClose, isModalOpen, isScrolling]);
+}, [location, openModal, closeModal, isModalOpen]);
 
 
 return (
@@ -126,12 +127,11 @@ return (
     )}
       <div 
           pointerEvents={isAnyModalOpen || isScrolling ? 'none' : 'auto'} // Disable when modal is open OR scrolling
-        onClick={(e) => {
-          if (!isModalOpen && !isScrolling) { // Prevent clicks if modal open or scrolling
-            console.log("CubeWithVideos clicked, isModalOpen:", isModalOpen, "isScrolling:", isScrolling);
-            closeModal(); 
-          }
-        }} 
+          onClick={(e) => {
+            if (isRootURL && !isModalOpen && !isScrolling) {
+              closeModal();
+            }
+          }}
         style={{ width: '100%', height: '100%' }} 
       > 
         <motion.div 
@@ -571,11 +571,6 @@ function AppWrapper() {
     }
   };
 
-  const handleModalClose = useCallback(() => {
-    closeModal();
-    navigate('/'); 
-  }, [closeModal, navigate]);
-
   // Updated useEffect for the question mark button visibility
   useEffect(() => {
     const shouldShowQuestionMark = !cubeLoading && (!isModalOpen || (isModalOpen && !isAboutModalOpen));
@@ -612,7 +607,7 @@ function AppWrapper() {
     <ModalProvider>
       {/* Pass isLoading to HeaderMenu */}
       {menuVisible && <HeaderMenu videos={allVideos} isLoading={cubeLoading} />} 
-      <CubeWithVideos setCubeLoading={setCubeLoading} setIsLoadingExternal={setIsLoading} onModalClose={handleModalClose}/>
+      <CubeWithVideos setCubeLoading={setCubeLoading} setIsLoadingExternal={setIsLoading} />
       {overlayVisible && (
         <div className="overlay" style={{
           position: 'fixed',
