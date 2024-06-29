@@ -272,13 +272,10 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     };
     document.addEventListener("touchend", onTouchEnd, false);
 
-    const onTouchMove = (event) => {
-        event.preventDefault(); // Prevents scrolling the page while touching the cube
-        event.offsetX = event.touches[0].clientX;
-        event.offsetY = event.touches[0].clientY - getHeaderSize();
-        onDocumentMouseMove(event);
-      };      
-    document.addEventListener("touchmove", onTouchMove, false);
+    document.addEventListener("touchmove", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+}, { passive: false });
 
     /**
      * Mouse events
@@ -294,7 +291,8 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     /**
      * Function to handle pointer down events
      */
-    const onDocumentMouseDown = (event) => {
+
+    document.addEventListener("pointerdown", (event) => {
         mouse.x = (event.offsetX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.offsetY / getHeight()) * 2 + 1;
         clickStartPosition = { x: event.offsetX, y: event.offsetY };
@@ -309,16 +307,14 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
             let clickedMesh = intersects[0].object;
             if (cube.stickersMap.has(clickedMesh.uuid)) {
                 selectedObject = intersects[0];
-                activeSticker = cube.stickersMap.get(clickedMesh.uuid);  // Set activeSticker immediately on click
+                activeSticker = cube.stickersMap.get(clickedMesh.uuid);
                 activeSticker.dim();
             }
         } else {
             controls.enabled = true;
             selectedObject = ClickFlags.ROTATION;
         }
-    };   
-
-    document.addEventListener("pointerdown", onDocumentMouseDown, false);
+    }, false);
 
     /**
      * Function to handle pointer up events
