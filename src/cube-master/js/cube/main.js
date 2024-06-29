@@ -325,7 +325,7 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     const onDocumentMouseUp = (event) => {
         let moveX = Math.abs(clickStartPosition.x - event.offsetX);
         let moveY = Math.abs(clickStartPosition.y - event.offsetY);
-        hasMoved = moveX > 5 || moveY > 5;
+        hasMoved = moveX > 15 || moveY > 15;
     
         if (!hasMoved && activeSticker) {
             openModal(activeSticker.videoid); // Open modal only if there was no significant move (click)

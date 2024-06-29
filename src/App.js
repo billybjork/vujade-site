@@ -401,10 +401,10 @@ function RenderAboutContent() {
         </div>
       </div>
       <div style={{ textAlign: 'center', color: 'grey', fontSize: 'small', opacity: contentVisible ? 1 : 0, transition: 'opacity 2s' }}>
-        © VU JA DE
+        (ↄ) VU JA DE
         <br />
         <br />
-        Rubik's Cube source code: <a href="https://github.com/KeatonMueller/cube" target="_blank" rel="noopener noreferrer" style={{ color: 'grey' }}>Keaton Muller</a>
+        Rubik's Cube source code:<br></br> <a href="https://github.com/KeatonMueller/cube" target="_blank" rel="noopener noreferrer" style={{ color: 'grey' }}>Keaton Muller</a>
       </div>
     </div>
   );    
