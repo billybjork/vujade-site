@@ -35,7 +35,7 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
   const [loadProgress, setLoadProgress] = useState(0);  
   const cubeContainerRef = useRef(null);
   const cubeMasterInitialized = useRef(false);
-  const { openModal, closeModal, isModalOpen, isScrolling } = useModal(); 
+  const { openModal, closeModal, isModalOpen, isScrolling, isRootURL } = useModal(); 
   const location = useLocation(); 
 
   // Ref to store the rendering functions
@@ -128,10 +128,8 @@ return (
       <div 
           pointerEvents={isAnyModalOpen || isScrolling ? 'none' : 'auto'} // Disable when modal is open OR scrolling
           onClick={(e) => {
-            if (isRootURL && !isModalOpen && !isScrolling) {
-              closeModal();
-            }
-          }}
+            if (isRootURL) closeModal();
+        }}
         style={{ width: '100%', height: '100%' }} 
       > 
         <motion.div 
