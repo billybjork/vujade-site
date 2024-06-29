@@ -420,6 +420,9 @@ function Modal() {
   const [videoInfo, setVideoInfo] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const modalRef = useRef(null);  // Ref for the regular video modal
+  const aboutBackdropRef = useRef(null); // Ref for the About modal backdrop
+
   // Fetch video information based on currentVideoID
   useEffect(() => {
     async function fetchVideoInfo() {
@@ -438,34 +441,34 @@ function Modal() {
     }
     fetchVideoInfo();
   }, [currentVideoID]);
-  
 
-  // Prevent scrolling on touch devices while the modal is open
+  const handleScrollOrTouchMove = (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+  };
+
   useEffect(() => {
-    const touchHandler = (e) => {
-        if (e.target !== document.querySelector('.modal') && e.target !== document.querySelector('.about-screen') && e.target !== document.querySelector('.close')) {
-          e.stopPropagation();
-          e.preventDefault(); 
-        }
-    };
-
     if (isModalOpen) {
-      document.addEventListener('touchstart', touchHandler, { passive: false });
-      document.addEventListener('touchmove', touchHandler, { passive: false });
-      document.addEventListener('touchend', touchHandler, { passive: false });
+      const targetRef = currentVideoID === 'about' ? aboutBackdropRef.current : modalRef.current;
+      if (targetRef) {
+        targetRef.addEventListener('touchmove', handleScrollOrTouchMove, { passive: false });
+        targetRef.addEventListener('scroll', handleScrollOrTouchMove, { passive: false });
+      }
     }
     return () => {
-      document.removeEventListener('touchstart', touchHandler);
-      document.removeEventListener('touchmove', touchHandler);
-      document.removeEventListener('touchend', touchHandler);
+      const targetRef = currentVideoID === 'about' ? aboutBackdropRef.current : modalRef.current;
+      if (targetRef) {
+        targetRef.removeEventListener('touchmove', handleScrollOrTouchMove);
+        targetRef.removeEventListener('scroll', handleScrollOrTouchMove);
+      }
     };
-  }, [isModalOpen]);
+  }, [isModalOpen, currentVideoID]);
 
   if (!isModalOpen || loading || !currentVideoID) return null;
   
   // Motion Variants for the modal backdrop and the modal itself
   const modalBackdropVariants = {
-    hidden: { opacity: 0 }, // Start invisible
+    hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { duration: 0.3, ease: "easeInOut" } },
     exit: { opacity: 0, transition: { duration: 0.3, ease: "easeInOut" } },
   };
@@ -489,12 +492,12 @@ function Modal() {
       <AnimatePresence>
         <motion.div
           className="about-modal-backdrop"
+          ref={aboutBackdropRef}
           variants={modalBackdropVariants} 
           initial="hidden"
           animate="visible"
           exit="exit"
           onClick={handleBackdropClick}
-          onTouchMove={e => e.preventDefault()}
           onTouchStart={e => e.stopPropagation()}
         >
           <motion.div 
@@ -533,11 +536,11 @@ function Modal() {
           animate="visible"
           exit="exit"
           onClick={handleBackdropClick}
-          onTouchMove={e => e.preventDefault()}
           onTouchStart={e => e.stopPropagation()}
         >
           <motion.div 
             className="modal"
+            ref={modalRef}
             onClick={e => e.stopPropagation()} // Prevent click from propagating to backdrop
             onTouchStart={e => e.stopPropagation()} // Stop touch events from propagating
             variants={modalVariants}
