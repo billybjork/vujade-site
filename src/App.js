@@ -558,6 +558,7 @@ function AppWrapper() {
   const [isCloseVisible, setIsCloseVisible] = useState(false);
   const [isQuestionMarkVisible, setIsQuestionMarkVisible] = useState(false);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+  const { isRootURL } = useModal();
 
   const toggleAbout = () => {
     if (!isCloseVisible) {
@@ -607,7 +608,7 @@ function AppWrapper() {
     <ModalProvider>
       {/* Pass isLoading to HeaderMenu */}
       {menuVisible && <HeaderMenu videos={allVideos} isLoading={cubeLoading} />} 
-      <CubeWithVideos setCubeLoading={setCubeLoading} setIsLoadingExternal={setIsLoading} />
+      <CubeWithVideos setCubeLoading={setCubeLoading} setIsLoadingExternal={setIsLoading} /> {/* Remove isRootURL here */}
       {overlayVisible && (
         <div className="overlay" style={{
           position: 'fixed',
