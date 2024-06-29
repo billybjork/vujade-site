@@ -127,12 +127,18 @@ return (
     )}
       <div 
           pointerEvents={isAnyModalOpen || isScrolling ? 'none' : 'auto'} // Disable when modal is open OR scrolling
-        onClick={(e) => {
-          if (!isModalOpen && !isScrolling) { // Prevent clicks if modal open or scrolling
-            console.log("CubeWithVideos clicked, isModalOpen:", isModalOpen, "isScrolling:", isScrolling);
-            closeModal(); 
-          }
-        }} 
+          onClick={(e) => {
+            if (!isModalOpen && !isScrolling) { // Prevent clicks if modal open or scrolling
+              console.log("CubeWithVideos clicked, isModalOpen:", isModalOpen, "isScrolling:", isScrolling);
+              // Instead of closeModal(), you want to check if a video has been clicked:
+              if (e.target.classList.contains('video')) { // Check if it's a video cube face
+                  const videoId = e.target.getAttribute('data-videoid'); // Get the video ID
+                  openModal(videoId); // Open the modal
+              } else {
+                  closeModal(); // Close any open modal if clicking elsewhere on the cube
+              }
+            }
+          }}
         style={{ width: '100%', height: '100%' }} 
       > 
         <motion.div 
@@ -415,6 +421,7 @@ function Modal() {
   const navigate = useNavigate();
   const [videoInfo, setVideoInfo] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [videoLoading, setVideoLoading] = useState(true);
 
   // Fetch video information based on currentVideoID
   useEffect(() => {
@@ -527,13 +534,17 @@ function Modal() {
             </span>
 
             <div className="embed-container">
-              <iframe
-                key={videoID}
+              {/* IFRAME WRAPPER: */}
+              <div style={{ pointerEvents: videoLoading ? 'all' : 'none', touchAction: 'none' }}>
+                <iframe
+                  key={videoID}
                 src={`https://player.vimeo.com/video/${videoID}`}
                 allow="autoplay; fullscreen"
                 allowFullScreen
                 title={videoInfo.videoName}
+                onLoad={() => setVideoLoading(false)}
               ></iframe>
+              </div>
             </div>
             <div className="text-container">
               <h2>{videoInfo.videoName}</h2>
