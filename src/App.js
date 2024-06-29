@@ -125,13 +125,13 @@ return (
         <img src={splashCubeGif} alt="Loading..." />
       </div>
     )}
-      <div 
-          pointerEvents={isAnyModalOpen || isScrolling ? 'none' : 'auto'} // Disable when modal is open OR scrolling
+    <div 
+        pointerEvents={isAnyModalOpen || isScrolling ? 'none' : 'auto'} // This remains as a safeguard
         onClick={(e) => {
-          if (!isModalOpen && !isScrolling) { // Prevent clicks if modal open or scrolling
-            console.log("CubeWithVideos clicked, isModalOpen:", isModalOpen, "isScrolling:", isScrolling);
-            closeModal(); 
-          }
+            if (!isModalOpen && !isScrolling) { // This is key: only process clicks if no modal is open and not scrolling
+                console.log("CubeWithVideos clicked, isModalOpen:", isModalOpen, "isScrolling:", isScrolling);
+                // Trigger modal open function here based on where the user clicked if needed
+            }
         }} 
         style={{ width: '100%', height: '100%' }} 
       > 
@@ -434,6 +434,21 @@ function Modal() {
     fetchVideoInfo();
   }, [currentVideoID]);
 
+  // Prevent scrolling on touch devices while the modal is open
+  useEffect(() => {
+    const touchMoveHandler = (e) => {
+      e.preventDefault();  // Prevent scrolling the background
+    };
+
+    if (isModalOpen) {
+      document.addEventListener('touchmove', touchMoveHandler, { passive: false });
+    }
+
+    return () => {
+      document.removeEventListener('touchmove', touchMoveHandler);
+    };
+  }, [isModalOpen]); // Only add/remove the event listener when isModalOpen changes
+
   if (!isModalOpen || loading || !currentVideoID) return null;
   
   // Motion Variants for the modal backdrop and the modal itself
@@ -454,6 +469,7 @@ function Modal() {
     closeModal();
     navigate('/');
     e.stopPropagation(); // Stop click event from propagating
+    e.preventDefault();  // Prevent any default behavior that might be triggered
   };
 
   if (currentVideoID === 'about') {
