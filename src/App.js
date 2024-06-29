@@ -126,34 +126,36 @@ return (
       </div>
     )}
     <div 
-        pointerEvents={isAnyModalOpen || isScrolling ? 'none' : 'auto'} // This remains as a safeguard
         onClick={(e) => {
-            if (!isModalOpen && !isScrolling) { // This is key: only process clicks if no modal is open and not scrolling
-                console.log("CubeWithVideos clicked, isModalOpen:", isModalOpen, "isScrolling:", isScrolling);
-                // Trigger modal open function here based on where the user clicked if needed
+            if (!isModalOpen && !isScrolling) {
+                const clickedElement = e.target; 
+                if (clickedElement.closest('#cube-container')) { // Only process clicks on the cube
+                    console.log("CubeWithVideos clicked, isModalOpen:", isModalOpen, "isScrolling:", isScrolling);
+                    // Trigger modal open function here based on the clicked element
+                }
             }
         }} 
         style={{ width: '100%', height: '100%' }} 
-      > 
-        <motion.div 
-          id="cube-container"
-          ref={cubeContainerRef}
-          initial="hidden" 
-          animate={isLoading ? "hidden" : "visible"} 
-          variants={{
-            hidden: { opacity: 0, scale: 0.95 }, 
-            visible: { 
-              opacity: isModalOpen ? 0.2 : 1, 
-              scale: 1, 
-              transition: { duration: 0.5 }
-            }
-          }}
-        >
-          {/* Cube content here */}
-        </motion.div>
-      </div>
-    </>
-  );
+    > 
+      <motion.div 
+        id="cube-container"
+        ref={cubeContainerRef}
+        initial="hidden" 
+        animate={isLoading ? "hidden" : "visible"} 
+        variants={{
+          hidden: { opacity: 0, scale: 0.95 }, 
+          visible: { 
+            opacity: isModalOpen ? 0.2 : 1, 
+            scale: 1, 
+            transition: { duration: 0.5 }
+          }
+        }}
+      >
+        {/* Cube content here */}
+      </motion.div>
+    </div>
+  </>
+);
 }
 
 function HeaderMenu({ videos, onVideoSelect, isLoading }) {
@@ -433,11 +435,13 @@ function Modal() {
     }
     fetchVideoInfo();
   }, [currentVideoID]);
+  
 
   // Prevent scrolling on touch devices while the modal is open
   useEffect(() => {
     const touchMoveHandler = (e) => {
       e.preventDefault();  // Prevent scrolling the background
+      e.stopPropagation(); // Prevent further event propagation
     };
 
     if (isModalOpen) {
