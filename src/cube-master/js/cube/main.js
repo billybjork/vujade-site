@@ -329,32 +329,32 @@ document.addEventListener("touchmove", {passive: false});
     const onDocumentMouseUp = (event) => {
         let moveX = Math.abs(clickStartPosition.x - event.offsetX);
         let moveY = Math.abs(clickStartPosition.y - event.offsetY);
-    
+
         // Use a timeout to delay the modal check
         setTimeout(() => {
           if (!hasMoved && activeSticker && !isModalOpen) {
             openModal(activeSticker.videoid); 
           }
         }, 50); // Adjust this delay as needed (e.g., 150ms - 300ms)
-    
+
         // Reset interactions
         controls.enabled = true;
         dragging = false;
         selectedObject = ClickFlags.NONE;
         chosenAxis = null;
         chosenDir = 0;
-    
-    if (activeSticker) {
-        console.log("Trying to open modal with videoID:", activeSticker.videoid); 
-        openModal(activeSticker.videoid, location); // Always attempt to open the modal
-        activeSticker.reset();
-        activeSticker = null;
-    }
-    
+
+        if (activeSticker) {
+            console.log("Trying to open modal with videoID:", activeSticker.videoid); 
+            openModal(activeSticker.videoid, window.location); // Explicitly use window.location
+            activeSticker.reset();
+            activeSticker = null;
+        }
+
         clickStartPosition = null;
     };
 
-    document.addEventListener("pointerup", onDocumentMouseUp, false);   
+    document.addEventListener("pointerup", onDocumentMouseUp, false); 
 
     /**
      * Handle mouse move events by determining what
