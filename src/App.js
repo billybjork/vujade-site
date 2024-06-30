@@ -84,18 +84,16 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
   useEffect(() => {
     const path = location.pathname;
     const videoID = path.split('/')[1];
-
-    // Handle 'about' modal separately
-    if (videoID === 'about') {
-        if (!isModalOpen) openModal('about');
-    } else if (videoID && videoID !== 'about' && !isModalOpen) {
-        // Handle video modals
-        openModal(videoID);
+  
+    if (videoID === 'about' && !isModalOpen) {
+      openModal('about');
+    } else if (videoID && videoID !== 'about' && !isModalOpen && path === `/${videoID}`) {
+      // Ensure that modals are only opened when the URL directly matches the videoID
+      openModal(videoID);
     } else if (!videoID && isModalOpen) {
-        // Close modal when no videoID or 'about' is in the path
-        closeModal();
+      closeModal();
     }
-}, [location, openModal, closeModal, isModalOpen]);
+  }, [location, openModal, closeModal, isModalOpen]);  
 
   return (
     <>
@@ -105,27 +103,7 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
           <img src={splashCubeGif} alt="Loading..." />
         </div>
       )}
-      <div 
-        onClick={(e) => {
-          if (isModalOpen) {
-            console.log("CubeWithVideos clicked while modal open:", {
-              timestamp: new Date(),
-              target: e.target, // Log the clicked element
-            });
-            e.preventDefault();
-            e.stopPropagation();
-          } else {
-            // handle click only if no modal is open
-            console.log("CubeWithVideos clicked while modal open:", {
-              timestamp: new Date(),
-              target: e.target, // Log the clicked element for inspection
-            });
-            e.preventDefault();
-            e.stopPropagation(); // Stop the click event from reaching the cube
-          }
-        }}
-        style={{ width: '100%', height: '100%' }} 
-      > 
+      <div> 
         <motion.div 
           id="cube-container"
           ref={cubeContainerRef}
@@ -174,9 +152,11 @@ function HeaderMenu({ videos, onVideoSelect, isLoading }) {
   }, [isOpen]);
 
   const handleVideoClick = (videoId) => {
-    openModal(videoId);
+    if (!isModalOpen && window.location.pathname === '/') {
+      openModal(videoId);
+    }
     setIsOpen(false);
-  };
+  };  
 
   // Define motion variants for animation
   const overlayVariants = {
@@ -438,6 +418,7 @@ function Modal() {
   }, [currentVideoID]);
 
   if (!isModalOpen || loading || !currentVideoID) return null;
+  console.log("Modal render check - isModalOpen:", isModalOpen);
   
   // Motion Variants for the modal backdrop and the modal itself
   const modalBackdropVariants = {
@@ -589,12 +570,10 @@ function AppWrapper() {
   useEffect(() => {
     if (location.pathname === '/about' && !isModalOpen) {
       openModal('about');
-      setIsCloseVisible(true); // Ensure button is "X" when modal is open
-    } else if (location.pathname !== '/about' && isModalOpen && currentVideoID !== 'about') {
+    } else if (location.pathname !== '/about' && isModalOpen && currentVideoID === 'about') {
       closeModal();
-      setIsCloseVisible(false); // Change button to "?"
     }
-  }, [location, isModalOpen, currentVideoID, openModal, closeModal]);
+  }, [location, isModalOpen, currentVideoID, openModal, closeModal]);  
 
   useEffect(() => {
     const fetchAllVideos = async () => {
