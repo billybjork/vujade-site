@@ -202,6 +202,9 @@ html, body {
   pointer-events: all;
   background-color: rgba(0, 0, 0, 1);
   z-index: 2051 !important;
+  overflow: hidden;
+  user-select: none; /* Disable text selection */
+  -webkit-user-select: none; /* For Safari */
 }
 
 .about-modal-backdrop {
@@ -218,6 +221,8 @@ html, body {
   transition: backdrop-filter 0.3s ease-in-out; /* Add this line */
   touch-action: none;
   pointer-events: all;
+  user-select: none; /* Disable text selection */
+  -webkit-user-select: none; /* For Safari */
 }
 
 .modal {
@@ -226,15 +231,15 @@ html, body {
   max-width: 800px; /* Max width for desktop */
   height: 100vh;
   border-radius: 8px;
-  overflow: hidden;
+  overflow: auto;
   display: flex;
   flex-direction: column;
-  z-index: 2051 !important;
+  z-index: 2052 !important;
   padding: 80px 20px 20px 20px; /* Increased top padding to accommodate close button */
   box-sizing: border-box; /* Ensures padding is included in the width calculation */
   overflow-y: auto;
   pointer-events: all;
-  touch-action: auto;
+  touch-action: pan-y; /* Allow vertical scrolling only */
   -webkit-overflow-scrolling: touch;
 }
 
@@ -247,7 +252,7 @@ html, body {
   max-height: 100vh;
   overflow: auto;
   pointer-events: auto;
-  touch-action: auto;
+  touch-action: pan-y; /* Allow vertical scrolling only */
 }
 
 @media (max-width: 768px) {

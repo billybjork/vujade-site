@@ -107,14 +107,15 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
       )}
       <div 
         onClick={(e) => {
-          if (!isModalOpen) {
-            // handle click only if no modal is open
-            const clickedElement = e.target;
-            if (clickedElement.closest('#cube-container')) {
-              console.log("CubeWithVideos clicked, isModalOpen:", isModalOpen );
-              // Proceed with actions only if it's relevant and no modal is open
-            }
+          if (isModalOpen) {
+            console.log("CubeWithVideos clicked while modal open:", {
+              timestamp: new Date(),
+              target: e.target, // Log the clicked element
+            });
+            e.preventDefault();
+            e.stopPropagation();
           } else {
+            // handle click only if no modal is open
             console.log("CubeWithVideos clicked while modal open:", {
               timestamp: new Date(),
               target: e.target, // Log the clicked element for inspection
@@ -408,6 +409,15 @@ function Modal() {
   const modalRef = useRef(null);  // Ref for the regular video modal
   const aboutBackdropRef = useRef(null); // Ref for the About modal backdrop
 
+  const handleTouchMove = (e) => {
+    e.stopPropagation();
+
+    // Prevent default to stop scrolling on body when modal is open 
+    if (isModalOpen) { 
+      e.preventDefault(); 
+    }
+  };
+
   // Fetch video information based on currentVideoID
   useEffect(() => {
     async function fetchVideoInfo() {
@@ -462,6 +472,7 @@ function Modal() {
           exit="exit"
           onClick={handleBackdropClick}
           onTouchStart={e => e.stopPropagation()}
+          onTouchMove={handleTouchMove}
         >
           <motion.div 
             className="modal"
@@ -491,22 +502,29 @@ function Modal() {
   return (
     <AnimatePresence>
       {isModalOpen && (
-        <motion.div
-          className="modal-backdrop"
+        <motion.div 
+          className="modal-backdrop" 
           variants={modalBackdropVariants} 
-          initial="hidden"
-          animate="visible"
-          exit="exit"
+          initial="hidden" 
+          animate="visible" 
+          exit="exit" 
+          // Prevent all clicks/touches from reaching elements underneath
           onClick={handleBackdropClick}
-          onTouchStart={e => e.stopPropagation()}
+          onTouchStart={handleBackdropClick}
+          onTouchMove={handleTouchMove}
         >
           <motion.div 
-            className="modal"
+            className="modal" 
             ref={modalRef}
-            onClick={e => e.stopPropagation()} // Prevent click from propagating to backdrop
-            variants={modalVariants}
-            initial="hidden"
-            animate="visible"
+            // Key change: Prevent clicks from going through the modal
+            onClick={(e) => {
+              e.stopPropagation(); 
+              e.preventDefault();
+            }} 
+            onTouchStart={e => e.stopPropagation()}
+            variants={modalVariants} 
+            initial="hidden" 
+            animate="visible" 
             exit="exit"
           >
             <span className="close" onClick={() => { 
@@ -516,7 +534,6 @@ function Modal() {
             }}>
               &times;
             </span>
-
             <div className="embed-container">
               <iframe
                 key={videoID}
@@ -536,7 +553,7 @@ function Modal() {
         </motion.div>
       )}
     </AnimatePresence>
-  );
+  ); 
 }
 
 function AppWrapper() {
