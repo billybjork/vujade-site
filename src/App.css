@@ -87,13 +87,13 @@ html, body {
   display: flex;
   align-items: flex-start;
   width: 100%;
-  margin-bottom: 10px;
-  padding: 8px 16px;
+  margin-bottom: 20px;
+  padding: 5px 25px;
   text-align: left;
   background-color: transparent;
   border: none;
   cursor: pointer;
-  transition: background-color 0.3s ease; /* Smooth transitions for background and transform */
+  transition: background-color 0.3s ease-in-out, font-weight 0.3s ease-in-out;
 }
 
 .header-menu button:hover {
@@ -243,6 +243,10 @@ html, body {
   -webkit-overflow-scrolling: touch;
 }
 
+.about-modal {
+  top: 100px;
+}
+
 .about-screen {
   padding: 0px 20px 20px 20px;
   border-radius: 8px;
@@ -265,6 +269,11 @@ html, body {
     font-size: 20px; /* Fixed font size on mobile */
   }
 
+  .header-menu button {
+    margin-bottom: 25px;
+    padding: 0px 10px;
+  }
+
   .header-menu button:hover .video-name {
     font-size: 20px; /* Keep font size consistent on hover for mobile */
   }
@@ -281,8 +290,12 @@ html, body {
   .modal {
     width: 100%; /* Full width on smaller screens */
     max-width: none; /* No maximum width */
-    padding: 70px 0px; /* Further reduced padding on very small screens */
   }
+  .about-modal {
+    padding: 0;
+    top: 0px;
+  }
+  
 }
 
 /* Media query to target touch devices */
@@ -377,7 +390,7 @@ html, body {
 .close {
   position: absolute;
   right: 20px;
-  top: 10px; /* Fixed position from the top right of the modal */
+  top: 10px;
   font-size: 55px;
   color: #ffffff;
   cursor: pointer;

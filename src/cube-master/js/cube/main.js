@@ -335,7 +335,7 @@ document.addEventListener("touchmove", {passive: false});
           if (!hasMoved && activeSticker && !isModalOpen) {
             openModal(activeSticker.videoid); 
           }
-        }, 200); // Adjust this delay as needed (e.g., 150ms - 300ms)
+        }, 50); // Adjust this delay as needed (e.g., 150ms - 300ms)
     
         // Reset interactions
         controls.enabled = true;

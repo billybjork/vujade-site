@@ -87,13 +87,12 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
   
     if (videoID === 'about' && !isModalOpen) {
       openModal('about');
-    } else if (videoID && videoID !== 'about' && !isModalOpen && path === `/${videoID}`) {
-      // Ensure that modals are only opened when the URL directly matches the videoID
+    } else if (videoID && videoID !== 'about' && !isModalOpen && window.location.pathname === `/${videoID}`) {
       openModal(videoID);
     } else if (!videoID && isModalOpen) {
       closeModal();
     }
-  }, [location, openModal, closeModal, isModalOpen]);  
+}, [location, openModal, closeModal, isModalOpen]);
 
   return (
     <>
@@ -344,23 +343,29 @@ function RenderAboutContent() {
           <div style={{ width: '470px', textAlign: 'center', fontWeight: 'bold', fontSize: '1.2em', padding: '0', margin: '0' }}>
             <div style={{ textAlign: 'center', margin: '0', padding: '0', whiteSpace: 'nowrap' }}>
               The Rubik’s Cube has <br />
-              <span style={{ color: '#4e74ff' }}>{displayNumber}</span> <br />
+              <span style={{ color: '#4e74ff' }}>{displayNumber}</span>
+              <div style={{ opacity: contentVisible ? 1 : 0, transition: 'opacity 1s ease' }}>
               possible combinations...
+              </div>
             </div>
           </div>
         </div>
         <br />
         <br />
-        <div style={{ opacity: contentVisible ? 1 : 0, transition: 'opacity 2s' }}>
+        <div style={{ opacity: contentVisible ? 1 : 0, transition: 'opacity 2s ease 0.5s' }}>
           ... and one solution.
           <br />
           <br />
-          <p><b>VU JA DE</b> exists to scramble the “solved” arrangements of internet ephemera. To turn <i>been here before</i> into <i>never seen this before.</i> From <i>déjà vu</i> to <i>vujà de.</i></p>
+          <div style={{ transition: 'opacity 2s ease 0.7s', opacity: contentVisible ? 1 : 0 }}>
+            <p><b>VU JA DE</b> exists to scramble the “solved” arrangements of internet ephemera. To turn <i>been here before</i> into <i>never seen this before.</i> From <i>déjà vu</i> to <i>vujà de.</i></p>
+          </div>
           <br />
-          <p>Like the 43 quintillion permutations of the Rubik's Cube, these stories are starting points, not resolutions. They're not made for an algorithmic feed or a distracted scroll, which is why they come to your email.</p>
+          <div style={{ transition: 'opacity 2s ease 0.9s', opacity: contentVisible ? 1 : 0 }}>
+            <p>Like the 43 quintillion permutations of the Rubik's Cube, these stories are starting points, not resolutions. They're not made for an algorithmic feed or a distracted scroll, which is why they come to your email.</p>
+          </div>
           <br />
           <br />
-          <div className="about-embed" style={{ display: 'flex', justifyContent: 'center' }}>
+          <div className="about-embed" style={{ display: 'flex', justifyContent: 'center', transition: 'opacity 2s ease 1.1s', opacity: contentVisible ? 1 : 0 }}>
             <div id="custom-substack-embed"></div>
             <br></br>
             <br></br>
@@ -370,14 +375,14 @@ function RenderAboutContent() {
           </div>
         </div>
       </div>
-      <div style={{ textAlign: 'center', color: 'grey', fontSize: 'small', opacity: contentVisible ? 1 : 0, transition: 'opacity 2s' }}>
+      <div style={{ textAlign: 'center', color: 'grey', fontSize: 'small', opacity: contentVisible ? 1 : 0, transition: 'opacity 2s ease 1.3s' }}>
         (ↄ) VU JA DE
         <br />
         <br />
         Rubik's Cube source code:<br></br> <a href="https://github.com/KeatonMueller/cube" target="_blank" rel="noopener noreferrer" style={{ color: 'grey' }}>Keaton Muller</a>
       </div>
     </div>
-  );    
+  );  
 }
 
 function Modal() {
@@ -385,6 +390,7 @@ function Modal() {
   const navigate = useNavigate();
   const [videoInfo, setVideoInfo] = useState(null);
   const [loading, setLoading] = useState(false);
+  const location = useLocation();
 
   const modalRef = useRef(null);  // Ref for the regular video modal
   const aboutBackdropRef = useRef(null); // Ref for the About modal backdrop
@@ -444,26 +450,26 @@ function Modal() {
   if (currentVideoID === 'about') {
     return (
       <AnimatePresence>
-        <motion.div
+        <motion.div 
           className="about-modal-backdrop"
           ref={aboutBackdropRef}
           variants={modalBackdropVariants} 
-          initial="hidden"
-          animate="visible"
+          initial="hidden" 
+          animate="visible" 
           exit="exit"
-          onClick={handleBackdropClick}
-          onTouchStart={e => e.stopPropagation()}
+          onClick={handleBackdropClick} 
+          onTouchStart={(e) => e.stopPropagation()}
           onTouchMove={handleTouchMove}
         >
           <motion.div 
-            className="modal"
-            onClick={e => e.stopPropagation()} // Prevent click from propagating to backdrop
-            initial={{ opacity: 0, y: 100 }}
-            animate={{ opacity: 1, y: 0 }}
+            className="modal about-modal" // Add the new class here
+            onClick={(e) => e.stopPropagation()} 
+            initial={{ opacity: 0, y: 100 }} 
+            animate={{ opacity: 1, y: 0 }} 
             exit={{ opacity: 0, y: 100 }}
             transition={{ type: 'spring', stiffness: 100 }}
           >
-            <RenderAboutContent />
+            <RenderAboutContent /> 
           </motion.div>
         </motion.div>
       </AnimatePresence>
@@ -473,12 +479,12 @@ function Modal() {
   if (!videoInfo) {
     return (
       <div className="modal-backdrop">
-        <div className="loading-container"></div> 
+        <div className="loading-container"></div>
       </div>
     );
   }
 
-  const videoID = videoInfo.URL.split("/")[3]; // Extract video ID from videoInfo URL
+  const videoID = videoInfo.URL.split("/")[3];
 
   return (
     <AnimatePresence>
@@ -488,22 +494,17 @@ function Modal() {
           variants={modalBackdropVariants} 
           initial="hidden" 
           animate="visible" 
-          exit="exit" 
-          // Prevent all clicks/touches from reaching elements underneath
-          onClick={handleBackdropClick}
+          exit="exit"
+          onClick={handleBackdropClick} 
           onTouchStart={handleBackdropClick}
           onTouchMove={handleTouchMove}
         >
           <motion.div 
             className="modal" 
             ref={modalRef}
-            // Key change: Prevent clicks from going through the modal
-            onClick={(e) => {
-              e.stopPropagation(); 
-              e.preventDefault();
-            }} 
-            onTouchStart={e => e.stopPropagation()}
-            variants={modalVariants} 
+            onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
+            onTouchStart={(e) => e.stopPropagation()} 
+            variants={modalVariants}
             initial="hidden" 
             animate="visible" 
             exit="exit"
@@ -511,16 +512,16 @@ function Modal() {
             <span className="close" onClick={() => { 
               closeModal(); 
               navigate('/');
-              setVideoInfo(null); // Reset video information on modal close 
+              setVideoInfo(null); 
             }}>
-              &times;
+              &times; 
             </span>
             <div className="embed-container">
-              <iframe
-                key={videoID}
-                src={`https://player.vimeo.com/video/${videoID}`}
-                allow="autoplay; fullscreen"
-                allowFullScreen
+              <iframe 
+                key={videoID} 
+                src={`https://player.vimeo.com/video/${videoID}`} 
+                allow="autoplay; fullscreen" 
+                allowFullScreen 
                 title={videoInfo.videoName}
               ></iframe>
             </div>
@@ -534,7 +535,7 @@ function Modal() {
         </motion.div>
       )}
     </AnimatePresence>
-  ); 
+  );
 }
 
 function AppWrapper() {
@@ -570,10 +571,18 @@ function AppWrapper() {
   useEffect(() => {
     if (location.pathname === '/about' && !isModalOpen) {
       openModal('about');
+      setIsCloseVisible(true);
     } else if (location.pathname !== '/about' && isModalOpen && currentVideoID === 'about') {
       closeModal();
     }
-  }, [location, isModalOpen, currentVideoID, openModal, closeModal]);  
+  }, [location, isModalOpen, currentVideoID, openModal, closeModal]);
+
+  useEffect(() => {
+    // If not on a modal route and modal is open, close it
+    if (location.pathname !== '/about' && !location.pathname.startsWith('/video') && isModalOpen) {
+      closeModal();
+    }
+  }, [location, isModalOpen, closeModal]);
 
   useEffect(() => {
     const fetchAllVideos = async () => {
