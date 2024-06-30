@@ -309,6 +309,7 @@ html, body {
   padding-top: 56.25%; /* 16:9 Aspect Ratio, calculates height based on the width */
   position: relative; /* Allows absolute positioning for the iframe */
   background: #000; /* Background color in case the iframe has issues */
+  z-index: 1500 !important;
 }
 
 .embed-container iframe {
@@ -327,6 +328,7 @@ html, body {
   padding-bottom: 120px;  /* Ensure this is sufficient to scroll out of the gradient */
   color: #fff;
   pointer-events: auto;
+  z-index: 1500 !important;
 
   /* Styles for the scrollbar */
   scrollbar-width: thin;  /* For Firefox */

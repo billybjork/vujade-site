@@ -35,29 +35,11 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
   const [loadProgress, setLoadProgress] = useState(0);  
   const cubeContainerRef = useRef(null);
   const cubeMasterInitialized = useRef(false);
-  const { openModal, closeModal, isModalOpen, isScrolling } = useModal(); 
+  const { openModal, closeModal, isModalOpen } = useModal(); 
   const location = useLocation(); 
 
   // Ref to store the rendering functions
   const renderingControl = useRef({ startRendering: null, stopRendering: null });
-
-  // Add a state variable to track modal visibility
-  const [isAnyModalOpen, setIsAnyModalOpen] = useState(false);
-
-  // Update setIsAnyModalOpen when modal state changes
-  useEffect(() => {
-    setIsAnyModalOpen(isModalOpen);
-  }, [isModalOpen]); // Dependency on isModalOpen
-
-  // Function to disable pointer events for the cube container when modal is open
-  useEffect(() => {
-    const cubeContainer = cubeContainerRef.current;
-    if (isAnyModalOpen) {
-      cubeContainer.classList.add('modal-active');
-    } else {
-      cubeContainer.classList.remove('modal-active');
-    }
-  }, [isAnyModalOpen]);
 
   // Fetch video URLs to be used as textures on the cube
   useEffect(() => {
@@ -91,13 +73,12 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
             if (!videoLoadedSuccess) {
                 // Handle autoplay failure if needed
             }
-        },
-        isAnyModalOpen
+        }
       );
       renderingControl.current = controls;
       cubeMasterInitialized.current = true;
     }
-  }, [cubeVideos, setCubeLoading, openModal, setIsLoadingExternal, isAnyModalOpen]);
+  }, [cubeVideos, setCubeLoading, openModal, setIsLoadingExternal]);
 
   // Handling the initial loading modal
   useEffect(() => {
@@ -126,15 +107,20 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
       )}
       <div 
         onClick={(e) => {
-          if (!isAnyModalOpen && !isScrolling) {
+          if (!isModalOpen) {
+            // handle click only if no modal is open
             const clickedElement = e.target;
-            if (clickedElement.closest('#cube-container')) { // Only process clicks on the cube
-              console.log("CubeWithVideos clicked, isModalOpen:", isModalOpen, "isScrolling:", isScrolling);
-              // Trigger modal open function here based on the clicked element
+            if (clickedElement.closest('#cube-container')) {
+              console.log("CubeWithVideos clicked, isModalOpen:", isModalOpen );
+              // Proceed with actions only if it's relevant and no modal is open
             }
           } else {
+            console.log("CubeWithVideos clicked while modal open:", {
+              timestamp: new Date(),
+              target: e.target, // Log the clicked element for inspection
+            });
             e.preventDefault();
-            e.stopPropagation();
+            e.stopPropagation(); // Stop the click event from reaching the cube
           }
         }}
         style={{ width: '100%', height: '100%' }} 
@@ -441,28 +427,6 @@ function Modal() {
     fetchVideoInfo();
   }, [currentVideoID]);
 
-  const handleScrollOrTouchMove = (event) => {
-    event.stopPropagation();
-    event.preventDefault();
-  };
-
-  useEffect(() => {
-    if (isModalOpen) {
-      const targetRef = currentVideoID === 'about' ? aboutBackdropRef.current : modalRef.current;
-      if (targetRef) {
-        targetRef.addEventListener('touchmove', handleScrollOrTouchMove, { passive: false });
-        targetRef.addEventListener('scroll', handleScrollOrTouchMove, { passive: false });
-      }
-    }
-    return () => {
-      const targetRef = currentVideoID === 'about' ? aboutBackdropRef.current : modalRef.current;
-      if (targetRef) {
-        targetRef.removeEventListener('touchmove', handleScrollOrTouchMove);
-        targetRef.removeEventListener('scroll', handleScrollOrTouchMove);
-      }
-    };
-  }, [isModalOpen, currentVideoID]);
-
   if (!isModalOpen || loading || !currentVideoID) return null;
   
   // Motion Variants for the modal backdrop and the modal itself
@@ -502,7 +466,6 @@ function Modal() {
           <motion.div 
             className="modal"
             onClick={e => e.stopPropagation()} // Prevent click from propagating to backdrop
-            onTouchStart={e => e.stopPropagation()} // Stop touch events from propagating
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 100 }}
@@ -541,7 +504,6 @@ function Modal() {
             className="modal"
             ref={modalRef}
             onClick={e => e.stopPropagation()} // Prevent click from propagating to backdrop
-            onTouchStart={e => e.stopPropagation()} // Stop touch events from propagating
             variants={modalVariants}
             initial="hidden"
             animate="visible"
@@ -638,19 +600,6 @@ function AppWrapper() {
       {/* Pass isLoading to HeaderMenu */}
       {menuVisible && <HeaderMenu videos={allVideos} isLoading={cubeLoading} />} 
       <CubeWithVideos setCubeLoading={setCubeLoading} setIsLoadingExternal={setIsLoading} />
-      {overlayVisible && (
-        <div className="overlay" style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 1001,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          backdropFilter: 'blur(5px)',
-          WebkitBackdropFilter: 'blur(5px)',
-        }}></div>
-      )}
       <AnimatePresence>
         <motion.button
           className={`question-mark-button ${isCloseVisible ? 'is-close' : ''}`}
