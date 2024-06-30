@@ -30,7 +30,7 @@ const render = (renderer, scene, camera, update, controls) => {
     animate(renderer, scene, camera, update, controls); // Use the globally defined animate function
 };
 
-export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallback, domElement, openModal, isModalOpen, isAnyModalOpen) {
+export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallback, domElement, openModal, isModalOpen) {
 
     const getHeaderSize = () => {
         // Height of header for embedding in other websites
@@ -179,6 +179,8 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     // Variable to hold the sticker that might be clicked
     let activeSticker = null;
 
+document.addEventListener("touchmove", {passive: false});
+
     // Event handlers for keyboard and mouse events, resize, and touch...
     document.addEventListener("pointermove", (event) => {
         if (!dragging) {
@@ -272,10 +274,13 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     };
     document.addEventListener("touchend", onTouchEnd, false);
 
-    document.addEventListener("touchmove", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-}, { passive: false });
+    const onTouchMove = (event) => {
+        event.preventDefault(); // Prevents scrolling the page while touching the cube
+        event.offsetX = event.touches[0].clientX;
+        event.offsetY = event.touches[0].clientY - getHeaderSize();
+        onDocumentMouseMove(event);
+      };      
+    document.addEventListener("touchmove", onTouchMove, false);
 
     /**
      * Mouse events
@@ -289,31 +294,31 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     let hasMoved = false;
 
     /**
-     * Function to handle pointer mouse events
+     * Function to handle pointer down events
      */
     const onDocumentMouseDown = (event) => {
         mouse.x = (event.offsetX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.offsetY / getHeight()) * 2 + 1;
         clickStartPosition = { x: event.offsetX, y: event.offsetY };
         hasMoved = false;
-
+    
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(cube.meshes, true);
-
+    
         if (intersects.length > 0) {
             controls.enabled = false;
             dragging = true;
             let clickedMesh = intersects[0].object;
             if (cube.stickersMap.has(clickedMesh.uuid)) {
                 selectedObject = intersects[0];
-                activeSticker = cube.stickersMap.get(clickedMesh.uuid);
+                activeSticker = cube.stickersMap.get(clickedMesh.uuid);  // Set activeSticker immediately on click
                 activeSticker.dim();
             }
         } else {
             controls.enabled = true;
             selectedObject = ClickFlags.ROTATION;
         }
-    };
+    };   
 
     document.addEventListener("pointerdown", onDocumentMouseDown, false);
 
@@ -323,7 +328,7 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     const onDocumentMouseUp = (event) => {
         let moveX = Math.abs(clickStartPosition.x - event.offsetX);
         let moveY = Math.abs(clickStartPosition.y - event.offsetY);
-        hasMoved = moveX > 15 || moveY > 15;
+        hasMoved = moveX > 5 || moveY > 5;
     
         if (!hasMoved && activeSticker && !isModalOpen) {
             openModal(activeSticker.videoid);

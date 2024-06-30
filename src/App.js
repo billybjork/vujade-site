@@ -645,6 +645,7 @@ function AppWrapper() {
           left: 0,
           right: 0,
           bottom: 0,
+          zIndex: 1001,
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
           backdropFilter: 'blur(5px)',
           WebkitBackdropFilter: 'blur(5px)',
