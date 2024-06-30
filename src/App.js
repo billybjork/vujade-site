@@ -281,7 +281,7 @@ function RenderAboutContent() {
     // Define the widget configuration
     window.CustomSubstackWidget = {
       substackUrl: "vujadeworld.substack.com",
-      placeholder: "example@gmail.com",
+      placeholder: "you@email.com",
       buttonText: "Subscribe",
       theme: "custom",
       colors: {
