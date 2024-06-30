@@ -96,10 +96,6 @@ html, body {
   transition: background-color 0.3s ease-in-out, font-weight 0.3s ease-in-out;
 }
 
-.header-menu button:hover {
-  transform: translateY(-2px); /* Slight raise effect on hover */
-}
-
 .header-menu button:hover .video-name {
   font-size: 26px; /* Slightly larger font size on hover */
   font-weight: bold;
@@ -201,7 +197,7 @@ html, body {
   touch-action: none;
   pointer-events: all;
   background-color: rgba(0, 0, 0, 1);
-  z-index: 2051 !important;
+  z-index: 2051;
   overflow: hidden;
   user-select: none; /* Disable text selection */
   -webkit-user-select: none; /* For Safari */
@@ -217,7 +213,7 @@ html, body {
   justify-content: center;
   align-items: center;
   background-color: rgba(0, 0, 0, 1);
-  z-index: 2050 !important;
+  z-index: 2050;
   transition: backdrop-filter 0.3s ease-in-out; /* Add this line */
   touch-action: none;
   pointer-events: all;
@@ -234,7 +230,7 @@ html, body {
   overflow: auto;
   display: flex;
   flex-direction: column;
-  z-index: 2052 !important;
+  z-index: 2052;
   padding: 80px 20px 20px 20px; /* Increased top padding to accommodate close button */
   box-sizing: border-box; /* Ensures padding is included in the width calculation */
   overflow-y: auto;
@@ -259,75 +255,13 @@ html, body {
   touch-action: pan-y; /* Allow vertical scrolling only */
 }
 
-@media (max-width: 768px) {
-  .hamburger-button {
-    left: 15px;
-    top: 15px;
-  }
-
-  .video-name {
-    font-size: 20px; /* Fixed font size on mobile */
-  }
-
-  .header-menu button {
-    margin-bottom: 25px;
-    padding: 0px 10px;
-  }
-
-  .header-menu button:hover .video-name {
-    font-size: 20px; /* Keep font size consistent on hover for mobile */
-  }
-
-  .question-mark-button {
-    right: 15px;
-    bottom: 15px;
-  }
-
-  .about-screen {
-    width: 100%;
-  }
-
-  .modal {
-    width: 100%; /* Full width on smaller screens */
-    max-width: none; /* No maximum width */
-  }
-  .about-modal {
-    padding: 0;
-    top: 0px;
-  }
-  
-}
-
-/* Media query to target touch devices */
-@media (hover: none) and (pointer: coarse) {
-  .cube-sticker:hover { /* Or the actual class name you're using for stickers */
-    opacity: 1; /* No dimming on hover for touch devices */
-  }
-  
-  .hamburger-button:hover {
-    color: #ffffff; /* No color change on hover for touch devices */
-  }
-
-  .header-menu button:hover {
-    transform: none; /* No transform (raise) on hover for touch devices */
-  }
-
-  .header-menu button:hover .video-name {
-    font-size: 24px; /* No font size change on hover for touch devices */
-    font-weight: normal;
-  }
-
-  .question-mark-button:hover {
-    color: #ffffff;
-  }
-}
 
 .embed-container {
   width: 100%; /* Ensures the video container takes up the full width of the modal */
   padding-top: 56.25%; /* 16:9 Aspect Ratio, calculates height based on the width */
   position: relative; /* Allows absolute positioning for the iframe */
   background: #000; /* Background color in case the iframe has issues */
-  z-index: 1500 !important;
+  z-index: 1500;
 }
 
 .embed-container iframe {
@@ -342,11 +276,10 @@ html, body {
 .text-container {
   flex-grow: 1;
   overflow-y: auto;
-  padding: 20px;
-  padding-bottom: 120px;  /* Ensure this is sufficient to scroll out of the gradient */
+  padding: 30px 0px 30px 0px;
   color: #fff;
   pointer-events: auto;
-  z-index: 1500 !important;
+  z-index: 1500;
 
   /* Styles for the scrollbar */
   scrollbar-width: thin;  /* For Firefox */
@@ -384,7 +317,7 @@ html, body {
   height: 100px;  /* Ensure this matches the extra padding added to the bottom of the text-container */
   background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
   pointer-events: none;
-  z-index: 1500 !important;
+  z-index: 1500;
 }
 
 .close {
@@ -398,4 +331,73 @@ html, body {
 
 .close:hover {
   color: #888;
+}
+
+@media (max-width: 768px) {
+  .hamburger-button {
+    left: 15px;
+    top: 15px;
+  }
+
+  .video-name {
+    font-size: 20px; /* Fixed font size on mobile */
+  }
+
+  .header-menu button {
+    margin-bottom: 25px;
+    padding: 0px 10px;
+  }
+
+  .header-menu button:hover .video-name {
+    font-size: 20px; /* Keep font size consistent on hover for mobile */
+  }
+
+  .question-mark-button {
+    right: 15px;
+    bottom: 15px;
+  }
+
+  .about-screen {
+    width: 100%;
+  }
+
+  .modal {
+    width: 100%; /* Full width on smaller screens */
+    max-width: none; /* No maximum width */
+    padding: 70px 0 0 0;
+  }
+  
+  .about-modal {
+    padding: 0;
+    top: 0px;
+  }
+
+  .text-container {
+    padding: 20px; /* Adjust padding as needed */
+  }
+  
+}
+
+/* Media query to target touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .cube-sticker:hover { /* Or the actual class name you're using for stickers */
+    opacity: 1; /* No dimming on hover for touch devices */
+  }
+  
+  .hamburger-button:hover {
+    color: #ffffff; /* No color change on hover for touch devices */
+  }
+
+  .header-menu button:hover {
+    transform: none; /* No transform (raise) on hover for touch devices */
+  }
+
+  .header-menu button:hover .video-name {
+    font-size: 24px; /* No font size change on hover for touch devices */
+    font-weight: normal;
+  }
+
+  .question-mark-button:hover {
+    color: #ffffff;
+  }
 }

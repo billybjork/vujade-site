@@ -387,6 +387,9 @@ function RenderAboutContent() {
         <br />
         <br />
         Rubik's Cube source code:<br></br> <a href="https://github.com/KeatonMueller/cube" target="_blank" rel="noopener noreferrer" style={{ color: 'grey' }}>Keaton Muller</a>
+        <br />
+        <br />
+        <br />
       </div>
     </div>
   );  
@@ -402,10 +405,9 @@ function Modal() {
   const modalRef = useRef(null);  // Ref for the regular video modal
   const aboutBackdropRef = useRef(null); // Ref for the About modal backdrop
 
+  // Prevent default to stop scrolling on body when modal is open 
   const handleTouchMove = (e) => {
     e.stopPropagation();
-
-    // Prevent default to stop scrolling on body when modal is open 
     if (isModalOpen) { 
       e.preventDefault(); 
     }
@@ -454,6 +456,15 @@ function Modal() {
     e.preventDefault();  // Prevent any default behavior that might be triggered
   };
 
+  // Handle the end of a drag event to potentially close the modal
+  const handleDragEnd = (event, info) => {
+    // Close the modal if the swipe down motion is strong enough
+    if (info.offset.y > 150) {
+      closeModal();
+      navigate('/');
+    }
+  };
+
   if (currentVideoID === 'about') {
     return (
       <AnimatePresence>
@@ -498,45 +509,49 @@ function Modal() {
       {isModalOpen && (
         <motion.div 
           className="modal-backdrop" 
-          variants={modalBackdropVariants} 
-          initial="hidden" 
-          animate="visible" 
-          exit="exit"
-          onClick={handleBackdropClick} 
-          onTouchStart={handleBackdropClick}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => {
+            closeModal();
+            navigate('/');
+          }}
           onTouchMove={handleTouchMove}
         >
           <motion.div 
             className="modal" 
             ref={modalRef}
-            onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
-            onTouchStart={(e) => e.stopPropagation()} 
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            onDragEnd={handleDragEnd}
             variants={modalVariants}
             initial="hidden" 
             animate="visible" 
             exit="exit"
+            onClick={(e) => e.stopPropagation()} // Prevent closing on click inside the modal
           >
             <span className="close" onClick={() => { 
               closeModal(); 
               navigate('/');
               setVideoInfo(null); 
-            }}>
-              &times; 
-            </span>
-            <div className="embed-container">
-              <iframe 
-                key={videoID} 
-                src={`https://player.vimeo.com/video/${videoID}`} 
-                allow="autoplay; fullscreen" 
-                allowFullScreen 
-                title={videoInfo.videoName}
-              ></iframe>
-            </div>
-            <div className="text-container">
-              <h2>{videoInfo.videoName}</h2>
-              <br />
-              <div dangerouslySetInnerHTML={{ __html: videoInfo.Description }}></div>
-            </div>
+            }}>&times;</span>
+            {videoInfo && (
+              <div className="embed-container">
+                <iframe 
+                  key={videoInfo.URL.split("/")[3]} 
+                  src={`https://player.vimeo.com/video/${videoInfo.URL.split("/")[3]}`} 
+                  allow="autoplay; fullscreen" 
+                  allowFullScreen 
+                  title={videoInfo.videoName}
+                ></iframe>
+              </div>
+            )}
+            {videoInfo && (
+              <div className="text-container">
+                <h2>{videoInfo.videoName}</h2>
+                <div dangerouslySetInnerHTML={{ __html: videoInfo.Description }}></div>
+              </div>
+            )}
             <div className="gradient-overlay"></div>
           </motion.div>
         </motion.div>

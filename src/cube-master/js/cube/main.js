@@ -293,15 +293,13 @@ document.addEventListener("touchmove", {passive: false});
     let clickStartPosition = null;
     let hasMoved = false;
 
-    /**
-     * Function to handle pointer down events
-     */
+    // Function to handle pointer down events
     const onDocumentMouseDown = (event) => {
         mouse.x = (event.offsetX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.offsetY / getHeight()) * 2 + 1;
         clickStartPosition = { x: event.offsetX, y: event.offsetY };
-        hasMoved = false;
-    
+        hasMoved = false;  // Reset flag on mousedown
+
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(cube.meshes, true);
     
@@ -323,19 +321,21 @@ document.addEventListener("touchmove", {passive: false});
 
     document.addEventListener("pointerdown", onDocumentMouseDown, false);
 
-    /**
-     * Function to handle pointer up events
-     */
+    // Function to handle pointer up events
     const onDocumentMouseUp = (event) => {
         let moveX = Math.abs(clickStartPosition.x - event.offsetX);
         let moveY = Math.abs(clickStartPosition.y - event.offsetY);
+        // Only consider a click if movement is minimal
+        const clickThreshold = 5;  // Adjust this threshold as needed
+        const wasClick = moveX < clickThreshold && moveY < clickThreshold;
+        const delay = 200; // milliseconds
 
-        // Use a timeout to delay the modal check
         setTimeout(() => {
-          if (!hasMoved && activeSticker && !isModalOpen) {
-            openModal(activeSticker.videoid); 
-          }
-        }, 50); // Adjust this delay as needed (e.g., 150ms - 300ms)
+            // Check modal conditions after the delay
+            if (wasClick && activeSticker && !isModalOpen) { 
+                openModal(activeSticker.videoid); 
+            }
+        }, delay);
 
         // Reset interactions
         controls.enabled = true;
@@ -510,9 +510,9 @@ document.addEventListener("touchmove", {passive: false});
         }
         // set dragging to false to not trigger another move
         dragging = false;
-    let moveX = Math.abs(clickStartPosition.x - event.offsetX);
-    let moveY = Math.abs(clickStartPosition.y - event.offsetY);
-    hasMoved = moveX > 5 || moveY > 5; // Update hasMoved during the drag
+        let moveX = Math.abs(clickStartPosition.x - event.offsetX);
+        let moveY = Math.abs(clickStartPosition.y - event.offsetY);
+        hasMoved = moveX > 5 || moveY > 5;
     };
     document.addEventListener("pointermove", onDocumentMouseMove, false);
 
