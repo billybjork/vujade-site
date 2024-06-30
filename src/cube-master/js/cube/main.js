@@ -306,19 +306,20 @@ document.addEventListener("touchmove", {passive: false});
         const intersects = raycaster.intersectObjects(cube.meshes, true);
     
         if (intersects.length > 0) {
-            controls.enabled = false;
-            dragging = true;
-            let clickedMesh = intersects[0].object;
-            if (cube.stickersMap.has(clickedMesh.uuid)) {
-                selectedObject = intersects[0];
-                activeSticker = cube.stickersMap.get(clickedMesh.uuid);  // Set activeSticker immediately on click
-                activeSticker.dim();
-            }
+          controls.enabled = false;
+          dragging = true;
+    
+          let clickedMesh = intersects[0].object;
+          if (cube.stickersMap.has(clickedMesh.uuid)) {
+            selectedObject = intersects[0];
+            activeSticker = cube.stickersMap.get(clickedMesh.uuid); 
+            activeSticker.dim();
+          } 
         } else {
-            controls.enabled = true;
-            selectedObject = ClickFlags.ROTATION;
+          controls.enabled = true;
+          selectedObject = ClickFlags.ROTATION;
         }
-    };   
+      };
 
     document.addEventListener("pointerdown", onDocumentMouseDown, false);
 
@@ -328,11 +329,13 @@ document.addEventListener("touchmove", {passive: false});
     const onDocumentMouseUp = (event) => {
         let moveX = Math.abs(clickStartPosition.x - event.offsetX);
         let moveY = Math.abs(clickStartPosition.y - event.offsetY);
-        hasMoved = moveX > 5 || moveY > 5;
     
-        if (!hasMoved && activeSticker && !isModalOpen) {
-            openModal(activeSticker.videoid);
-        }
+        // Use a timeout to delay the modal check
+        setTimeout(() => {
+          if (!hasMoved && activeSticker && !isModalOpen) {
+            openModal(activeSticker.videoid); 
+          }
+        }, 200); // Adjust this delay as needed (e.g., 150ms - 300ms)
     
         // Reset interactions
         controls.enabled = true;
@@ -507,6 +510,9 @@ document.addEventListener("touchmove", {passive: false});
         }
         // set dragging to false to not trigger another move
         dragging = false;
+    let moveX = Math.abs(clickStartPosition.x - event.offsetX);
+    let moveY = Math.abs(clickStartPosition.y - event.offsetY);
+    hasMoved = moveX > 5 || moveY > 5; // Update hasMoved during the drag
     };
     document.addEventListener("pointermove", onDocumentMouseMove, false);
 
