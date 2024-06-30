@@ -346,7 +346,7 @@ document.addEventListener("touchmove", {passive: false});
     
     if (activeSticker) {
         console.log("Trying to open modal with videoID:", activeSticker.videoid); 
-        openModal(activeSticker.videoid); // Always attempt to open the modal
+        openModal(activeSticker.videoid, location); // Always attempt to open the modal
         activeSticker.reset();
         activeSticker = null;
     }

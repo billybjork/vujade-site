@@ -15,22 +15,24 @@ export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
   const [initialLoad, setInitialLoad] = useState(true);
 
   // Function to open the modal with the video ID
-  const openModal = useCallback((videoID) => {
+  const openModal = useCallback((videoID, location) => {
     setIsModalOpen(true);
     setCurrentVideoID(videoID);
 
-    // Navigate only if opening from the root or for the 'about' modal
-    if (location.pathname === '/' || videoID === 'about') {
-      navigate(videoID === 'about' ? '/about' : `/${videoID}`, { replace: true });
+    // Check if location is available before navigating
+    if (location && (location.pathname === '/' || videoID === 'about')) {
+        navigate(videoID === 'about' ? '/about' : `/${videoID}`, { replace: true });
+    } else if (videoID === 'about') {
+        // If location is not available, delay the navigation
+        setTimeout(() => navigate('/about', { replace: true }), 100); // Adjust delay if needed
     }
-  }, [location.pathname, navigate]);
+}, [navigate]);
 
-  // Function to close the modal
-  const closeModal = useCallback(() => {
+const closeModal = useCallback((location) => {
     setIsModalOpen(false);
     setCurrentVideoID(null);
-    navigate('/', { replace: true }); // Always navigate back to root on close
-  }, [navigate]);
+    navigate('/', { replace: true }); 
+}, [navigate]);
 
   const providerValue = useMemo(() => ({
     isModalOpen, currentVideoID, openModal, closeModal, overlayVisible

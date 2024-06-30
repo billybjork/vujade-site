@@ -35,7 +35,7 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
   const [loadProgress, setLoadProgress] = useState(0);  
   const cubeContainerRef = useRef(null);
   const cubeMasterInitialized = useRef(false);
-  const { openModal, closeModal, isModalOpen } = useModal(); 
+  const { openModal, closeModal, isModalOpen, currentVideoID } = useModal();
   const location = useLocation(); 
 
   // Ref to store the rendering functions
@@ -86,13 +86,19 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
     const videoID = path.split('/')[1];
   
     if (videoID === 'about' && !isModalOpen) {
-      openModal('about');
-    } else if (videoID && videoID !== 'about' && !isModalOpen && window.location.pathname === `/${videoID}`) {
-      openModal(videoID);
+      openModal('about', location); 
+    } else if (
+        videoID && 
+        videoID !== 'about' && 
+        !isModalOpen && 
+        window.location.pathname === `/${videoID}` &&
+        currentVideoID !== videoID // Check if it is the same video
+    ) {
+      openModal(videoID, location);
     } else if (!videoID && isModalOpen) {
-      closeModal();
+      closeModal(location);
     }
-}, [location, openModal, closeModal, isModalOpen]);
+  }, [location, openModal, closeModal, isModalOpen, currentVideoID]);
 
   return (
     <>
@@ -128,6 +134,7 @@ function HeaderMenu({ videos, onVideoSelect, isLoading }) {
   const { openModal, isModalOpen } = useModal(); // Get modal context
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef();
+  const location = useLocation();
 
   // Animation Controls for the Hamburger Button
   const menuButtonControls = useAnimation();
@@ -152,10 +159,10 @@ function HeaderMenu({ videos, onVideoSelect, isLoading }) {
 
   const handleVideoClick = (videoId) => {
     if (!isModalOpen && window.location.pathname === '/') {
-      openModal(videoId);
+      openModal(videoId, location); // Pass location
     }
     setIsOpen(false);
-  };  
+  };
 
   // Define motion variants for animation
   const overlayVariants = {
@@ -552,13 +559,12 @@ function AppWrapper() {
 
   const toggleAbout = () => {
     if (!isCloseVisible) {
-      openModal('about');
-      navigate('/about');
-      setIsCloseVisible(true); // Change button to "X"
+      openModal('about', location);
+      // Update state for close button display
+      setIsCloseVisible(true);
     } else {
-      closeModal();
-      navigate('/');
-      setIsCloseVisible(false); // Change button to "?"
+      closeModal(location);
+      setIsCloseVisible(false);
     }
   };
 
