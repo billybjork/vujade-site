@@ -542,6 +542,10 @@ function Modal() {
             {videoInfo && (
               <div className="text-container">
                 <h2>{videoInfo.videoName}</h2>
+                {/* Add the published date below the title, with updated styles */}
+                <p className="published-date" style={{ fontSize: 'smaller', color: 'gray' }}>
+                  {formatDate(videoInfo.Published)}
+                </p> 
                 <br></br>
                 <div dangerouslySetInnerHTML={{ __html: videoInfo.Description }}></div>
                 <br></br>

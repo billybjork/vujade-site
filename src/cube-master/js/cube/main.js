@@ -178,6 +178,7 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     let hoveredSticker = null;
     // Variable to hold the sticker that might be clicked
     let activeSticker = null;
+    let mouseDownEvent = null;
 
 document.addEventListener("touchmove", {passive: false});
 
@@ -197,14 +198,14 @@ document.addEventListener("touchmove", {passive: false});
                         if (hoveredSticker) hoveredSticker.reset();
                         hoveredSticker = intersectedSticker;
                         hoveredSticker.dim();
-                        activeSticker = hoveredSticker; // Set activeSticker when a new sticker is hovered
+                        activeSticker = hoveredSticker;
                     }
                 }
             } else {
                 if (hoveredSticker) {
                     hoveredSticker.reset();
                     hoveredSticker = null;
-                    activeSticker = null; // Clear activeSticker if no sticker is hovered
+                    activeSticker = null;
                 }
             }
         } else {
@@ -217,6 +218,11 @@ document.addEventListener("touchmove", {passive: false});
                 // Compute the direction of the drag here and handle it appropriately
                 // Ensure you update chosenAxis and chosenDir as needed
             }
+    
+            // Update the hasMoved flag for click/drag differentiation
+            let moveX = Math.abs(clickStartPosition.x - event.offsetX);
+            let moveY = Math.abs(clickStartPosition.y - event.offsetY);
+            hasMoved = moveX > 5 || moveY > 5;
         }
     }, false);
 
@@ -295,6 +301,7 @@ document.addEventListener("touchmove", {passive: false});
 
     // Function to handle pointer down events
     const onDocumentMouseDown = (event) => {
+        mouseDownEvent = event; // Store the mousedown event
         mouse.x = (event.offsetX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.offsetY / getHeight()) * 2 + 1;
         clickStartPosition = { x: event.offsetX, y: event.offsetY };
@@ -329,10 +336,11 @@ document.addEventListener("touchmove", {passive: false});
 
     // Function to handle pointer up events
     const onDocumentMouseUp = (event) => {
-        // If there was significant movement, it's a drag, not a click
-        if (hasMoved) { 
-          activeSticker = null; // Clear activeSticker if it was a drag
-          return; // Exit the function early to prevent the modal opening
+        // Early exit if a drag rotation was performed
+        if (selectedObject === ClickFlags.ROTATION && hasMoved) {
+            activeSticker = null; // Clear activeSticker if it was a drag rotation
+            mouseDownEvent = null; // Clear the mousedown event
+            return;
         }
         
         let moveX = Math.abs(clickStartPosition.x - event.offsetX);
@@ -364,6 +372,7 @@ document.addEventListener("touchmove", {passive: false});
         }
 
         clickStartPosition = null;
+        mouseDownEvent = null; // Clear the mousedown event
     };
 
     document.addEventListener("pointerup", onDocumentMouseUp, false); 
