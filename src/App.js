@@ -392,6 +392,8 @@ function RenderAboutContent() {
         <br />
         <br />
         <br />
+        <br />
+        <br />
       </div>
     </div>
   );  
@@ -542,6 +544,8 @@ function Modal() {
                 <h2>{videoInfo.videoName}</h2>
                 <br></br>
                 <div dangerouslySetInnerHTML={{ __html: videoInfo.Description }}></div>
+                <br></br>
+                <br></br>
                 <br></br>
                 <br></br>
               </div>

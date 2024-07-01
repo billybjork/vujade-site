@@ -215,7 +215,7 @@ document.addEventListener("touchmove", {passive: false});
             );
             if (delta.length() > getTolerance() && selectedObject !== ClickFlags.CUBIE) {
                 // Compute the direction of the drag here and handle it appropriately
-                // Ensure you update `chosenAxis` and `chosenDir` as needed
+                // Ensure you update chosenAxis and chosenDir as needed
             }
         }
     }, false);
@@ -304,16 +304,22 @@ document.addEventListener("touchmove", {passive: false});
         const intersects = raycaster.intersectObjects(cube.meshes, true);
     
         if (intersects.length > 0) {
-          controls.enabled = false;
-          dragging = true;
-    
-          let clickedMesh = intersects[0].object;
-          if (cube.stickersMap.has(clickedMesh.uuid)) {
-            selectedObject = intersects[0];
-            activeSticker = cube.stickersMap.get(clickedMesh.uuid); 
-            activeSticker.dim();
-          } 
-        } else {
+            controls.enabled = false;
+            dragging = true;
+        
+            let clickedMesh = intersects[0].object;
+        
+            if (cube.stickersMap.has(clickedMesh.uuid)) {
+              selectedObject = intersects[0];
+              activeSticker = cube.stickersMap.get(clickedMesh.uuid);
+        
+              // Immediately dim the sticker to provide visual feedback
+              activeSticker.dim(); 
+        
+              // Track if a drag actually starts (significant movement)
+              hasMoved = false; 
+            }
+          } else {
           controls.enabled = true;
           selectedObject = ClickFlags.ROTATION;
         }
@@ -323,6 +329,12 @@ document.addEventListener("touchmove", {passive: false});
 
     // Function to handle pointer up events
     const onDocumentMouseUp = (event) => {
+        // If there was significant movement, it's a drag, not a click
+        if (hasMoved) { 
+          activeSticker = null; // Clear activeSticker if it was a drag
+          return; // Exit the function early to prevent the modal opening
+        }
+        
         let moveX = Math.abs(clickStartPosition.x - event.offsetX);
         let moveY = Math.abs(clickStartPosition.y - event.offsetY);
         // Only consider a click if movement is minimal
@@ -510,10 +522,11 @@ document.addEventListener("touchmove", {passive: false});
         }
         // set dragging to false to not trigger another move
         dragging = false;
-        let moveX = Math.abs(clickStartPosition.x - event.offsetX);
-        let moveY = Math.abs(clickStartPosition.y - event.offsetY);
-        hasMoved = moveX > 5 || moveY > 5;
-    };
+    let moveX = Math.abs(clickStartPosition.x - event.offsetX);
+    let moveY = Math.abs(clickStartPosition.y - event.offsetY);
+    hasMoved = moveX > 5 || moveY > 5;
+};
+
     document.addEventListener("pointermove", onDocumentMouseMove, false);
 
     // Start the animation loop with update function integrated

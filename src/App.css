@@ -315,7 +315,7 @@ html, body {
   height: 75px; /* Height of gradient effect */
   background: linear-gradient(to top, rgba(0, 0, 0, 1) 30%, transparent 100%);
   pointer-events: none; /* Ensures it doesn't interfere with scrolling/clicking */
-  z-index: 2053; /* Ensures it's above the modal content but under any top layer like modals */
+  z-index: 1500; /* Ensures it's above the modal content but under any top layer like modals */
 }
 
 .close {
@@ -383,13 +383,16 @@ html, body {
     color: #ffffff; /* No color change on hover for touch devices */
   }
 
-  .header-menu button:hover {
-    transform: none; /* No transform (raise) on hover for touch devices */
+  .header-menu button:active .video-name,
+  .header-menu button:hover .video-name {
+    font-size: 24px; /* Ensures font size does not change on touch */
+    font-weight: normal; /* Keeps font weight consistent */
   }
 
-  .header-menu button:hover .video-name {
-    font-size: 24px; /* No font size change on hover for touch devices */
-    font-weight: normal;
+  .header-menu button:active,
+  .header-menu button:hover {
+    background-color: transparent; /* Keeps background consistent */
+    transform: none; /* Removes any transformation */
   }
 
   .question-mark-button:hover {
