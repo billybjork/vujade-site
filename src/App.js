@@ -390,6 +390,8 @@ function RenderAboutContent() {
         <br />
         <br />
         <br />
+        <br />
+        <br />
       </div>
     </div>
   );  
@@ -456,15 +458,6 @@ function Modal() {
     e.preventDefault();  // Prevent any default behavior that might be triggered
   };
 
-  // Handle the end of a drag event to potentially close the modal
-  const handleDragEnd = (event, info) => {
-    // Close the modal if the swipe down motion is strong enough
-    if (info.offset.y > 150) {
-      closeModal();
-      navigate('/');
-    }
-  };
-
   if (currentVideoID === 'about') {
     return (
       <AnimatePresence>
@@ -488,6 +481,7 @@ function Modal() {
             transition={{ type: 'spring', stiffness: 100 }}
           >
             <RenderAboutContent /> 
+            <div className="gradient-overlay"></div> {/* Gradient overlay added here */}
           </motion.div>
         </motion.div>
       </AnimatePresence>
@@ -521,9 +515,6 @@ function Modal() {
           <motion.div 
             className="modal" 
             ref={modalRef}
-            drag="y"
-            dragConstraints={{ top: 0, bottom: 0 }}
-            onDragEnd={handleDragEnd}
             variants={modalVariants}
             initial="hidden" 
             animate="visible" 
@@ -549,7 +540,10 @@ function Modal() {
             {videoInfo && (
               <div className="text-container">
                 <h2>{videoInfo.videoName}</h2>
+                <br></br>
                 <div dangerouslySetInnerHTML={{ __html: videoInfo.Description }}></div>
+                <br></br>
+                <br></br>
               </div>
             )}
             <div className="gradient-overlay"></div>

@@ -220,7 +220,7 @@ class Sticker {
     // Method to dim the sticker
     dim() {
         gsap.to(this.material, {
-            duration: 0.3, // Duration of the dim animation in seconds
+            duration: 0.5, // Duration of the dim animation in seconds
             opacity: 0.5,
             onUpdate: () => {
                 this.material.transparent = true;
@@ -232,14 +232,17 @@ class Sticker {
     // Method to reset the sticker's appearance
     reset() {
         gsap.to(this.material, {
-            duration: 0.3, // Duration of the reset animation in seconds
+            duration: 0.5, // Duration of the reset animation in seconds
             opacity: 1.0,
             onUpdate: () => {
-                this.material.transparent = false;
+                this.material.transparent = true; // Keep transparent during animation
                 this.material.needsUpdate = true;
+            },
+            onComplete: () => {
+                this.material.transparent = false; // Set transparent to false only after animation completes
             }
         });
-    }
+    }    
 }
 
 export default Sticker;

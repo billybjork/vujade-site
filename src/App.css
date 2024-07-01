@@ -225,26 +225,25 @@ html, body {
   position: relative;
   width: 90%; /* Responsive width */
   max-width: 800px; /* Max width for desktop */
-  height: 100vh;
+  height: 100%;
   border-radius: 8px;
-  overflow: auto;
+  overflow: hidden; /* Changed to 'hidden' to prevent scroll bars on the modal itself */
   display: flex;
   flex-direction: column;
   z-index: 2052;
-  padding: 80px 20px 20px 20px; /* Increased top padding to accommodate close button */
-  box-sizing: border-box; /* Ensures padding is included in the width calculation */
-  overflow-y: auto;
-  pointer-events: all;
-  touch-action: pan-y; /* Allow vertical scrolling only */
-  -webkit-overflow-scrolling: touch;
+  padding: 80px 20px 0px 20px; /* Padding to accommodate content */
+  box-sizing: border-box; /* Padding included in width calculation */
+  overflow-y: auto; /* Allows content inside to scroll */
+  touch-action: pan-y; /* Allows vertical scrolling only */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS devices */
 }
 
 .about-modal {
-  top: 100px;
+  top: 60px;
 }
 
 .about-screen {
-  padding: 0px 20px 20px 20px;
+  padding: 0px 30px 20px 30px;
   border-radius: 8px;
   font-size: large;
   width: 90%;
@@ -254,7 +253,6 @@ html, body {
   pointer-events: auto;
   touch-action: pan-y; /* Allow vertical scrolling only */
 }
-
 
 .embed-container {
   width: 100%; /* Ensures the video container takes up the full width of the modal */
@@ -314,10 +312,10 @@ html, body {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 100px;  /* Ensure this matches the extra padding added to the bottom of the text-container */
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
-  pointer-events: none;
-  z-index: 1500;
+  height: 75px; /* Height of gradient effect */
+  background: linear-gradient(to top, rgba(0, 0, 0, 1) 30%, transparent 100%);
+  pointer-events: none; /* Ensures it doesn't interfere with scrolling/clicking */
+  z-index: 2053; /* Ensures it's above the modal content but under any top layer like modals */
 }
 
 .close {
@@ -364,9 +362,9 @@ html, body {
   .modal {
     width: 100%; /* Full width on smaller screens */
     max-width: none; /* No maximum width */
-    padding: 70px 0 0 0;
+    padding: 70px 0 0px 0;
   }
-  
+
   .about-modal {
     padding: 0;
     top: 0px;
@@ -380,9 +378,6 @@ html, body {
 
 /* Media query to target touch devices */
 @media (hover: none) and (pointer: coarse) {
-  .cube-sticker:hover { /* Or the actual class name you're using for stickers */
-    opacity: 1; /* No dimming on hover for touch devices */
-  }
   
   .hamburger-button:hover {
     color: #ffffff; /* No color change on hover for touch devices */
