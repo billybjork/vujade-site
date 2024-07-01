@@ -335,47 +335,36 @@ document.addEventListener("touchmove", {passive: false});
     document.addEventListener("pointerdown", onDocumentMouseDown, false);
 
     // Function to handle pointer up events
+
     const onDocumentMouseUp = (event) => {
-        // Early exit if a drag rotation was performed
-        if (selectedObject === ClickFlags.ROTATION && hasMoved) {
-            activeSticker = null; // Clear activeSticker if it was a drag rotation
-            mouseDownEvent = null; // Clear the mousedown event
-            return;
-        }
-        
-        let moveX = Math.abs(clickStartPosition.x - event.offsetX);
-        let moveY = Math.abs(clickStartPosition.y - event.offsetY);
-        // Only consider a click if movement is minimal
-        const clickThreshold = 5;  // Adjust this threshold as needed
-        const wasClick = moveX < clickThreshold && moveY < clickThreshold;
-        const delay = 200; // milliseconds
-
-        setTimeout(() => {
-            // Check modal conditions after the delay
-            if (wasClick && activeSticker && !isModalOpen) { 
-                openModal(activeSticker.videoid); 
-            }
-        }, delay);
-
-        // Reset interactions
+        console.log('Pointer up, active sticker before reset check:', activeSticker);
         controls.enabled = true;
         dragging = false;
         selectedObject = ClickFlags.NONE;
         chosenAxis = null;
         chosenDir = 0;
 
+        let moveX = Math.abs(clickStartPosition.x - event.offsetX);
+        let moveY = Math.abs(clickStartPosition.y - event.offsetY);
+        hasMoved = moveX > 5 || moveY > 5;
+        console.log(`Mouse moved: ${moveX}px, ${moveY}px - Considered as 'moved': ${hasMoved}`);
+
+        if (activeSticker && !hasMoved) {
+            console.log(`Click detected on sticker with videoID: ${activeSticker.videoid}`);
+            openModal(activeSticker.videoid, window.location);
+        } else {
+            console.log('Click not detected or has moved:', hasMoved);
+        }
+
         if (activeSticker) {
-            console.log("Trying to open modal with videoID:", activeSticker.videoid); 
-            openModal(activeSticker.videoid, window.location); // Explicitly use window.location
             activeSticker.reset();
             activeSticker = null;
         }
 
         clickStartPosition = null;
-        mouseDownEvent = null; // Clear the mousedown event
-    };
+    };        
 
-    document.addEventListener("pointerup", onDocumentMouseUp, false); 
+    document.addEventListener("pointerup", onDocumentMouseUp, false);  
 
     /**
      * Handle mouse move events by determining what
