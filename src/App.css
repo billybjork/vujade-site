@@ -283,8 +283,7 @@ html, body {
 
 /* Responsive Styles */
 @media (max-width: 768px) {
-  .hamburger-button,
-  .question-mark-button {
+  .hamburger-button {
     left: 15px;
     top: 15px;
   }
