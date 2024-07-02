@@ -386,9 +386,7 @@ function RenderAboutContent() {
         (ↄ) VU JA DE
         <br />
         <br />
-        Rubik's Cube source code:<br></br> <a href="https://github.com/KeatonMueller/cube" target="_blank" rel="noopener noreferrer" style={{ color: 'grey' }}>Keaton Muller</a>
-        <br />
-        <br />
+        Rubik's Cube source code:<br></br> <a href="https://github.com/KeatonMueller/cube" target="_blank" rel="noopener noreferrer" style={{ color: 'grey' }}>Keaton Mueller</a>
         <br />
         <br />
         <br />
@@ -475,20 +473,20 @@ function Modal() {
           onTouchMove={handleTouchMove}
         >
           <motion.div 
-            className="modal about-modal" // Add the new class here
+            className="modal about-modal"
             onClick={(e) => e.stopPropagation()} 
-            initial={{ opacity: 0, y: 100 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            exit={{ opacity: 0, y: 100 }}
-            transition={{ type: 'spring', stiffness: 100 }}
+            variants={modalVariants}
+            initial="hidden" 
+            animate="visible" 
+            exit="exit"
           >
             <RenderAboutContent /> 
-            <div className="gradient-overlay"></div> {/* Gradient overlay added here */}
+            <div className="gradient-overlay"></div>
           </motion.div>
         </motion.div>
       </AnimatePresence>
     );
-  }
+  }  
 
   if (!videoInfo) {
     return (
