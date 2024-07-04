@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { BrowserRouter as Router, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './App.css';
-import { motion, AnimatePresence, useAnimation } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { MdMenu, MdClose } from 'react-icons/md';
 import { CubeMasterInit } from './cube-master/js/cube/main.js';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useModal, ModalProvider } from './ModalContext';
-import splashCubeGif from './assets/splashcube_small.gif';
+import './App.css';
 import { formatDate } from './dateUtils';
+import splashCubeGif from './assets/splashcube_small.gif';
 import _ from 'lodash';
 
 const BASE_URL = process.env.NODE_ENV === 'production'
@@ -135,9 +135,6 @@ function HeaderMenu({ videos, onVideoSelect, isLoading }) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef();
   const location = useLocation();
-
-  // Animation Controls for the Hamburger Button
-  const menuButtonControls = useAnimation();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -383,10 +380,11 @@ function RenderAboutContent() {
         </div>
       </div>
       <div style={{ textAlign: 'center', color: 'grey', fontSize: 'small', opacity: contentVisible ? 1 : 0, transition: 'opacity 2s ease 1.3s' }}>
+        Rubik's Cube source code: <a href="https://github.com/KeatonMueller/cube" target="_blank" rel="noopener noreferrer" style={{ color: 'grey' }}>Keaton Mueller</a>
+        <br />
+        <br />
         (ↄ) VU JA DE
         <br />
-        <br />
-        Rubik's Cube source code:<br></br> <a href="https://github.com/KeatonMueller/cube" target="_blank" rel="noopener noreferrer" style={{ color: 'grey' }}>Keaton Mueller</a>
         <br />
         <br />
         <br />
@@ -450,14 +448,6 @@ function Modal() {
     exit: { y: '100vh', opacity: 0, transition: { duration: 0.3, ease: 'easeInOut' } }
   };
 
-  // Function to handle backdrop click
-  const handleBackdropClick = (e) => {
-    closeModal();
-    navigate('/');
-    e.stopPropagation(); // Stop click event from propagating
-    e.preventDefault();  // Prevent any default behavior that might be triggered
-  };
-
   if (currentVideoID === 'about') {
     return (
       <AnimatePresence>
@@ -468,9 +458,6 @@ function Modal() {
           initial="hidden" 
           animate="visible" 
           exit="exit"
-          onClick={handleBackdropClick} 
-          onTouchStart={(e) => e.stopPropagation()}
-          onTouchMove={handleTouchMove}
         >
           <motion.div 
             className="modal about-modal"
