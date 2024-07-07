@@ -34,12 +34,22 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
   const [isLoading, setIsLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState(0);  
   const cubeContainerRef = useRef(null);
+  const [showFooterInstructions, setShowFooterInstructions] = useState(false);
+  const userInteracted = useRef(false);
   const cubeMasterInitialized = useRef(false);
   const { openModal, closeModal, isModalOpen, currentVideoID } = useModal();
   const location = useLocation(); 
 
   // Ref to store the rendering functions
   const renderingControl = useRef({ startRendering: null, stopRendering: null });
+
+  // Handle user interaction, which hides footer instructions if shown
+  const handleUserInteraction = () => {
+    if (!userInteracted.current) {
+      userInteracted.current = true;
+      setShowFooterInstructions(false);  // This will trigger the exit animation automatically
+    }
+  };
 
   // Fetch video URLs to be used as textures on the cube
   useEffect(() => {
@@ -65,6 +75,15 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
             setIsLoading(false);
             setCubeLoading(false);
             setIsLoadingExternal(false);
+            // Start the timer after the cube has finished loading
+            const timer = setTimeout(() => {
+              if (!userInteracted.current) {
+                setShowFooterInstructions(true);
+              }
+            }, 3000);
+
+            // Cleanup the timer when the cube is reloaded or component unmounts
+            return () => clearTimeout(timer);
           },
           (progress) => { setLoadProgress(progress); },
           cubeContainerRef.current,
@@ -104,27 +123,41 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
     <>
       {isLoading && (
         <div className="loading">
-          <p>Loading...</p> 
+          <p>Loading...</p>
           <img src={splashCubeGif} alt="Loading..." />
         </div>
       )}
-      <div> 
-        <motion.div 
+      <div onClick={handleUserInteraction} onTouchStart={handleUserInteraction}>
+        <motion.div
           id="cube-container"
           ref={cubeContainerRef}
-          initial="hidden" 
-          animate={isLoading ? "hidden" : "visible"} 
+          initial="hidden"
+          animate={isLoading ? "hidden" : "visible"}
           variants={{
-            hidden: { opacity: 0, scale: 0.95 }, 
-            visible: { 
-              opacity: isModalOpen ? 0.2 : 1, 
-              scale: 1, 
+            hidden: { opacity: 0, scale: 0.95 },
+            visible: {
+              opacity: isModalOpen ? 0.2 : 1,
+              scale: 1,
               transition: { duration: 0.5 }
             }
           }}
         >
           {/* Cube content here */}
         </motion.div>
+        <AnimatePresence>
+          {showFooterInstructions && (
+            <motion.div
+              className="footer-instructions"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}  // Ensures the component fades out smoothly
+              transition={{ duration: 0.3 }}  // Controls the speed of the fade in/out animation
+              style={{ textAlign: 'center', position: 'fixed', bottom: 70, width: '100%', backgroundColor: 'rgba(0,0,0,0.5)', color: 'white', padding: '10px' }}
+            >
+              This is an interactive Rubik’s Cube. Give it a try!
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </>
   );
@@ -356,22 +389,21 @@ function RenderAboutContent() {
         </div>
         <br />
         <br />
-        <div style={{ opacity: contentVisible ? 1 : 0, transition: 'opacity 2s ease 0.5s' }}>
-          ... and one solution.
+        <div style={{ opacity: contentVisible ? 1 : 0, transition: 'opacity 2s ease' }}>
+          ... but only one solution.
           <br />
           <br />
-          <div style={{ transition: 'opacity 2s ease 0.7s', opacity: contentVisible ? 1 : 0 }}>
-            <p><b>VU JA DE</b> exists to scramble the “solved” arrangements of internet ephemera. To turn <i>been here before</i> into <i>never seen this before.</i> From <i>déjà vu</i> to <i>vujà de.</i></p>
-          </div>
+          <div style={{ transition: 'opacity 2s ease 0.2s', opacity: contentVisible ? 1 : 0 }}>
+          <p>This website does not <i>solve</i> anything. After all, solutions are rare. <b>VU JA DE</b> exists to scramble the seemingly 'solved' arrangements of internet ephemera. To turn <i>déjà vu</i> into <i style={{ color: '#4e74ff', fontWeight: 'bold' }}>vujà de.</i></p>
+        </div>
           <br />
-          <div style={{ transition: 'opacity 2s ease 0.9s', opacity: contentVisible ? 1 : 0 }}>
+          <div style={{ transition: 'opacity 2s ease 0.4s', opacity: contentVisible ? 1 : 0 }}>
             <p>Like the 43 quintillion permutations of the Rubik's Cube, these stories are starting points, not resolutions. They're not made for an algorithmic feed or a distracted scroll, which is why they come to your email.</p>
           </div>
           <br />
           <br />
-          <div className="about-embed" style={{ display: 'flex', justifyContent: 'center', transition: 'opacity 2s ease 1.1s', opacity: contentVisible ? 1 : 0 }}>
+          <div className="about-embed" style={{ display: 'flex', justifyContent: 'center', transition: 'opacity 2s ease 0.6s', opacity: contentVisible ? 1 : 0 }}>
             <div id="custom-substack-embed"></div>
-            <br></br>
             <br></br>
             <br></br>
             <br></br>
@@ -379,13 +411,11 @@ function RenderAboutContent() {
           </div>
         </div>
       </div>
-      <div style={{ textAlign: 'center', color: 'grey', fontSize: 'small', opacity: contentVisible ? 1 : 0, transition: 'opacity 2s ease 1.3s' }}>
-        Rubik's Cube source code: <a href="https://github.com/KeatonMueller/cube" target="_blank" rel="noopener noreferrer" style={{ color: 'grey' }}>Keaton Mueller</a>
+      <div style={{ textAlign: 'center', color: 'grey', fontSize: 'small', opacity: contentVisible ? 1 : 0, transition: 'opacity 2s ease 0.8s' }}>
+        Rubik's Cube source code:<br></br><a href="https://github.com/KeatonMueller/cube" target="_blank" rel="noopener noreferrer" style={{ color: 'grey' }}>Keaton Mueller</a>
         <br />
         <br />
         (ↄ) VU JA DE
-        <br />
-        <br />
         <br />
         <br />
         <br />

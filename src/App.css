@@ -177,7 +177,7 @@ html, body {
 }
 
 .about-screen {
-  padding: 0px 30px 20px 30px;
+  padding: 0px 82px 20px 82px;
   border-radius: 8px;
   font-size: large;
   width: 90%;
@@ -315,7 +315,7 @@ html, body {
 
   .about-modal {
     padding: 0;
-    top: 0px;
+    top: -69px;
   }
 
   .modal {

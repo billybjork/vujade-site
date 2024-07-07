@@ -221,7 +221,7 @@ class Sticker {
     dim() {
         gsap.to(this.material, {
             duration: 0.5, // Duration of the dim animation in seconds
-            opacity: 0.5,
+            opacity: 0.3,
             onUpdate: () => {
                 this.material.transparent = true;
                 this.material.needsUpdate = true;
