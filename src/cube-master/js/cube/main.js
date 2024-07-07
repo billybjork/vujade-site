@@ -318,7 +318,6 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
 
     // Handle pointer up events
     const onDocumentMouseUp = (event) => {
-        console.log('Pointer up, active sticker before reset check:', activeSticker);
         controls.enabled = true;
         dragging = false;
         selectedObject = ClickFlags.NONE;
@@ -328,13 +327,10 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
         let moveX = Math.abs(clickStartPosition.x - event.offsetX);
         let moveY = Math.abs(clickStartPosition.y - event.offsetY);
         hasMoved = moveX > 5 || moveY > 5;
-        console.log(`Mouse moved: ${moveX}px, ${moveY}px - Considered as 'moved': ${hasMoved}`);
 
         if (activeSticker && !hasMoved) {
-            console.log(`Click detected on sticker with videoID: ${activeSticker.videoid}`);
             openModal(activeSticker.videoid, window.location);
         } else {
-            console.log('Click not detected or has moved:', hasMoved);
         }
 
         if (activeSticker) {
