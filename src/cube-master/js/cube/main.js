@@ -9,28 +9,28 @@ import {
     ANIMATION_SPEED,
 } from "./Constants.js";
 
-let animationFrameId = null;  // This will store the request ID for the animation frame
-let mouse = new THREE.Vector2(); // Vector2 for storing mouse coordinates
-let raycaster = new THREE.Raycaster(); // Raycaster for detecting intersects
+let animationFrameId = null;  // Store the request ID for the animation frame
+let mouse = new THREE.Vector2(); // Store mouse coordinates
+let raycaster = new THREE.Raycaster(); // Raycaster to detect intersects
 let isCameraRotating = true; // Track whether the camera is rotating
 
 // Define animate globally within the module
 const animate = (renderer, scene, camera, update, controls) => {
     const loop = () => {
         animationFrameId = requestAnimationFrame(loop);
-        update(controls); // Now passing controls as an argument
+        update(controls);
         update(); // Call update to process moves and handle animations
         renderer.render(scene, camera);
     };
     loop();
 };
 
-// Main rendering function that handles continuous rendering of the scene
+// Handle continuous rendering of the scene
 const render = (renderer, scene, camera, update, controls) => {
-    animate(renderer, scene, camera, update, controls); // Use the globally defined animate function
+    animate(renderer, scene, camera, update, controls);
 };
 
-export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallback, domElement, openModal, isModalOpen) {
+export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallback, domElement, openModal) {
 
     const getHeaderSize = () => {
         // Height of header for embedding in other websites
@@ -60,8 +60,8 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     renderer.setSize(window.innerWidth, window.innerHeight);
     domElement.appendChild(renderer.domElement);
 
-    // Adding spotlight and ambient light
-    const spotlight = new THREE.SpotLight(0xffffff, 0.5); // white light with full intensity
+    // Spotlight and ambient light configuration
+    const spotlight = new THREE.SpotLight(0xffffff, 0.5); // White light with full intensity
     const spotlightPosition = new THREE.Vector3(3, 0, 2); // Initial spotlight position
     spotlight.position.copy(spotlightPosition);
     spotlight.target.position.set(0, 0, 0); // Ensure this is the center of the cube
@@ -72,8 +72,8 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     scene.add(spotlight);
     scene.add(spotlight.target);
 
-    // Adjust ambient light if scene is too dark or too bright
-    const ambientLight = new THREE.AmbientLight(0x404040, 2); // You can reduce intensity if needed
+    // Adjust if overall scene is too dark or too bright
+    const ambientLight = new THREE.AmbientLight(0x404040, 2);
     scene.add(ambientLight);
 
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -95,7 +95,7 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
 
     const startRendering = () => {
         if (!animationFrameId) {
-            animate(renderer, scene, camera, update); // Correctly call the global animate function
+            animate(renderer, scene, camera, update);
         }
     };    
 
@@ -106,12 +106,11 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
         }
     };
 
-    let rotationPixelCutoff; // Declare variable to store rotation pixel cutoff
-    let animating = false; // Tracks whether any animation is currently happening
-    let holdingW = false; // Tracks whether the 'W' key is being held down
+    let rotationPixelCutoff; // Store rotation pixel cutoff
+    let animating = false; // Track whether any animation is currently happening
+    let holdingW = false; // Track whether the 'W' key is being held down
     let moveBuffer = [];  // Initialize moveBuffer as an empty array
 
-    // Update the rotation pixel cutoff based on interactions
     const updateRotationPixelCutoff = () => {
         const halfWidth = window.innerWidth / 2;
         cube.cubies.forEach((cubie) => {
@@ -123,16 +122,16 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
         });
     };
     updateRotationPixelCutoff();
-    controls.addEventListener("change", updateRotationPixelCutoff); // Add listener to update cutoff on control changes
+    controls.addEventListener("change", updateRotationPixelCutoff);
 
-    const clock = new THREE.Clock(); // Use a clock to manage time within the animation
+    const clock = new THREE.Clock(); // Manage time within the animation
 
-    // Function for making updates per tick
+    // Make updates per tick
     const update = () => {
         const delta = clock.getDelta();
     
         if (isCameraRotating) {
-            camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), delta * 0.1); // Adjust the rotation speed as needed
+            camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), delta * 0.1);
             camera.lookAt(scene.position); // Ensure the camera is always looking at the cube
         }
     
@@ -172,20 +171,14 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
         });
     };    
 
-    // Event handlers for keyboard and mouse events, resize, and touch
-
-    // Declare a variable to keep track of the currently hovered sticker
-    let hoveredSticker = null;
-    // Variable to hold the sticker that might be clicked
-    let activeSticker = null;
+    let hoveredSticker = null; // Keep track of the currently hovered sticker
+    let activeSticker = null;  // Store the sticker that might be clicked
     let mouseDownEvent = null;
 
-document.addEventListener("touchmove", {passive: false});
+    document.addEventListener("touchmove", {passive: false});
 
-    // Event handlers for keyboard and mouse events, resize, and touch...
     document.addEventListener("pointermove", (event) => {
         if (!dragging) {
-            // Existing hover functionality
             mouse.x = (event.offsetX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.offsetY / getHeight()) * 2 + 1;
             raycaster.setFromCamera(mouse, camera);
@@ -209,14 +202,11 @@ document.addEventListener("touchmove", {passive: false});
                 }
             }
         } else {
-            // Existing dragging functionality
             const delta = new THREE.Vector2(
                 (event.offsetX / window.innerWidth) * 2 - 1 - mouse.x,
                 -(event.offsetY / getHeight()) * 2 + 1 - mouse.y
             );
             if (delta.length() > getTolerance() && selectedObject !== ClickFlags.CUBIE) {
-                // Compute the direction of the drag here and handle it appropriately
-                // Ensure you update chosenAxis and chosenDir as needed
             }
     
             // Update the hasMoved flag for click/drag differentiation
@@ -226,9 +216,7 @@ document.addEventListener("touchmove", {passive: false});
         }
     }, false);
 
-    /**
-     * Handle key press event
-     */
+    // Handle key press event
     const onKeyPress = (event) => {
 
         // append 'w' if holding w
@@ -245,18 +233,14 @@ document.addEventListener("touchmove", {passive: false});
     };
     document.addEventListener("keypress", onKeyPress, false);
 
-    /**
-     * Handle key up event
-     */
+    // Handle mouse up event
     const onKeyUp = (event) => {
         // unset holdingW if released w
         if (event.key === "w" || event.key === "W") holdingW = false;
     };
     document.addEventListener("keyup", onKeyUp, false);
 
-    /**
-     * Resize canvas on window resize
-     */
+    // Resize canvas on window resize
     const onWindowResize = () => {
         camera.aspect = window.innerWidth / getHeight();
         camera.updateProjectionMatrix();
@@ -265,9 +249,7 @@ document.addEventListener("touchmove", {passive: false});
     };
     window.addEventListener("resize", onWindowResize, false);
 
-    /**
-     * Route touch events to mouse events
-     */
+    // Route touch events to mouse events
     const onTouchStart = (event) => {
         event.offsetX = event.touches[0].clientX;
         event.offsetY = event.touches[0].clientY - getHeaderSize();
@@ -281,7 +263,7 @@ document.addEventListener("touchmove", {passive: false});
     document.addEventListener("touchend", onTouchEnd, false);
 
     const onTouchMove = (event) => {
-        event.preventDefault(); // Prevents scrolling the page while touching the cube
+        event.preventDefault(); // Prevent scrolling the page while touching the cube
         event.offsetX = event.touches[0].clientX;
         event.offsetY = event.touches[0].clientY - getHeaderSize();
         onDocumentMouseMove(event);
@@ -299,9 +281,9 @@ document.addEventListener("touchmove", {passive: false});
     let clickStartPosition = null;
     let hasMoved = false;
 
-    // Function to handle pointer down events
+    // Handle pointer down events
     const onDocumentMouseDown = (event) => {
-        mouseDownEvent = event; // Store the mousedown event
+        mouseDownEvent = event;
         mouse.x = (event.offsetX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.offsetY / getHeight()) * 2 + 1;
         clickStartPosition = { x: event.offsetX, y: event.offsetY };
@@ -320,7 +302,7 @@ document.addEventListener("touchmove", {passive: false});
               selectedObject = intersects[0];
               activeSticker = cube.stickersMap.get(clickedMesh.uuid);
         
-              // Immediately dim the sticker to provide visual feedback
+              // Dim the hovered sticker to provide visual feedback
               activeSticker.dim(); 
         
               // Track if a drag actually starts (significant movement)
@@ -334,8 +316,7 @@ document.addEventListener("touchmove", {passive: false});
 
     document.addEventListener("pointerdown", onDocumentMouseDown, false);
 
-    // Function to handle pointer up events
-
+    // Handle pointer up events
     const onDocumentMouseUp = (event) => {
         console.log('Pointer up, active sticker before reset check:', activeSticker);
         controls.enabled = true;
@@ -366,10 +347,7 @@ document.addEventListener("touchmove", {passive: false});
 
     document.addEventListener("pointerup", onDocumentMouseUp, false);  
 
-    /**
-     * Handle mouse move events by determining what
-     * move is being requested, and pushing it to the moveBuffer.
-     */
+    // Handle mouse move events by determining what move is being requested, and pushing it to the moveBuffer
     const onDocumentMouseMove = (event) => {
     
         // do nothing if not dragging

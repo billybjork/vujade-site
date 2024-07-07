@@ -1,20 +1,16 @@
-import React, {
-  createContext, useContext, useState, useMemo, useCallback, useEffect
-} from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const ModalContext = createContext();
 
 export const useModal = () => useContext(ModalContext);
 
-export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
+export const ModalProvider = ({ children }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideoID, setCurrentVideoID] = useState(null);
-  const [overlayVisible, setOverlayVisible] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
 
-  // State to track if it's the initial site load
+  // Track whether it's the initial site load
   const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
@@ -42,13 +38,13 @@ export const ModalProvider = ({ children, onModalOpen, onModalClose }) => {
   const closeModal = useCallback(() => {
     setIsModalOpen(false);
     setCurrentVideoID(null);
-    navigate('/', { replace: true }); 
-  }, [navigate]);
+    navigate('/', { replace: true });
+  }, [navigate]);  
 
   const providerValue = useMemo(() => ({
-    isModalOpen, currentVideoID, openModal, closeModal, overlayVisible
+    isModalOpen, currentVideoID, openModal, closeModal
   }), [
-    isModalOpen, currentVideoID, openModal, closeModal, overlayVisible
+    isModalOpen, currentVideoID, openModal, closeModal
   ]);
 
   return (

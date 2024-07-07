@@ -1,5 +1,5 @@
-from flask import Flask, send_from_directory, request, jsonify
 import os
+from flask import Flask, send_from_directory, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
@@ -111,4 +111,5 @@ def get_video_info(videoID):
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(debug=True)  # Turn off debug mode in production
+    debug_mode = os.environ.get('FLASK_DEBUG', 'false').lower() in ['true', '1', 't']
+    app.run(debug=debug_mode)

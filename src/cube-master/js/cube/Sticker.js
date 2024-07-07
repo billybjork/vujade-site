@@ -106,8 +106,8 @@ class Sticker {
         this.material = new THREE.MeshPhongMaterial({
             map: texture,
             side: THREE.DoubleSide,
-            shininess: 10,  // Optional, adjust for desired shininess effect
-            specular: 0x222222,  // Optional, adjust the color reflected by the light
+            shininess: 10,  // Adjust for desired shininess effect
+            specular: 0x222222,  // Adjust the color reflected by the light
         });
     
         // Use the rounded square geometry for the mesh
@@ -229,7 +229,7 @@ class Sticker {
         });
     }
 
-    // Method to reset the sticker's appearance
+    // Reset the sticker's appearance
     reset() {
         gsap.to(this.material, {
             duration: 0.5, // Duration of the reset animation in seconds

@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-
 import getRotationMatrix from "./RotationMatrices.js";
 import Sticker from "./Sticker.js";
 

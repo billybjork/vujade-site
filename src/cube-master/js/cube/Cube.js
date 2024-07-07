@@ -104,64 +104,6 @@ class Cube {
                 ["B", "B", "B"],
             ],
         ];
-        // for each cubie, store its face color
-        this.cubies.forEach((cubie) => {
-            // up face
-            if (cubie.positionVector.y === 1) {
-                cubie.stickers.forEach((sticker) => {
-                    if (sticker.facingVector.y === 1)
-                        stickers[0][sticker.fixedPositionVector.z + 1][
-                            sticker.fixedPositionVector.x + 1
-                        ] = sticker.getColor();
-                });
-            }
-            // down face
-            if (cubie.positionVector.y === -1) {
-                cubie.stickers.forEach((sticker) => {
-                    if (sticker.facingVector.y === -1) {
-                        stickers[1][-1 * sticker.fixedPositionVector.z + 1][
-                            sticker.fixedPositionVector.x + 1
-                        ] = sticker.getColor();
-                    }
-                });
-            }
-            // front face
-            if (cubie.positionVector.z === 1) {
-                cubie.stickers.forEach((sticker) => {
-                    if (sticker.facingVector.z === 1)
-                        stickers[2][-1 * sticker.fixedPositionVector.y + 1][
-                            sticker.fixedPositionVector.x + 1
-                        ] = sticker.getColor();
-                });
-            }
-            // back face
-            if (cubie.positionVector.z === -1) {
-                cubie.stickers.forEach((sticker) => {
-                    if (sticker.facingVector.z === -1)
-                        stickers[3][-1 * sticker.fixedPositionVector.y + 1][
-                            -1 * sticker.fixedPositionVector.x + 1
-                        ] = sticker.getColor();
-                });
-            }
-            // right face
-            if (cubie.positionVector.x === 1) {
-                cubie.stickers.forEach((sticker) => {
-                    if (sticker.facingVector.x === 1)
-                        stickers[4][-1 * sticker.fixedPositionVector.y + 1][
-                            -1 * sticker.fixedPositionVector.z + 1
-                        ] = sticker.getColor();
-                });
-            }
-            // left face
-            if (cubie.positionVector.x === -1) {
-                cubie.stickers.forEach((sticker) => {
-                    if (sticker.facingVector.x === -1)
-                        stickers[5][-1 * sticker.fixedPositionVector.y + 1][
-                            sticker.fixedPositionVector.z + 1
-                        ] = sticker.getColor();
-                });
-            }
-        });
 
         // construct the repr from the extracted stickers data
         let cubeRepr = "";
