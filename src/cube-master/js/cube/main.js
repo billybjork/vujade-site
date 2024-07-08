@@ -267,44 +267,12 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     document.addEventListener("touchend", onTouchEnd, false);    
 
     const onTouchMove = (event) => {
-        event.preventDefault(); // Prevent default to stop scrolling and zooming on touch devices
-        let touchX = event.touches[0].clientX;
-        let touchY = event.touches[0].clientY - getHeaderSize(); // Adjust for any header offset
-        event.offsetX = touchX;
-        event.offsetY = touchY;
-    
-        if (activeSticker && !isTouchOverSticker(activeSticker, touchX, touchY, camera, renderer.domElement)) {
-            activeSticker.reset();
-            activeSticker = null;
-        }
-    
-        onDocumentMouseMove(event); // Handle other move-related logic
-    };
-    document.addEventListener("touchmove", onTouchMove, { passive: false });     
-
-    function isTouchOverSticker(sticker, touchX, touchY, camera, domElement) {
-        // Normalize the touch coordinates to [-1, 1], where (0, 0) is the center of the element
-        const rect = domElement.getBoundingClientRect();
-        const x = ((touchX - rect.left) / rect.width) * 2 - 1;
-        const y = -((touchY - rect.top) / rect.height) * 2 + 1;
-    
-        // Set up the raycaster
-        const mouse = new THREE.Vector2(x, y);
-        const raycaster = new THREE.Raycaster();
-        raycaster.setFromCamera(mouse, camera);
-    
-        // Get the intersections with the cube's meshes
-        const intersects = raycaster.intersectObjects(cube.meshes, true);
-        if (intersects.length > 0) {
-            let intersectedMesh = intersects[0].object;
-            // Check if the intersected mesh is the current sticker
-            if (cube.stickersMap.has(intersectedMesh.uuid)) {
-                let intersectedSticker = cube.stickersMap.get(intersectedMesh.uuid);
-                return intersectedSticker === sticker;
-            }
-        }
-        return false;
-    }    
+        event.preventDefault(); // Prevent scrolling the page while touching the cube
+        event.offsetX = event.touches[0].clientX;
+        event.offsetY = event.touches[0].clientY - getHeaderSize();
+        onDocumentMouseMove(event);
+      };      
+    document.addEventListener("touchmove", onTouchMove, false);
 
     /**
      * Mouse events
@@ -337,9 +305,6 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
             if (cube.stickersMap.has(clickedMesh.uuid)) {
               selectedObject = intersects[0];
               activeSticker = cube.stickersMap.get(clickedMesh.uuid);
-        
-              // Dim the hovered sticker to provide visual feedback
-              activeSticker.dim(); 
         
               // Track if a drag actually starts (significant movement)
               hasMoved = false; 
