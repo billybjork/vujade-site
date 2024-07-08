@@ -258,9 +258,13 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
     document.addEventListener("touchstart", onTouchStart, false);
 
     const onTouchEnd = (event) => {
-        onDocumentMouseUp(event);
+        if (activeSticker) {
+            activeSticker.reset();  // Reset the visual state of the sticker
+            activeSticker = null;  // Clear the active sticker reference
+        }
+        onDocumentMouseUp(event);  // Continue with any other cleanup
     };
-    document.addEventListener("touchend", onTouchEnd, false);
+    document.addEventListener("touchend", onTouchEnd, false);    
 
     const onTouchMove = (event) => {
         event.preventDefault(); // Prevent scrolling the page while touching the cube

@@ -373,6 +373,7 @@ function RenderAboutContent() {
         <br />
         <br />
         <br />
+        <br />
       </div>
     </div>
   );  
@@ -503,7 +504,11 @@ function Modal() {
               <p className="published-date" style={{ fontSize: 'smaller', color: 'gray' }}>
                 {formatDate(videoState.info.Published)}
               </p>
+              <br></br>
               <div dangerouslySetInnerHTML={{ __html: videoState.info.Description }}></div>
+              <br></br>
+              <br></br>
+              <br></br>
             </div>
             <div className="gradient-overlay"></div>
           </motion.div>
