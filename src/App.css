@@ -160,8 +160,6 @@ html, body {
   pointer-events: all;
   background-color: rgba(0, 0, 0, 1);
   overflow: hidden;
-  user-select: none;
-  -webkit-user-select: none;
 }
 
 .modal-backdrop {
@@ -177,7 +175,7 @@ html, body {
 }
 
 .about-screen {
-  padding: 0px 82px 20px 82px;
+  padding: 0px 97px 20px 97px;
   border-radius: 8px;
   font-size: large;
   width: 90%;

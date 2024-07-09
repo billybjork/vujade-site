@@ -344,12 +344,11 @@ function RenderAboutContent() {
         <br />
         <br />
         <div style={{ opacity: contentVisible ? 1 : 0, transition: 'opacity 2s ease' }}>
-          ... but only one solution.
+          ... but only one solution. Which is why this website doesn't aim to <i>solve</i> anything. After all, solutions are rare.
           <br />
           <br />
-          <div style={{ transition: 'opacity 2s ease 0.2s', opacity: contentVisible ? 1 : 0 }}>
-          <p>This website does not <i>solve</i> anything. After all, solutions are rare. <b>VU JA DE</b> exists to scramble the seemingly 'solved' arrangements of internet ephemera. To turn <i>déjà vu</i> into <i style={{ color: '#4e74ff', fontWeight: 'bold' }}>vujà de.</i></p>
-        </div>
+          <b>VU JA DE</b> exists to scramble the seemingly 'solved' arrangements of internet ephemera. To turn <i>déjà vu</i> into <i style={{ color: '#4e74ff', fontWeight: 'bold' }}>vujà de.</i>
+          <br />
           <br />
           <div style={{ transition: 'opacity 2s ease 0.4s', opacity: contentVisible ? 1 : 0 }}>
             <p>Like the 43 quintillion permutations of the Rubik's Cube, these stories are starting points, not resolutions. They're not made for an algorithmic feed or a distracted scroll, which is why they come to your email.</p>
@@ -370,6 +369,7 @@ function RenderAboutContent() {
         <br />
         <br />
         (ↄ) VU JA DE
+        <br />
         <br />
         <br />
         <br />
@@ -506,6 +506,7 @@ function Modal() {
               </p>
               <br></br>
               <div dangerouslySetInnerHTML={{ __html: videoState.info.Description }}></div>
+              <br></br>
               <br></br>
               <br></br>
               <br></br>
