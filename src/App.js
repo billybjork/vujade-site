@@ -27,7 +27,20 @@ const fadeInVariants = {
       ease: "easeInOut"
     }
   }
-};  
+};
+
+function usePageTracking() {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Ensure the GA script has loaded
+    if (window.gtag) {
+      window.gtag('config', 'G-JTS9LK76J9', {
+        page_path: location.pathname + location.search,
+      });
+    }
+  }, [location]);
+}
 
 function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
   const cubeContainerRef = useRef(null);
@@ -526,6 +539,8 @@ function AppWrapper() {
   const [cubeLoading, setCubeLoading] = useState(true);
   const [isCloseVisible, setIsCloseVisible] = useState(false);
   const [isQuestionMarkVisible, setIsQuestionMarkVisible] = useState(false);
+
+  usePageTracking(); // Track page views
 
   const toggleAbout = () => {
     // Toggle the about modal and close button visibility
