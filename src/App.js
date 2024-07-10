@@ -367,7 +367,7 @@ function RenderAboutContent() {
           <div style={{ transition: 'opacity 2s ease 0.4s', opacity: contentVisible ? 1 : 0 }}>
             <p>Like the 43 quintillion permutations of the Rubik's Cube, these stories are starting points, not resolutions. They're not made for an algorithmic feed or a distracted scroll, which is why they come to your email.</p>
           </div>
-          <br />
+          <br /> 
           <br />
           <div className="about-embed" style={{ display: 'flex', justifyContent: 'center', transition: 'opacity 2s ease 0.6s', opacity: contentVisible ? 1 : 0 }}>
             <div id="custom-substack-embed"></div>
