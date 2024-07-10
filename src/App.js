@@ -349,7 +349,7 @@ function RenderAboutContent() {
               The Rubik’s Cube has <br />
               <span style={{ color: '#4e74ff' }}>{displayNumber}</span>
               <div style={{ opacity: contentVisible ? 1 : 0, transition: 'opacity 1s ease' }}>
-              possible combinations...
+                possible combinations...
               </div>
             </div>
           </div>
@@ -360,8 +360,9 @@ function RenderAboutContent() {
           ... but only one solution. Which is why this website doesn't aim to <i>solve</i> anything. After all, solutions are rare.
           <br />
           <br />
-          <b>VU JA DE</b> exists to scramble the seemingly 'solved' arrangements of internet ephemera. To turn <i>déjà vu</i> into <i style={{ color: '#4e74ff', fontWeight: 'bold' }}>vujà de.</i>
-          <br />
+          <div style={{ transition: 'opacity 2s ease 0.2s', opacity: contentVisible ? 1 : 0 }}>
+            <b>VU JA DE</b> exists to scramble the seemingly 'solved' arrangements of internet ephemera. To turn <i>déjà vu</i> into <i style={{ color: '#4e74ff', fontWeight: 'bold' }}>vujà de.</i>
+          </div>
           <br />
           <div style={{ transition: 'opacity 2s ease 0.4s', opacity: contentVisible ? 1 : 0 }}>
             <p>Like the 43 quintillion permutations of the Rubik's Cube, these stories are starting points, not resolutions. They're not made for an algorithmic feed or a distracted scroll, which is why they come to your email.</p>
@@ -389,7 +390,7 @@ function RenderAboutContent() {
         <br />
       </div>
     </div>
-  );  
+  );   
 }
 
 function Modal() {
