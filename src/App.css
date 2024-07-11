@@ -39,6 +39,7 @@ html, body {
 
 .cube-container {
   z-index: 1000;
+  cursor: pointer;
 }
 
 .cube-container.modal-active {

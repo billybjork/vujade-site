@@ -143,6 +143,7 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
           ref={cubeContainerRef}
           initial="hidden"
           animate={isLoading ? "hidden" : "visible"}
+          style={{ cursor: isLoading ? 'default' : 'pointer' }}
           variants={{
             hidden: { opacity: 0, scale: 0.95 },
             visible: {
