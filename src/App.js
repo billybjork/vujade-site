@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Helmet } from 'react-helmet';
 import { BrowserRouter as Router, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -592,10 +591,6 @@ function AppWrapper() {
 
   return (
     <ModalProvider>
-      <Helmet>
-        <title>{`${location.pathname.substring(1).toUpperCase()}`}</title>
-        <meta property="og:title" content={`${location.pathname.substring(1).toUpperCase()}`} />
-      </Helmet>
       <HeaderMenu videos={allVideos} isLoading={cubeLoading} setIsQuestionMarkVisible={setIsQuestionMarkVisible} />
       <CubeWithVideos setCubeLoading={setCubeLoading} setIsLoadingExternal={setIsQuestionMarkVisible} />
       <AnimatePresence>
