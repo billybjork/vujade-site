@@ -472,7 +472,6 @@ function Modal() {
      // Handle case where fetching failed or info is null after loading
      return (
        <div className="modal-backdrop">
-         <div className="loading-container">Could not load video information.</div>
        </div>
      );
   }
