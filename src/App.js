@@ -487,7 +487,6 @@ function Modal() {
      );
   }
 
-  // --- YOUTUBE URL PARSING AND EMBED LOGIC ---
   let videoId = null;
   let embedUrl = null;
   try {
@@ -510,7 +509,6 @@ function Modal() {
     console.error("Error parsing video URL:", error);
     // Optionally handle the error, maybe show a message
   }
-  // --- END YOUTUBE LOGIC ---
 
   return (
     <AnimatePresence>
@@ -538,7 +536,6 @@ function Modal() {
             <span className="close" onClick={() => {
               closeModal();
               navigate('/');
-              // No need to reset videoState here, useEffect handles it
             }}>×</span>
 
             {/* --- UPDATED IFRAME SECTION --- */}
@@ -555,7 +552,6 @@ function Modal() {
                  <p style={{color: 'white', textAlign: 'center', paddingTop: '20%'}}>Video unavailable.</p> // Fallback if URL/ID is invalid
               )}
             </div>
-            {/* --- END UPDATED IFRAME SECTION --- */}
 
             <div className="text-container">
               <h2>{videoState.info.videoName}</h2>
