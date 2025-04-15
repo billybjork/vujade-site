@@ -45,4 +45,4 @@ EXPOSE 8080
 # Define the command to run the application using Gunicorn
 # Railway will inject the correct $PORT environment variable.
 # Use python -m gunicorn for robustness
-CMD ["python", "-m", "gunicorn", "api:app", "--bind", "0.0.0.0:$PORT"]
+CMD python -m gunicorn api:app --bind 0.0.0.0:$PORT
