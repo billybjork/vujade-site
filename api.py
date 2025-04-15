@@ -18,7 +18,7 @@ if uri.startswith("postgres://"):
 app.config['SQLALCHEMY_DATABASE_URI'] = uri
 db = SQLAlchemy(app)
 
-CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:5000", "https://vujade-site-bd6c94750c62.herokuapp.com", "https://vujade.world", "http://vujade.world", "https://www.vujade.world", "http://www.vujade.world"]}})
+CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:5000", "https://web-production-d14cb.up.railway.app", "https://vujade.world", "http://vujade.world", "https://www.vujade.world", "http://www.vujade.world"]}})
 
 def dict_factory(cursor, row):
     d = {}

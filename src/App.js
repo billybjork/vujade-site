@@ -11,7 +11,7 @@ import splashCubeGif from './assets/splashcube_small.gif';
 import _ from 'lodash';
 
 const BASE_URL = process.env.NODE_ENV === 'production'
-  ? 'https://vujade-site-bd6c94750c62.herokuapp.com'
+  ? 'https://web-production-d14cb.up.railway.app'
   : 'http://127.0.0.1:5000';
 
 const fadeInVariants = {
