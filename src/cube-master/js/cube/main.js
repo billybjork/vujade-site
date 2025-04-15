@@ -173,7 +173,6 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
 
     let hoveredSticker = null; // Keep track of the currently hovered sticker
     let activeSticker = null;  // Store the sticker that might be clicked
-    let mouseDownEvent = null;
 
     document.addEventListener("touchmove", {passive: false});
 
@@ -287,7 +286,6 @@ export function CubeMasterInit(videoURLs, allVideosLoadedCallback, progressCallb
 
     // Handle pointer down events
     const onDocumentMouseDown = (event) => {
-        mouseDownEvent = event;
         mouse.x = (event.offsetX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.offsetY / getHeight()) * 2 + 1;
         clickStartPosition = { x: event.offsetX, y: event.offsetY };

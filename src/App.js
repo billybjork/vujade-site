@@ -468,16 +468,6 @@ function Modal() {
     );
   }
 
-  // Handle video modal loading and rendering
-  if (videoState.loading) {
-     return (
-      <div className="modal-backdrop">
-        {/* Optional: Add a loading indicator specific to the video modal */}
-        <div className="loading-container">Loading Video...</div>
-      </div>
-    );
-  }
-
   if (!videoState.info) {
      // Handle case where fetching failed or info is null after loading
      return (
