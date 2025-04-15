@@ -79,7 +79,7 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
 
   // Initialize the cube once videos and container are ready
   useEffect(() => {
-    if (cubeVideos.length == 54 && !cubeMasterInitialized.current && cubeContainerRef.current) {
+    if (cubeVideos.length === 54 && !cubeMasterInitialized.current && cubeContainerRef.current) {
       const controls = CubeMasterInit(
           cubeVideos, 
           () => {
@@ -401,11 +401,11 @@ function Modal() {
   const modalRef = useRef(null);
   const aboutBackdropRef = useRef(null);
 
-  // Prevent interactions on body when modal is open 
+  // Prevent interactions on body when modal is open
   const handleTouchMove = (e) => {
     e.stopPropagation();
     if (isModalOpen) {
-      e.preventDefault(); 
+      e.preventDefault();
     }
   };
 
@@ -425,7 +425,7 @@ function Modal() {
     fetchVideoInfo();
   }, [currentVideoID]);
 
-  if (!isModalOpen || videoState.loading || !currentVideoID) return null;
+  if (!isModalOpen || !currentVideoID) return null; // Simplified loading check
 
   const modalVariants = {
     hidden: { y: '100vh', opacity: 0 },
@@ -433,55 +433,90 @@ function Modal() {
     exit: { y: '100vh', opacity: 0, transition: { duration: 0.3, ease: 'easeInOut' } }
   };
 
+  // Handle the 'about' modal separately
   if (currentVideoID === 'about') {
     return (
       <AnimatePresence>
-        <motion.div 
-          className="about-modal-backdrop"
-          ref={aboutBackdropRef}
-          variants={{
-            hidden: { opacity: 0 },
-            visible: { opacity: 1, transition: { duration: 0.3, ease: "easeInOut" } },
-            exit: { opacity: 0, transition: { duration: 0.3, ease: "easeInOut" } }
-          }} 
-          initial="hidden" 
-          animate="visible" 
-          exit="exit"
-          onTouchMove={handleTouchMove}
-        >
-          <motion.div 
-            className="modal about-modal"
-            onClick={(e) => e.stopPropagation()} 
+        {isModalOpen && ( // Ensure modal only renders when open
+          <motion.div
+            className="about-modal-backdrop"
+            ref={aboutBackdropRef}
             variants={{
-              hidden: { y: '100vh', opacity: 0 },
-              visible: { y: 0, opacity: 1, transition: { type: 'spring', damping: 25, stiffness: 120 } },
-              exit: { y: '100vh', opacity: 0, transition: { duration: 0.3, ease: 'easeInOut' } }
+              hidden: { opacity: 0 },
+              visible: { opacity: 1, transition: { duration: 0.3, ease: "easeInOut" } },
+              exit: { opacity: 0, transition: { duration: 0.3, ease: "easeInOut" } }
             }}
-            initial="hidden" 
-            animate="visible" 
+            initial="hidden"
+            animate="visible"
             exit="exit"
+            onTouchMove={handleTouchMove}
           >
-            <RenderAboutContent /> 
-            <div className="gradient-overlay"></div>
+            <motion.div
+              className="modal about-modal"
+              onClick={(e) => e.stopPropagation()}
+              variants={modalVariants} // Use the same modal variants
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              <RenderAboutContent />
+              <div className="gradient-overlay"></div>
+            </motion.div>
           </motion.div>
-        </motion.div>
+        )}
       </AnimatePresence>
     );
   }
 
-  if (!videoState.info) {
-    return (
+  // Handle video modal loading and rendering
+  if (videoState.loading) {
+     return (
       <div className="modal-backdrop">
-        <div className="loading-container"></div>
+        {/* Optional: Add a loading indicator specific to the video modal */}
+        <div className="loading-container">Loading Video...</div>
       </div>
     );
   }
 
+  if (!videoState.info) {
+     // Handle case where fetching failed or info is null after loading
+     return (
+       <div className="modal-backdrop">
+         <div className="loading-container">Could not load video information.</div>
+       </div>
+     );
+  }
+
+  // --- YOUTUBE URL PARSING AND EMBED LOGIC ---
+  let videoId = null;
+  let embedUrl = null;
+  try {
+    // Assuming URL format like "https://youtu.be/VIDEO_ID"
+    const url = new URL(videoState.info.URL);
+    if (url.hostname === 'youtu.be') {
+      videoId = url.pathname.substring(1); // Remove leading '/'
+    } else if (url.hostname === 'www.youtube.com' || url.hostname === 'youtube.com') {
+       // Handle standard youtube.com links like youtube.com/watch?v=VIDEO_ID
+       videoId = url.searchParams.get('v');
+    }
+
+    if (videoId) {
+       // Construct YouTube embed URL with minimal parameters
+      embedUrl = `https://www.youtube.com/embed/${videoId}?controls=1&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&rel=0&playsinline=1`;
+    } else {
+        console.error("Could not extract YouTube video ID from URL:", videoState.info.URL);
+    }
+  } catch (error) {
+    console.error("Error parsing video URL:", error);
+    // Optionally handle the error, maybe show a message
+  }
+  // --- END YOUTUBE LOGIC ---
+
   return (
     <AnimatePresence>
       {isModalOpen && (
-        <motion.div 
-          className="modal-backdrop" 
+        <motion.div
+          className="modal-backdrop"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -491,29 +526,37 @@ function Modal() {
           }}
           onTouchMove={handleTouchMove}
         >
-          <motion.div 
-            className="modal" 
+          <motion.div
+            className="modal"
             ref={modalRef}
             variants={modalVariants}
-            initial="hidden" 
-            animate="visible" 
+            initial="hidden"
+            animate="visible"
             exit="exit"
             onClick={(e) => e.stopPropagation()} // Prevent closing on click inside the modal
           >
-            <span className="close" onClick={() => { 
-              closeModal(); 
+            <span className="close" onClick={() => {
+              closeModal();
               navigate('/');
-              setVideoState({ ...videoState, info: null }); 
-            }}>&times;</span>
+              // No need to reset videoState here, useEffect handles it
+            }}>×</span>
+
+            {/* --- UPDATED IFRAME SECTION --- */}
             <div className="embed-container">
-              <iframe 
-                key={videoState.info.URL.split("/")[3]} 
-                src={`https://player.vimeo.com/video/${videoState.info.URL.split("/")[3]}`} 
-                allow="autoplay; fullscreen" 
-                allowFullScreen 
-                title={videoState.info.videoName}
-              ></iframe>
+              {embedUrl ? (
+                <iframe
+                  key={videoId} // Use YouTube video ID as key
+                  src={embedUrl} // Use the constructed YouTube URL
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" // Standard YouTube permissions
+                  allowFullScreen
+                  title={videoState.info.videoName}
+                ></iframe>
+              ) : (
+                 <p style={{color: 'white', textAlign: 'center', paddingTop: '20%'}}>Video unavailable.</p> // Fallback if URL/ID is invalid
+              )}
             </div>
+            {/* --- END UPDATED IFRAME SECTION --- */}
+
             <div className="text-container">
               <h2>{videoState.info.videoName}</h2>
               <p className="published-date" style={{ fontSize: 'smaller', color: 'gray' }}>

@@ -248,11 +248,11 @@ html, body {
 
 .text-container a, .text-container a:visited {
   color: var(--link-color);
-  text-decoration: none; /* Remove underline from links */
+  text-decoration: none;
 }
 
 .text-container a:hover, .text-container a:focus {
-  text-decoration: underline; /* Underline on hover on desktop */
+  text-decoration: underline;
 }
 
 .gradient-overlay {
