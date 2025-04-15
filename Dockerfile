@@ -27,7 +27,7 @@ ENV PYTHONUNBUFFERED 1
 # Install Python dependencies
 # Copy requirements first to leverage Docker layer caching
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --verbose -r requirements.txt
 
 # Copy built frontend from the builder stage
 COPY --from=builder /app/build ./build
