@@ -1,5 +1,5 @@
 import os
-from flask import Flask, send_from_directory, request, jsonify
+from flask import Flask, send_from_directory, request, jsonify, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
@@ -47,8 +47,12 @@ class Scene(db.Model):
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-    # Attempt to serve the file directly from the static folder, if it exists
-    # Otherwise, serve index.html
+    # Redirect non-www domain to www
+    host = request.headers.get("Host", "")
+    if host == "vujade.world":
+        return redirect(f"https://www.vujade.world/{path}", code=301)
+
+    # Serve static files from React build
     if path != "" and os.path.exists(os.path.join(react_build_directory, path)):
         return send_from_directory(react_build_directory, path)
     return send_from_directory(react_build_directory, 'index.html')
