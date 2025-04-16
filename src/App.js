@@ -9,6 +9,8 @@ import './App.css';
 import { formatDate } from './dateUtils';
 import splashCubeGif from './assets/splashcube_small.gif';
 import _ from 'lodash';
+import 'lite-youtube-embed/src/lite-yt-embed.css';
+import 'lite-youtube-embed/src/lite-yt-embed.js';
 
 const BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://web-production-d14cb.up.railway.app'
@@ -395,166 +397,175 @@ function RenderAboutContent() {
 }
 
 function Modal() {
-  const { isModalOpen, currentVideoID, closeModal } = useModal();
-  const navigate = useNavigate();
-  const [videoState, setVideoState] = useState({ info: null, loading: false });
-  const modalRef = useRef(null);
-  const aboutBackdropRef = useRef(null);
+  const { isModalOpen, currentVideoID, closeModal } = useModal(); // [cite: 69]
+  const navigate = useNavigate(); // [cite: 69]
+  const [videoState, setVideoState] = useState({ info: null, loading: false }); // [cite: 70]
+  const modalRef = useRef(null); // [cite: 70]
+  const aboutBackdropRef = useRef(null); // [cite: 70]
 
   // Prevent interactions on body when modal is open
-  const handleTouchMove = (e) => {
-    e.stopPropagation();
-    if (isModalOpen) {
-      e.preventDefault();
+  const handleTouchMove = (e) => { // [cite: 71]
+    e.stopPropagation(); // [cite: 71]
+    if (isModalOpen) { // [cite: 72]
+      e.preventDefault(); // [cite: 72]
     }
   };
 
   // Fetch video information based on video ID
-  useEffect(() => {
+  useEffect(() => { // [cite: 73]
     async function fetchVideoInfo() {
-      if (!currentVideoID || currentVideoID === 'about') return;
-      setVideoState({ info: null, loading: true });
+      if (!currentVideoID || currentVideoID === 'about') return; // [cite: 73]
+      setVideoState({ info: null, loading: true }); // [cite: 73]
       try {
-        const { data } = await axios.get(`${BASE_URL}/api/video_info/${currentVideoID}`);
-        setVideoState({ info: data, loading: false });
+        const { data } = await axios.get(`${BASE_URL}/api/video_info/${currentVideoID}`); // [cite: 73]
+        setVideoState({ info: data, loading: false }); // [cite: 73]
       } catch (error) {
-        console.error('Error fetching video info:', error);
-        setVideoState({ info: null, loading: false });
+        console.error('Error fetching video info:', error); // [cite: 73]
+        setVideoState({ info: null, loading: false }); // [cite: 74]
       }
     }
     fetchVideoInfo();
-  }, [currentVideoID]);
+  }, [currentVideoID]); // [cite: 74]
 
-  if (!isModalOpen || !currentVideoID) return null; // Simplified loading check
+  if (!isModalOpen || !currentVideoID) return null; // [cite: 75]
 
-  const modalVariants = {
-    hidden: { y: '100vh', opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { type: 'spring', damping: 25, stiffness: 120 } },
-    exit: { y: '100vh', opacity: 0, transition: { duration: 0.3, ease: 'easeInOut' } }
+  const modalVariants = { // [cite: 75]
+    hidden: { y: '100vh', opacity: 0 }, // [cite: 75]
+    visible: { y: 0, opacity: 1, transition: { type: 'spring', damping: 25, stiffness: 120 } }, // [cite: 75]
+    exit: { y: '100vh', opacity: 0, transition: { duration: 0.3, ease: 'easeInOut' } } // [cite: 75]
   };
 
   // Handle the 'about' modal separately
-  if (currentVideoID === 'about') {
+  if (currentVideoID === 'about') { // [cite: 76]
     return (
       <AnimatePresence>
-        {isModalOpen && ( // Ensure modal only renders when open
+        {isModalOpen && ( // [cite: 76]
           <motion.div
-            className="about-modal-backdrop"
-            ref={aboutBackdropRef}
+            className="about-modal-backdrop" // [cite: 76]
+            ref={aboutBackdropRef} // [cite: 76]
             variants={{
-              hidden: { opacity: 0 },
-              visible: { opacity: 1, transition: { duration: 0.3, ease: "easeInOut" } },
-              exit: { opacity: 0, transition: { duration: 0.3, ease: "easeInOut" } }
+              hidden: { opacity: 0 }, // [cite: 77]
+              visible: { opacity: 1, transition: { duration: 0.3, ease: "easeInOut" } }, // [cite: 77]
+              exit: { opacity: 0, transition: { duration: 0.3, ease: "easeInOut" } } // [cite: 77]
             }}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            onTouchMove={handleTouchMove}
+            initial="hidden" // [cite: 77]
+            animate="visible" // [cite: 77]
+            exit="exit" // [cite: 78]
+            onTouchMove={handleTouchMove} // [cite: 78]
           >
             <motion.div
-              className="modal about-modal"
-              onClick={(e) => e.stopPropagation()}
-              variants={modalVariants} // Use the same modal variants
-              initial="hidden"
-              animate="visible"
-              exit="exit"
+              className="modal about-modal" // [cite: 78]
+              onClick={(e) => e.stopPropagation()} // [cite: 78]
+              variants={modalVariants} // Use the same modal variants [cite: 78]
+              initial="hidden" // [cite: 79]
+              animate="visible" // [cite: 79]
+              exit="exit" // [cite: 79]
             >
               <RenderAboutContent />
-              <div className="gradient-overlay"></div>
+              <div className="gradient-overlay"></div> {/* [cite: 79] */}
             </motion.div>
           </motion.div>
-        )}
+        )} {/* [cite: 80] */}
       </AnimatePresence>
     );
-  }
+  } // [cite: 81]
 
-  if (!videoState.info) {
+  if (!videoState.info) { // [cite: 81]
      // Handle case where fetching failed or info is null after loading
      return (
-       <div className="modal-backdrop">
+       <div className="modal-backdrop"> {/* [cite: 81] */}
+         {/* Optionally show a loading spinner or message */}
        </div>
      );
-  }
+  } // [cite: 82]
 
-  let videoId = null;
-  let embedUrl = null;
-  try {
-    // Assuming URL format like "https://youtu.be/VIDEO_ID"
-    const url = new URL(videoState.info.URL);
-    if (url.hostname === 'youtu.be') {
-      videoId = url.pathname.substring(1); // Remove leading '/'
-    } else if (url.hostname === 'www.youtube.com' || url.hostname === 'youtube.com') {
-       // Handle standard youtube.com links like youtube.com/watch?v=VIDEO_ID
-       videoId = url.searchParams.get('v');
-    }
-
-    if (videoId) {
-       // Construct YouTube embed URL with minimal parameters
-      embedUrl = `https://www.youtube.com/embed/${videoId}?controls=1&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&rel=0&playsinline=1`;
+  let videoId = null; // [cite: 82]
+  try { // [cite: 83]
+    const url = new URL(videoState.info.URL); // [cite: 83]
+    if (url.hostname === 'www.youtube-nocookie.com') { // [cite: 84] Handle youtube-nocookie used by lite-youtube
+      const pathParts = url.pathname.split('/');
+      if (pathParts[1] === 'embed') {
+          videoId = pathParts[2]; // e.g. /embed/VIDEO_ID
+      }
+    } else if (url.hostname === 'www.youtube.com' || url.hostname === 'youtube.com' || url.hostname === 'youtu.be') { // [cite: 85] Handle standard youtube links
+       if (url.pathname === '/watch') {
+         videoId = url.searchParams.get('v'); // [cite: 85]
+       } else if (url.pathname.length > 1) { // Handle youtu.be/VIDEO_ID
+         videoId = url.pathname.substring(1);
+       }
     } else {
-        console.error("Could not extract YouTube video ID from URL:", videoState.info.URL);
+       // Fallback or specific logic if you have other URL types
+       console.warn("Could not determine YouTube video ID extraction method for URL:", videoState.info.URL);
+       // Attempt to extract from pathname if it looks like an ID (simple heuristic)
+       const pathId = url.pathname.substring(1);
+       if (pathId && pathId.length === 11) { // Basic check for YouTube ID length
+         videoId = pathId;
+         console.log("Attempting fallback ID extraction from path:", videoId);
+       }
     }
-  } catch (error) {
-    console.error("Error parsing video URL:", error);
-    // Optionally handle the error, maybe show a message
-  }
+
+    if (!videoId) { // [cite: 87]
+        console.error("Could not extract YouTube video ID from URL:", videoState.info.URL); // [cite: 87]
+    }
+  } catch (error) { // [cite: 88]
+    console.error("Error parsing video URL:", error); // [cite: 88]
+  } // [cite: 89]
 
   return (
     <AnimatePresence>
-      {isModalOpen && (
+      {isModalOpen && ( // [cite: 89]
         <motion.div
-          className="modal-backdrop"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          className="modal-backdrop" // [cite: 89]
+          initial={{ opacity: 0 }} // [cite: 89]
+          animate={{ opacity: 1 }} // [cite: 90]
+          exit={{ opacity: 0 }} // [cite: 90]
           onClick={() => {
-            closeModal();
-            navigate('/');
+            closeModal(); // [cite: 90]
+            navigate('/'); // [cite: 90]
           }}
-          onTouchMove={handleTouchMove}
+          onTouchMove={handleTouchMove} // [cite: 90]
         >
           <motion.div
-            className="modal"
-            ref={modalRef}
-            variants={modalVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            onClick={(e) => e.stopPropagation()} // Prevent closing on click inside the modal
+            className="modal" // [cite: 90]
+            ref={modalRef} // [cite: 90]
+            variants={modalVariants} // [cite: 90]
+            initial="hidden" // [cite: 91]
+            animate="visible" // [cite: 91]
+            exit="exit" // [cite: 91]
+            onClick={(e) => e.stopPropagation()} // Prevent closing on click inside the modal [cite: 91]
           >
-            <span className="close" onClick={() => {
-              closeModal();
-              navigate('/');
+            <span className="close" onClick={() => { // [cite: 91]
+              closeModal(); // [cite: 91]
+              navigate('/'); // [cite: 92]
             }}>×</span>
 
-            {/* --- UPDATED IFRAME SECTION --- */}
-            <div className="embed-container">
-              {embedUrl ? (
-                <iframe
-                  key={videoId} // Use YouTube video ID as key
-                  src={embedUrl} // Use the constructed YouTube URL
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" // Standard YouTube permissions
-                  allowFullScreen
-                  title={videoState.info.videoName}
-                ></iframe>
+            <div className="embed-container"> {/* [cite: 92] */}
+              {videoId ? (
+                <lite-youtube
+                  key={videoId} // Using videoId as key is good practice
+                  videoid={videoId} // Use the extracted videoId
+                  playlabel={`Play: ${videoState.info.videoName}`} // Add a play label
+                  title={videoState.info.videoName} // Set the title attribute
+                  params="controls=1&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&rel=0&playsinline=1" // Pass relevant params
+                ></lite-youtube>
               ) : (
-                 <p style={{color: 'white', textAlign: 'center', paddingTop: '20%'}}>Video unavailable.</p> // Fallback if URL/ID is invalid
+                 <p style={{color: 'white', textAlign: 'center', paddingTop: '20%'}}>Video unavailable.</p> // Fallback if ID extraction failed [cite: 95]
               )}
             </div>
 
-            <div className="text-container">
-              <h2>{videoState.info.videoName}</h2>
-              <p className="published-date" style={{ fontSize: 'smaller', color: 'gray' }}>
-                {formatDate(videoState.info.Published)}
+            <div className="text-container"> {/* [cite: 95] */}
+              <h2>{videoState.info.videoName}</h2> {/* [cite: 95] */}
+              <p className="published-date" style={{ fontSize: 'smaller', color: 'gray' }}> {/* [cite: 95] */}
+                {formatDate(videoState.info.Published)} {/* [cite: 96] */}
               </p>
-              <br></br>
-              <div dangerouslySetInnerHTML={{ __html: videoState.info.Description }}></div>
-              <br></br>
-              <br></br>
-              <br></br>
-              <br></br>
-            </div>
-            <div className="gradient-overlay"></div>
+              <br></br> {/* [cite: 96] */}
+              <div dangerouslySetInnerHTML={{ __html: videoState.info.Description }}></div> {/* [cite: 96] */}
+              <br></br> {/* [cite: 96] */}
+              <br></br> {/* [cite: 96] */}
+              <br></br> {/* [cite: 96] */}
+              <br></br> {/* [cite: 96] */}
+            </div> {/* [cite: 97] */}
+            <div className="gradient-overlay"></div> {/* [cite: 97] */}
           </motion.div>
         </motion.div>
       )}
