@@ -12,10 +12,6 @@ import _ from 'lodash';
 import 'lite-youtube-embed/src/lite-yt-embed.css';
 import 'lite-youtube-embed/src/lite-yt-embed.js';
 
-const BASE_URL = process.env.NODE_ENV === 'production'
-  ? 'https://web-production-d14cb.up.railway.app'
-  : 'http://127.0.0.1:5000';
-
 const fadeInVariants = {
   hidden: {
     opacity: 0,
@@ -68,7 +64,7 @@ function CubeWithVideos({ setCubeLoading, setIsLoadingExternal }) {
   useEffect(() => {
     const fetchCubeVideos = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/api/scenes`);
+        const response = await axios.get(`/api/scenes`);
         const shuffledScenes = _.shuffle(response.data);
         const first54Videos = shuffledScenes.slice(0, 54).map(scene => scene.sceneURL);
         setCubeVideos(first54Videos);
@@ -417,7 +413,7 @@ function Modal() {
       if (!currentVideoID || currentVideoID === 'about') return; // [cite: 73]
       setVideoState({ info: null, loading: true }); // [cite: 73]
       try {
-        const { data } = await axios.get(`${BASE_URL}/api/video_info/${currentVideoID}`); // [cite: 73]
+        const { data } = await axios.get(`/api/video_info/${currentVideoID}`); // [cite: 73]
         setVideoState({ info: data, loading: false }); // [cite: 73]
       } catch (error) {
         console.error('Error fetching video info:', error); // [cite: 73]
@@ -615,7 +611,7 @@ function AppWrapper() {
     // Fetches all video details from Flask API
     const fetchAllVideos = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/api/videos`);
+        const response = await axios.get(`/api/videos`);
         setAllVideos(response.data.map(video => ({
           id: video.videoID,
           name: video.videoName,
