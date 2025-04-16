@@ -207,7 +207,6 @@ html, body {
 .embed-container {
   z-index: 1500;
   width: 100%;
-  padding-top: 56.25%; /* 16:9 Aspect Ratio */
   position: relative; /* Allows absolute positioning for the iframe */
   background: var(--background-color);
 }
@@ -219,6 +218,12 @@ html, body {
   width: 100%;
   height: 100%;
   border: none;
+}
+
+lite-youtube {
+  display: block; /* Ensure it takes block layout */
+  width: 100%;
+  /* lite-youtube handles aspect ratio internally, often via --aspect-ratio CSS var */
 }
 
 .text-container {
