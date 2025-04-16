@@ -3,12 +3,10 @@ from flask import Flask, send_from_directory, request, jsonify, redirect, url_fo
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from urllib.parse import urlparse, urlunparse
-from werkzeug.middleware.proxy_fix import ProxyFix # Keep the import
+from werkzeug.middleware.proxy_fix import ProxyFix
 
-# Determine the directory containing this script
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Set the path to the React app's build directory
 react_build_directory = os.path.join(BASE_DIR, 'build')
 
 # Initialize the Flask app with the build directory as the static folder
@@ -40,11 +38,6 @@ if not app.config['SQLALCHEMY_DATABASE_URI']:
     print("Warning: DATABASE_URL environment variable not set.")
 elif app.debug and not app.config['SQLALCHEMY_DATABASE_URI']:
     print("Warning: DATABASE_URL not set in debug mode. DB operations will fail.")
-    # Optional: Set a default local SQLite DB for easier local dev if needed
-    # local_db_path = os.path.join(BASE_DIR, 'local_dev.db')
-    # app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{local_db_path}'
-    # print(f"Using local SQLite DB: {app.config['SQLALCHEMY_DATABASE_URI']}")
-    # db = SQLAlchemy(app)
 else:
     try:
         db = SQLAlchemy(app)
@@ -75,19 +68,13 @@ allowed_origins = [
 CORS(app, resources={r"/api/*": {"origins": allowed_origins}})
 print(f"CORS configured for origins: {allowed_origins}")
 
-
 @app.before_request
 def handle_redirects():
     """Redirect non-www to www and http to https, ONLY IN PRODUCTION."""
 
     # --- Use the explicitly set app.debug ---
     if app.debug:
-        # Add a print statement to CONFIRM this branch is hit locally
-        # print(f"--- DEBUG MODE: Skipping redirect check for: {request.url}") # Can be noisy, uncomment if needed
-        return None # <<<<<<<<<<<< EXIT HERE IN DEBUG MODE
-
-    # --- Production Redirect Logic (only runs if app.debug is False) ---
-    # print(f"--- PRODUCTION MODE: Checking redirect for: {request.url}") # Can be noisy
+        return None
 
     # Avoid redirecting static file requests internally if possible
     if request.endpoint == 'static':
@@ -115,11 +102,6 @@ def handle_redirects():
     elif current_host == "vujade.world":
         needs_redirect = True
         log_reason = f"Host is non-www ({current_host})"
-    # Optional: Redirect Railway default domain? Be careful not to break health checks.
-    # elif current_host == "web-production-d14cb.up.railway.app":
-    #     needs_redirect = True
-    #     log_reason = f"Host is Railway default domain ({current_host})"
-
 
     if needs_redirect:
         new_url = f"{target_scheme}://{target_host}{request.full_path}"
@@ -128,7 +110,6 @@ def handle_redirects():
 
     # If no redirect needed in production
     return None
-
 
 # --- Model definitions (conditional) ---
 if db:
@@ -149,7 +130,6 @@ if db:
         sceneurl = db.Column(db.Text(), nullable=False)
 else:
     print("--- Database not initialized. Models not defined. API routes needing DB will fail. ---")
-
 
 # --- Serve React App Route ---
 # Catches all non-API routes to serve the frontend
@@ -174,7 +154,6 @@ def serve(path):
     else:
         app.logger.error("React build index.html not found at expected path.")
         return jsonify({"error": "Application frontend not found"}), 404
-
 
 # --- API Routes ---
 # Add checks for 'db' before accessing Video or Scene queries
